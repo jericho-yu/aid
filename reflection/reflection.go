@@ -45,12 +45,15 @@ const (
 	Dict              ReflectionType = "DICT"
 	Struct            ReflectionType = "STR"
 	Nil               ReflectionType = "N"
-	PtrSlicePtrStruct ReflectionType = "*[]*struct"
-	PtrSliceStruct    ReflectionType = "*[]struct"
-	PtrSliceMap       ReflectionType = "*[]map"
-	PtrStruct         ReflectionType = "*struct"
-	PtrPtrStruct      ReflectionType = "**struct"
-	Any               ReflectionType = "any"
+	PtrSliceAny       ReflectionType = "*[]ANY"
+	PtrSlicePtrStruct ReflectionType = "*[]*STRUCT"
+	PtrSliceStruct    ReflectionType = "*[]STRUCT"
+	PtrSlicePtrMap    ReflectionType = "*[]*MAP"
+	PtrSliceMap       ReflectionType = "*[]MAP"
+	PtrStruct         ReflectionType = "*STRUCT"
+	PtrPtrStruct      ReflectionType = "**STRUCT"
+	Any               ReflectionType = "ANY"
+	UnKnowType        ReflectionType = "UN-KNOW-TYPE"
 )
 
 // New 实例化：反射帮助
@@ -179,7 +182,13 @@ func (r *Reflection) GetReflectionType() ReflectionType {
 			elemType = elem.Type().Elem()
 			switch elemType.Kind() {
 			case reflect.Ptr: // *[]*struct
-				return PtrSlicePtrStruct
+				if elemType.Elem().Kind() == reflect.Struct { // *[]*struct
+					return PtrSlicePtrStruct
+				} else if elemType.Elem().Kind() == reflect.Map { // *[]*map
+					return PtrSlicePtrMap
+				} else { // *[]*Other
+					return UnKnowType
+				}
 			case reflect.Struct: // *[]struct
 				return PtrSliceStruct
 			case reflect.Map: // *[]map
@@ -198,7 +207,7 @@ func (r *Reflection) GetReflectionType() ReflectionType {
 			return Any
 		}
 	}
-	return Nil
+	return UnKnowType
 }
 
 // IsSame 判断两个类型是否相等
