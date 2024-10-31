@@ -225,3 +225,20 @@ func FromAnyArray[T any](anyArray *AnyArray[any]) []T {
 
 	return l.All()
 }
+
+// CopyFromAnyArray 从AnyArray复制并处理转换内容
+func CopyFromAnyArray[S any, D any](src *AnyArray[S], processFn func(idx int, item S) D) *AnyArray[D] {
+	var dst *AnyArray[D] = MakeAnyArray[D](src.Len())
+
+	if src.IsEmpty() {
+		return dst
+	}
+
+	if processFn != nil {
+		src.Each(func(idx int, item S) {
+			dst.Set(idx, processFn(idx, item))
+		})
+	}
+
+	return dst
+}

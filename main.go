@@ -4,8 +4,9 @@ import (
 	"github.com/jericho-yu/aid/reflection"
 )
 
-func main() {
-	var exa int
-	println(reflection.New(exa).GetReflectionType())
+type Example struct{}
 
+func main() {
+	var exa *Example
+	println(reflection.New(&exa).GetReflectionType())
 }
