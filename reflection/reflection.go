@@ -52,6 +52,8 @@ const (
 	PtrSliceMap       ReflectionType = "*[]MAP"
 	PtrStruct         ReflectionType = "*STRUCT"
 	PtrPtrStruct      ReflectionType = "**STRUCT"
+	PtrMap            ReflectionType = "**MAP"
+	Map               ReflectionType = "*MAP"
 	Any               ReflectionType = "ANY"
 	UnKnowType        ReflectionType = "UN-KNOW-TYPE"
 )
@@ -196,6 +198,8 @@ func (r *Reflection) GetReflectionType() ReflectionType {
 			}
 		} else if elem.Kind() == reflect.Struct { // *struct
 			return PtrStruct
+		} else if elem.Kind() == reflect.Map { // *map
+			return PtrMap
 		} else {
 			return Any
 		}
@@ -203,6 +207,8 @@ func (r *Reflection) GetReflectionType() ReflectionType {
 		elemType = elem.Type().Elem()
 		if elemType.Kind() == reflect.Struct { // **struct
 			return PtrPtrStruct
+		} else if elemType.Kind() == reflect.Map {
+			return Map
 		} else {
 			return Any
 		}
