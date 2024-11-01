@@ -99,7 +99,7 @@ func (*RedisPool) Set(clientName, key string, val any, exp time.Duration) (strin
 }
 
 // Close 关闭链接
-func (mine *RedisPool) Close(key string) error {
+func (my *RedisPool) Close(key string) error {
 	if client, exist := redisPoolIns.connections.Get(key); exist {
 		return client.conn.Close()
 	}

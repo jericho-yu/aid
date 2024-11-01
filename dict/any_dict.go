@@ -29,84 +29,84 @@ func MakeAnyDict[K comparable, V any]() *AnyDict[K, V] {
 }
 
 // Set 设置元素
-func (r *AnyDict[K, V]) Set(key K, value V) *AnyDict[K, V] {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+func (my *AnyDict[K, V]) Set(key K, value V) *AnyDict[K, V] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
 
-	r.data[key] = value
-	return r
+	my.data[key] = value
+	return my
 }
 
 // Get 获取元素
-func (r *AnyDict[K, V]) Get(key K) (V, bool) {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
+func (my *AnyDict[K, V]) Get(key K) (V, bool) {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
 
-	val, exist := r.data[key]
+	val, exist := my.data[key]
 	return val, exist
 }
 
 // All 获取全部元素
-func (r *AnyDict[K, V]) All() map[K]V {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
+func (my *AnyDict[K, V]) All() map[K]V {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
 
-	return r.data
+	return my.data
 }
 
 // Len 获取长度
-func (r *AnyDict[K, V]) Len() int {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
+func (my *AnyDict[K, V]) Len() int {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
 
-	return len(r.data)
+	return len(my.data)
 }
 
 // Filter 过滤元素
-func (r *AnyDict[K, V]) Filter(fn func(V) bool) *AnyDict[K, V] {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+func (my *AnyDict[K, V]) Filter(fn func(V) bool) *AnyDict[K, V] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
 
-	for key, val := range r.data {
+	for key, val := range my.data {
 		if !fn(val) {
-			delete(r.data, key)
+			delete(my.data, key)
 		}
 	}
-	return r
+	return my
 }
 
 // RemoveEmpty 清除空值元素
-func (r *AnyDict[K, T]) RemoveEmpty() *AnyDict[K, T] {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+func (my *AnyDict[K, T]) RemoveEmpty() *AnyDict[K, T] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
 
-	for key, val := range r.data {
+	for key, val := range my.data {
 		ref := reflect.ValueOf(val)
 
 		if ref.Kind() == reflect.Ptr {
 			if ref.IsNil() {
-				delete(r.data, key)
+				delete(my.data, key)
 			}
 			if ref.Elem().IsZero() {
-				delete(r.data, key)
+				delete(my.data, key)
 			}
 		} else {
 			if ref.IsZero() {
-				delete(r.data, key)
+				delete(my.data, key)
 			}
 		}
 	}
-	return r
+	return my
 }
 
 // JoinWithoutEmpty 拼接非空元素
-func (r *AnyDict[K, V]) JoinWithoutEmpty(sep string) string {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
+func (my *AnyDict[K, V]) JoinWithoutEmpty(sep string) string {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
 
-	values := make([]string, r.RemoveEmpty().Len())
+	values := make([]string, my.RemoveEmpty().Len())
 	j := 0
-	for _, datum := range r.data {
+	for _, datum := range my.data {
 		values[j] = fmt.Sprintf("%v", datum)
 		j++
 	}
@@ -114,13 +114,13 @@ func (r *AnyDict[K, V]) JoinWithoutEmpty(sep string) string {
 }
 
 // ToAnyList 转any list
-func (r *AnyDict[K, V]) ToAnyList() *array.AnyArray[V] {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
+func (my *AnyDict[K, V]) ToAnyList() *array.AnyArray[V] {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
 
-	l := array.MakeAnyArray[V](r.Len())
+	l := array.MakeAnyArray[V](my.Len())
 	j := 0
-	for _, v := range r.data {
+	for _, v := range my.data {
 		l.Set(j, v)
 		j++
 	}
@@ -129,45 +129,45 @@ func (r *AnyDict[K, V]) ToAnyList() *array.AnyArray[V] {
 }
 
 // InKey 检查key是否存在
-func (r *AnyDict[K, V]) InKey(target K) bool {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
+func (my *AnyDict[K, V]) InKey(target K) bool {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
 
-	_, exit := r.data[target]
+	_, exit := my.data[target]
 	return exit
 }
 
 // InVal 检查值是否存在
-func (r *AnyDict[K, V]) InVal(target V) bool {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
+func (my *AnyDict[K, V]) InVal(target V) bool {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
 
-	return r.ToAnyList().In(target)
+	return my.ToAnyList().In(target)
 }
 
 // AllEmpty 检查是否全部为空
-func (r *AnyDict[K, V]) AllEmpty() bool {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
+func (my *AnyDict[K, V]) AllEmpty() bool {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
 
-	return r.ToAnyList().AllEmpty()
+	return my.ToAnyList().AllEmpty()
 }
 
 // AnyEmpty 检查是否存在空值
-func (r *AnyDict[K, V]) AnyEmpty() bool {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
+func (my *AnyDict[K, V]) AnyEmpty() bool {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
 
-	return r.ToAnyList().AnyEmpty()
+	return my.ToAnyList().AnyEmpty()
 }
 
 // GetKeysByValue 通过值找到所有对应的key
-func (r *AnyDict[K, V]) GetKeysByValue(value *array.AnyArray[V]) *array.AnyArray[K] {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
+func (my *AnyDict[K, V]) GetKeysByValue(value *array.AnyArray[V]) *array.AnyArray[K] {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
 
 	l := array.MakeAnyArray[K](0)
-	for key, val := range r.data {
+	for key, val := range my.data {
 		if value.In(val) {
 			l.Append(key)
 		}
@@ -177,59 +177,59 @@ func (r *AnyDict[K, V]) GetKeysByValue(value *array.AnyArray[V]) *array.AnyArray
 }
 
 // RemoveByKey 根据key删除元素
-func (r *AnyDict[K, V]) RemoveByKey(key K) *AnyDict[K, V] {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+func (my *AnyDict[K, V]) RemoveByKey(key K) *AnyDict[K, V] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
 
-	delete(r.data, key)
-	return r
+	delete(my.data, key)
+	return my
 }
 
 // RemoveByKeys 根据key批量删除元素
-func (r *AnyDict[K, V]) RemoveByKeys(keys ...K) *AnyDict[K, V] {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+func (my *AnyDict[K, V]) RemoveByKeys(keys ...K) *AnyDict[K, V] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
 
 	for _, key := range keys {
-		r.RemoveByKey(key)
+		my.RemoveByKey(key)
 	}
-	return r
+	return my
 }
 
 // RemoveByValue 根据值删除元素
-func (r *AnyDict[K, V]) RemoveByValue(value V) *AnyDict[K, V] {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+func (my *AnyDict[K, V]) RemoveByValue(value V) *AnyDict[K, V] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
 
-	for key, v := range r.data {
+	for key, v := range my.data {
 		if reflect.DeepEqual(v, value) {
-			delete(r.data, key)
+			delete(my.data, key)
 		}
 	}
-	return r
+	return my
 }
 
 // RemoveByValues 根据值批量删除元素
-func (r *AnyDict[K, V]) RemoveByValues(values ...V) *AnyDict[K, V] {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+func (my *AnyDict[K, V]) RemoveByValues(values ...V) *AnyDict[K, V] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
 
-	r.RemoveByKeys(r.GetKeysByValue(array.NewAnyArray[V](values)).All()...)
-	return r
+	my.RemoveByKeys(my.GetKeysByValue(array.NewAnyArray[V](values)).All()...)
+	return my
 }
 
 // Clean 清理数据
-func (r *AnyDict[K, V]) Clean() *AnyDict[K, V] {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+func (my *AnyDict[K, V]) Clean() *AnyDict[K, V] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
 
-	r.data = make(map[K]V)
+	my.data = make(map[K]V)
 
-	return r
+	return my
 }
 
 // Keys 获取所有的key
-func (r *AnyDict[K, V]) Keys() []K { return GetKeys[K, V](r.All()) }
+func (my *AnyDict[K, V]) Keys() []K { return GetKeys[K, V](my.All()) }
 
 // Values 获取所有的value
-func (r *AnyDict[K, V]) Values() []V { return GetValues[K, V](r.All()) }
+func (my *AnyDict[K, V]) Values() []V { return GetValues[K, V](my.All()) }

@@ -34,18 +34,18 @@ func (RouteLimiter) Once() *RouteLimiter {
 }
 
 // Add 添加限流规则
-func (r *RouteLimiter) Add(router string, t time.Duration, maxVisitTimes uint64) *RouteLimiter {
+func (my *RouteLimiter) Add(router string, t time.Duration, maxVisitTimes uint64) *RouteLimiter {
 
-	if _, exist := r.RouteSetMap.Load(router); exist {
-		r.RouteSetMap.Delete(router)
+	if _, exist := my.RouteSetMap.Load(router); exist {
+		my.RouteSetMap.Delete(router)
 	}
-	r.RouteSetMap.Store(router, &visitor{ipLimiter: ipLimiter.App.New(), t: t, maxVisitTimes: maxVisitTimes})
-	return r
+	my.RouteSetMap.Store(router, &visitor{ipLimiter: ipLimiter.App.New(), t: t, maxVisitTimes: maxVisitTimes})
+	return my
 }
 
 // Affirm 检查是否通过限流
-func (r *RouteLimiter) Affirm(router, ip string) (*ipLimiter.Visit, bool) {
-	if val, exist := r.RouteSetMap.Load(router); exist {
+func (my *RouteLimiter) Affirm(router, ip string) (*ipLimiter.Visit, bool) {
+	if val, exist := my.RouteSetMap.Load(router); exist {
 		v := val.(*visitor)
 		return v.ipLimiter.Affirm(ip, v.t, v.maxVisitTimes)
 	}

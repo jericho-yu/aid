@@ -74,54 +74,54 @@ func NewCellFormula(content string) *Cell {
 }
 
 // GetBorder 获取边框
-func (r *Cell) GetBorder() *array.AnyArray[border] {
+func (my *Cell) GetBorder() *array.AnyArray[border] {
 	borders := array.MakeAnyArray[border](0)
 
-	if r.borderTopRgb != "" {
+	if my.borderTopRgb != "" {
 		borders.Append(border{
 			Type:  "top",
-			Rgb:   r.borderTopRgb,
-			Style: r.borderTopStyle,
+			Rgb:   my.borderTopRgb,
+			Style: my.borderTopStyle,
 		})
 	}
 
-	if r.borderBottomRgb != "" {
+	if my.borderBottomRgb != "" {
 		borders.Append(border{
 			Type:  "bottom",
-			Rgb:   r.borderBottomRgb,
-			Style: r.borderBottomStyle,
+			Rgb:   my.borderBottomRgb,
+			Style: my.borderBottomStyle,
 		})
 	}
 
-	if r.borderLeftRgb != "" {
+	if my.borderLeftRgb != "" {
 		borders.Append(border{
 			Type:  "left",
-			Rgb:   r.borderLeftRgb,
-			Style: r.borderLeftStyle,
+			Rgb:   my.borderLeftRgb,
+			Style: my.borderLeftStyle,
 		})
 	}
 
-	if r.borderRightRgb != "" {
+	if my.borderRightRgb != "" {
 		borders.Append(border{
 			Type:  "right",
-			Rgb:   r.borderRightRgb,
-			Style: r.borderRightStyle,
+			Rgb:   my.borderRightRgb,
+			Style: my.borderRightStyle,
 		})
 	}
 
-	if r.borderDiagonalUpRgb != "" {
+	if my.borderDiagonalUpRgb != "" {
 		borders.Append(border{
 			Type:  "diagonalUp",
-			Rgb:   r.borderDiagonalUpRgb,
-			Style: r.borderDiagonalUpStyle,
+			Rgb:   my.borderDiagonalUpRgb,
+			Style: my.borderDiagonalUpStyle,
 		})
 	}
 
-	if r.borderDiagonalDownRgb != "" {
+	if my.borderDiagonalDownRgb != "" {
 		borders.Append(border{
 			Type:  "diagonalDown",
-			Rgb:   r.borderDiagonalDownRgb,
-			Style: r.borderDiagonalDownStyle,
+			Rgb:   my.borderDiagonalDownRgb,
+			Style: my.borderDiagonalDownStyle,
 		})
 	}
 
@@ -129,393 +129,393 @@ func (r *Cell) GetBorder() *array.AnyArray[border] {
 }
 
 // SetWrapText 设置自动换行
-func (r *Cell) SetWrapText(wrapText bool) *Cell {
-	r.wrapText = wrapText
-	return r
+func (my *Cell) SetWrapText(wrapText bool) *Cell {
+	my.wrapText = wrapText
+	return my
 }
 
 // GetWrapText 获取自动换行
-func (r *Cell) GetWrapText() bool {
-	return r.wrapText
+func (my *Cell) GetWrapText() bool {
+	return my.wrapText
 }
 
 // SetBorderSurrounding 设置四周边框
-func (r *Cell) SetBorderSurrounding(borderRgb string, borderStyle int, condition bool) *Cell {
+func (my *Cell) SetBorderSurrounding(borderRgb string, borderStyle int, condition bool) *Cell {
 	if condition {
-		r.borderTopRgb = borderRgb
-		r.borderBottomRgb = borderRgb
-		r.borderLeftRgb = borderRgb
-		r.borderRightRgb = borderRgb
-		r.borderTopStyle = borderStyle
-		r.borderBottomStyle = borderStyle
-		r.borderLeftStyle = borderStyle
-		r.borderRightStyle = borderStyle
+		my.borderTopRgb = borderRgb
+		my.borderBottomRgb = borderRgb
+		my.borderLeftRgb = borderRgb
+		my.borderRightRgb = borderRgb
+		my.borderTopStyle = borderStyle
+		my.borderBottomStyle = borderStyle
+		my.borderLeftStyle = borderStyle
+		my.borderRightStyle = borderStyle
 	}
 
-	return r
+	return my
 }
 
 // SetBorderSurroundingFunc 设置四周边框 函数
-func (r *Cell) SetBorderSurroundingFunc(condition func() (string, int, bool)) *Cell {
+func (my *Cell) SetBorderSurroundingFunc(condition func() (string, int, bool)) *Cell {
 	if condition != nil {
-		r.SetBorderSurrounding(condition())
+		my.SetBorderSurrounding(condition())
 	}
-	return r
+	return my
 }
 
 // SetBorderTopRgb 设置边框颜色：上
-func (r *Cell) SetBorderTopRgb(borderTopRgb string, condition bool) *Cell {
+func (my *Cell) SetBorderTopRgb(borderTopRgb string, condition bool) *Cell {
 	if condition {
-		r.borderTopRgb = borderTopRgb
+		my.borderTopRgb = borderTopRgb
 	}
-	return r
+	return my
 }
 
 // SetBorderTopRbgFunc 设置边框颜色：上 函数
-func (r *Cell) SetBorderTopRbgFunc(condition func() (string, bool)) *Cell {
+func (my *Cell) SetBorderTopRbgFunc(condition func() (string, bool)) *Cell {
 	if condition != nil {
-		r.SetBorderTopRgb(condition())
+		my.SetBorderTopRgb(condition())
 	}
-	return r
+	return my
 }
 
 // SetBorderTopStyle 设置边框样式：上
-func (r *Cell) SetBorderTopStyle(borderTopStyle int, condition bool) *Cell {
+func (my *Cell) SetBorderTopStyle(borderTopStyle int, condition bool) *Cell {
 	if condition {
-		r.borderTopStyle = borderTopStyle
+		my.borderTopStyle = borderTopStyle
 	}
-	return r
+	return my
 }
 
 // SetBorderTopStyleFunc 设置边框样式：上 函数
-func (r *Cell) SetBorderTopStyleFunc(condition func() (int, bool)) *Cell {
+func (my *Cell) SetBorderTopStyleFunc(condition func() (int, bool)) *Cell {
 	if condition != nil {
-		r.SetBorderTopStyle(condition())
+		my.SetBorderTopStyle(condition())
 	}
-	return r
+	return my
 }
 
 // SetBorderBottomRgb 设置边框颜色：下
-func (r *Cell) SetBorderBottomRgb(borderBottomRgb string, condition bool) *Cell {
+func (my *Cell) SetBorderBottomRgb(borderBottomRgb string, condition bool) *Cell {
 	if condition {
-		r.borderBottomRgb = borderBottomRgb
+		my.borderBottomRgb = borderBottomRgb
 	}
-	return r
+	return my
 }
 
 // SetBorderBottomRbgFunc 设置边框颜色：下 函数
-func (r *Cell) SetBorderBottomRbgFunc(condition func() (string, bool)) *Cell {
+func (my *Cell) SetBorderBottomRbgFunc(condition func() (string, bool)) *Cell {
 	if condition != nil {
-		r.SetBorderBottomRgb(condition())
+		my.SetBorderBottomRgb(condition())
 	}
-	return r
+	return my
 }
 
 // SetBorderBottomStyle 设置边框样式：下
-func (r *Cell) SetBorderBottomStyle(borderBottomStyle int, condition bool) *Cell {
+func (my *Cell) SetBorderBottomStyle(borderBottomStyle int, condition bool) *Cell {
 	if condition {
-		r.borderBottomStyle = borderBottomStyle
+		my.borderBottomStyle = borderBottomStyle
 	}
-	return r
+	return my
 }
 
 // SetBorderBottomStyleFunc 设置边框样式：下 函数
-func (r *Cell) SetBorderBottomStyleFunc(condition func() (int, bool)) *Cell {
+func (my *Cell) SetBorderBottomStyleFunc(condition func() (int, bool)) *Cell {
 	if condition != nil {
-		r.SetBorderBottomStyle(condition())
+		my.SetBorderBottomStyle(condition())
 	}
-	return r
+	return my
 }
 
 // SetBorderLeftRgb 设置边框颜色：左
-func (r *Cell) SetBorderLeftRgb(borderLeftRgb string, condition bool) *Cell {
+func (my *Cell) SetBorderLeftRgb(borderLeftRgb string, condition bool) *Cell {
 	if condition {
-		r.borderLeftRgb = borderLeftRgb
+		my.borderLeftRgb = borderLeftRgb
 	}
-	return r
+	return my
 }
 
 // SetBorderLeftRbgFunc 设置边框颜色：左 函数
-func (r *Cell) SetBorderLeftRbgFunc(condition func() (string, bool)) *Cell {
+func (my *Cell) SetBorderLeftRbgFunc(condition func() (string, bool)) *Cell {
 	if condition != nil {
-		r.SetBorderLeftRgb(condition())
+		my.SetBorderLeftRgb(condition())
 	}
-	return r
+	return my
 }
 
 // SetBorderLeftStyle 设置边框样式：左
-func (r *Cell) SetBorderLeftStyle(borderLeftStyle int, condition bool) *Cell {
+func (my *Cell) SetBorderLeftStyle(borderLeftStyle int, condition bool) *Cell {
 	if condition {
-		r.borderLeftStyle = borderLeftStyle
+		my.borderLeftStyle = borderLeftStyle
 	}
-	return r
+	return my
 }
 
 // SetBorderLeftStyleFunc 设置边框样式：左 函数
-func (r *Cell) SetBorderLeftStyleFunc(condition func() (int, bool)) *Cell {
+func (my *Cell) SetBorderLeftStyleFunc(condition func() (int, bool)) *Cell {
 	if condition != nil {
-		r.SetBorderLeftStyle(condition())
+		my.SetBorderLeftStyle(condition())
 	}
-	return r
+	return my
 }
 
 // SetBorderRightRgb 设置边框颜色：右
-func (r *Cell) SetBorderRightRgb(borderRightRgb string, condition bool) *Cell {
+func (my *Cell) SetBorderRightRgb(borderRightRgb string, condition bool) *Cell {
 	if condition {
-		r.borderRightRgb = borderRightRgb
+		my.borderRightRgb = borderRightRgb
 	}
-	return r
+	return my
 }
 
 // SetBorderRightRbgFunc 设置边框颜色：右 函数
-func (r *Cell) SetBorderRightRbgFunc(condition func() (string, bool)) *Cell {
+func (my *Cell) SetBorderRightRbgFunc(condition func() (string, bool)) *Cell {
 	if condition != nil {
-		r.SetBorderRightRgb(condition())
+		my.SetBorderRightRgb(condition())
 	}
-	return r
+	return my
 }
 
 // SetBorderRightStyle 设置边框样式：右
-func (r *Cell) SetBorderRightStyle(borderRightStyle int, condition bool) *Cell {
+func (my *Cell) SetBorderRightStyle(borderRightStyle int, condition bool) *Cell {
 	if condition {
-		r.borderRightStyle = borderRightStyle
+		my.borderRightStyle = borderRightStyle
 	}
-	return r
+	return my
 }
 
 // SetBorderRightStyleFunc 设置边框样式：右 函数
-func (r *Cell) SetBorderRightStyleFunc(condition func() (int, bool)) *Cell {
+func (my *Cell) SetBorderRightStyleFunc(condition func() (int, bool)) *Cell {
 	if condition != nil {
-		r.SetBorderRightStyle(condition())
+		my.SetBorderRightStyle(condition())
 	}
-	return r
+	return my
 }
 
 // SetBorderDiagonalUpRgb 设置边框颜色：对角线上
-func (r *Cell) SetBorderDiagonalUpRgb(borderDiagonalUpRgb string, condition bool) *Cell {
+func (my *Cell) SetBorderDiagonalUpRgb(borderDiagonalUpRgb string, condition bool) *Cell {
 	if condition {
-		r.borderDiagonalUpRgb = borderDiagonalUpRgb
+		my.borderDiagonalUpRgb = borderDiagonalUpRgb
 	}
-	return r
+	return my
 }
 
 // SetBorderDiagonalUpRbgFunc 设置边框颜色：对角线上 函数
-func (r *Cell) SetBorderDiagonalUpRbgFunc(condition func() (string, bool)) *Cell {
+func (my *Cell) SetBorderDiagonalUpRbgFunc(condition func() (string, bool)) *Cell {
 	if condition != nil {
-		r.SetBorderDiagonalUpRgb(condition())
+		my.SetBorderDiagonalUpRgb(condition())
 	}
-	return r
+	return my
 }
 
 // SetBorderDiagonalUpStyle 设置边框样式：对角线上
-func (r *Cell) SetBorderDiagonalUpStyle(borderDiagonalUpStyle int, condition bool) *Cell {
+func (my *Cell) SetBorderDiagonalUpStyle(borderDiagonalUpStyle int, condition bool) *Cell {
 	if condition {
-		r.borderDiagonalUpStyle = borderDiagonalUpStyle
+		my.borderDiagonalUpStyle = borderDiagonalUpStyle
 	}
-	return r
+	return my
 }
 
 // SetBorderDiagonalUpStyleFunc 设置边框样式：对角线上 函数
-func (r *Cell) SetBorderDiagonalUpStyleFunc(condition func() (int, bool)) *Cell {
+func (my *Cell) SetBorderDiagonalUpStyleFunc(condition func() (int, bool)) *Cell {
 	if condition != nil {
-		r.SetBorderDiagonalUpStyle(condition())
+		my.SetBorderDiagonalUpStyle(condition())
 	}
-	return r
+	return my
 }
 
 // SetBorderDiagonalDownRgb 设置边框颜色：对角线下
-func (r *Cell) SetBorderDiagonalDownRgb(borderDiagonalDownRgb string, condition bool) *Cell {
+func (my *Cell) SetBorderDiagonalDownRgb(borderDiagonalDownRgb string, condition bool) *Cell {
 	if condition {
-		r.borderDiagonalDownRgb = borderDiagonalDownRgb
+		my.borderDiagonalDownRgb = borderDiagonalDownRgb
 	}
-	return r
+	return my
 }
 
 // SetBorderDiagonalDownRbgFunc 设置边框颜色：对角线下 函数
-func (r *Cell) SetBorderDiagonalDownRbgFunc(condition func() (string, bool)) *Cell {
+func (my *Cell) SetBorderDiagonalDownRbgFunc(condition func() (string, bool)) *Cell {
 	if condition != nil {
-		r.SetBorderDiagonalDownRgb(condition())
+		my.SetBorderDiagonalDownRgb(condition())
 	}
-	return r
+	return my
 }
 
 // SetBorderDiagonalDownStyle 设置边框样式：对角线下
-func (r *Cell) SetBorderDiagonalDownStyle(borderDiagonalDownStyle int, condition bool) *Cell {
+func (my *Cell) SetBorderDiagonalDownStyle(borderDiagonalDownStyle int, condition bool) *Cell {
 	if condition {
-		r.borderDiagonalDownStyle = borderDiagonalDownStyle
+		my.borderDiagonalDownStyle = borderDiagonalDownStyle
 	}
-	return r
+	return my
 }
 
 // SetBorderDiagonalDownStyleFunc 设置边框样式：对角线下 函数
-func (r *Cell) SetBorderDiagonalDownStyleFunc(condition func() (int, bool)) *Cell {
+func (my *Cell) SetBorderDiagonalDownStyleFunc(condition func() (int, bool)) *Cell {
 	if condition != nil {
-		r.SetBorderDiagonalDownStyle(condition())
+		my.SetBorderDiagonalDownStyle(condition())
 	}
-	return r
+	return my
 }
 
 // GetFontRgb 获取字体颜色
-func (r *Cell) GetFontRgb() string {
-	return r.fontRgb
+func (my *Cell) GetFontRgb() string {
+	return my.fontRgb
 }
 
 // SetFontRgb 设置字体颜色
-func (r *Cell) SetFontRgb(fontRgb string, condition bool) *Cell {
+func (my *Cell) SetFontRgb(fontRgb string, condition bool) *Cell {
 	if condition {
-		r.fontRgb = fontRgb
+		my.fontRgb = fontRgb
 	}
-	return r
+	return my
 }
 
 // SetFontRgbFunc 设置字体颜色：函数
-func (r *Cell) SetFontRgbFunc(condition func() (string, bool)) *Cell {
+func (my *Cell) SetFontRgbFunc(condition func() (string, bool)) *Cell {
 	if condition != nil {
-		r.SetFontRgb(condition())
+		my.SetFontRgb(condition())
 	}
-	return r
+	return my
 }
 
 // GetPatternRgb 获取填充色
-func (r *Cell) GetPatternRgb() string {
-	return r.patternRgb
+func (my *Cell) GetPatternRgb() string {
+	return my.patternRgb
 }
 
 // SetPatternRgb 设置填充色
-func (r *Cell) SetPatternRgb(patternRgb string, condition bool) *Cell {
+func (my *Cell) SetPatternRgb(patternRgb string, condition bool) *Cell {
 	if condition {
-		r.patternRgb = patternRgb
+		my.patternRgb = patternRgb
 	}
-	return r
+	return my
 }
 
 // SetPatternRgbFunc 设置填充色：函数
-func (r *Cell) SetPatternRgbFunc(condition func() (string, bool)) *Cell {
+func (my *Cell) SetPatternRgbFunc(condition func() (string, bool)) *Cell {
 	if condition != nil {
-		r.SetPatternRgb(condition())
+		my.SetPatternRgb(condition())
 	}
-	return r
+	return my
 }
 
 // GetFontBold 获取字体粗体
-func (r *Cell) GetFontBold() bool {
-	return r.fontBold
+func (my *Cell) GetFontBold() bool {
+	return my.fontBold
 }
 
 // SetFontBold 设置字体粗体
-func (r *Cell) SetFontBold(fontBold bool, condition bool) *Cell {
+func (my *Cell) SetFontBold(fontBold bool, condition bool) *Cell {
 	if condition {
-		r.fontBold = fontBold
+		my.fontBold = fontBold
 	}
-	return r
+	return my
 }
 
 // SetFontBoldFunc 设置字体粗体：函数
-func (r *Cell) SetFontBoldFunc(condition func() (bool, bool)) *Cell {
+func (my *Cell) SetFontBoldFunc(condition func() (bool, bool)) *Cell {
 	if condition != nil {
-		r.SetFontBold(condition())
+		my.SetFontBold(condition())
 	}
-	return r
+	return my
 }
 
 // GetFontItalic 获取字体斜体
-func (r *Cell) GetFontItalic() bool {
-	return r.fontItalic
+func (my *Cell) GetFontItalic() bool {
+	return my.fontItalic
 }
 
 // SetFontItalic 设置字体斜体
-func (r *Cell) SetFontItalic(fontItalic bool, condition bool) *Cell {
+func (my *Cell) SetFontItalic(fontItalic bool, condition bool) *Cell {
 	if condition {
-		r.fontItalic = fontItalic
+		my.fontItalic = fontItalic
 	}
-	return r
+	return my
 }
 
 // SetFontItalicFunc 设置字体斜体：函数
-func (r *Cell) SetFontItalicFunc(condition func() (bool, bool)) *Cell {
+func (my *Cell) SetFontItalicFunc(condition func() (bool, bool)) *Cell {
 	if condition != nil {
-		r.SetFontItalic(condition())
+		my.SetFontItalic(condition())
 	}
-	return r
+	return my
 }
 
 // GetFontFamily 获取字体
-func (r *Cell) GetFontFamily() string {
-	return r.fontFamily
+func (my *Cell) GetFontFamily() string {
+	return my.fontFamily
 }
 
 // SetFontFamily 设置字体
-func (r *Cell) SetFontFamily(fontFamily string, condition bool) *Cell {
+func (my *Cell) SetFontFamily(fontFamily string, condition bool) *Cell {
 	if condition {
-		r.fontFamily = fontFamily
+		my.fontFamily = fontFamily
 	}
-	return r
+	return my
 }
 
 // SetFontFamilyFunc 设置字体：函数
-func (r *Cell) SetFontFamilyFunc(condition func() (string, bool)) *Cell {
+func (my *Cell) SetFontFamilyFunc(condition func() (string, bool)) *Cell {
 	if condition != nil {
-		r.SetFontFamily(condition())
+		my.SetFontFamily(condition())
 	}
-	return r
+	return my
 }
 
 // GetFontSize 获取字体字号
-func (r *Cell) GetFontSize() float64 {
-	return r.fontSize
+func (my *Cell) GetFontSize() float64 {
+	return my.fontSize
 }
 
 // SetFontSize 设置字体字号
-func (r *Cell) SetFontSize(fontSize float64, condition bool) *Cell {
+func (my *Cell) SetFontSize(fontSize float64, condition bool) *Cell {
 	if condition {
-		r.fontSize = fontSize
+		my.fontSize = fontSize
 	}
-	return r
+	return my
 }
 
 // SetFontSizeFunc 设置字体字号：函数
-func (r *Cell) SetFontSizeFunc(condition func() (float64, bool)) *Cell {
+func (my *Cell) SetFontSizeFunc(condition func() (float64, bool)) *Cell {
 	if condition != nil {
-		r.SetFontSize(condition())
+		my.SetFontSize(condition())
 	}
-	return r
+	return my
 }
 
 // Init 初始化
-func (r *Cell) Init(content any) *Cell {
-	r.content = content
-	return r
+func (my *Cell) Init(content any) *Cell {
+	my.content = content
+	return my
 }
 
 // GetContent 获取内容
-func (r *Cell) GetContent() any {
-	return r.content
+func (my *Cell) GetContent() any {
+	return my.content
 }
 
 // SetContent 设置内容
-func (r *Cell) SetContent(content any) *Cell {
-	r.content = content
-	return r
+func (my *Cell) SetContent(content any) *Cell {
+	my.content = content
+	return my
 }
 
 // GetCoordinate 获取单元格坐标
-func (r *Cell) GetCoordinate() string {
-	return r.coordinate
+func (my *Cell) GetCoordinate() string {
+	return my.coordinate
 }
 
 // SetCoordinate 设置单元格坐标
-func (r *Cell) SetCoordinate(coordinate string) *Cell {
-	r.coordinate = coordinate
-	return r
+func (my *Cell) SetCoordinate(coordinate string) *Cell {
+	my.coordinate = coordinate
+	return my
 }
 
 // GetContentType 获取单元格类型
-func (r *Cell) GetContentType() CellContentType {
-	return r.contentType
+func (my *Cell) GetContentType() CellContentType {
+	return my.contentType
 }
 
 // SetContentType 设置单元格类型
-func (r *Cell) SetContentType(contentType CellContentType) *Cell {
-	r.contentType = contentType
-	return r
+func (my *Cell) SetContentType(contentType CellContentType) *Cell {
+	my.contentType = contentType
+	return my
 }

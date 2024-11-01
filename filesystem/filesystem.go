@@ -43,42 +43,42 @@ func (FileSystem) NewByAbs(dir string) *FileSystem {
 }
 
 // Copy 复制一个新的对象
-func (r *FileSystem) Copy() *FileSystem {
-	copied := *r
+func (my *FileSystem) Copy() *FileSystem {
+	copied := *my
 	return &copied
 }
 
 // SetDirByRelative 设置路径：相对路径
-func (r *FileSystem) SetDirByRelative(dir string) *FileSystem {
-	r.dir = filepath.Clean(filepath.Join(FileSystem{}.GetRootPath(), dir))
+func (my *FileSystem) SetDirByRelative(dir string) *FileSystem {
+	my.dir = filepath.Clean(filepath.Join(FileSystem{}.GetRootPath(), dir))
 
-	r.init()
-	return r
+	my.init()
+	return my
 }
 
 // SetDirByAbs 设置路径：绝对路径
-func (r *FileSystem) SetDirByAbs(dir string) *FileSystem {
-	r.dir = dir
+func (my *FileSystem) SetDirByAbs(dir string) *FileSystem {
+	my.dir = dir
 
-	r.init()
-	return r
+	my.init()
+	return my
 }
 
-func (r *FileSystem) Join(dir string) *FileSystem {
-	r.dir = filepath.Join(r.dir, dir)
+func (my *FileSystem) Join(dir string) *FileSystem {
+	my.dir = filepath.Join(my.dir, dir)
 
-	r.init()
-	return r
+	my.init()
+	return my
 }
 
 // Joins 增加若干路径
-func (r *FileSystem) Joins(dir ...string) *FileSystem {
+func (my *FileSystem) Joins(dir ...string) *FileSystem {
 	for _, v := range dir {
-		r.Join(v)
+		my.Join(v)
 	}
 
-	r.init()
-	return r
+	my.init()
+	return my
 }
 
 func (FileSystem) GetRootPath() string {
@@ -126,24 +126,24 @@ func getGoRunPath() string {
 }
 
 // 初始化
-func (r *FileSystem) init() *FileSystem {
+func (my *FileSystem) init() *FileSystem {
 	var e error
-	r.IsExist, e = r.Exist() // 检查文件是否存在
+	my.IsExist, e = my.Exist() // 检查文件是否存在
 	if e != nil {
 		panic(fmt.Errorf("检查路径错误：%s", e.Error()))
 	}
-	if r.IsExist {
-		e = r.CheckPathType() // 检查路径类型
+	if my.IsExist {
+		e = my.CheckPathType() // 检查路径类型
 		if e != nil {
 			panic(fmt.Errorf("检查路径类型错误：%s", e.Error()))
 		}
 	}
-	return r
+	return my
 }
 
 // Exist 检查文件是否存在
-func (r *FileSystem) Exist() (bool, error) {
-	_, err := os.Stat(r.dir)
+func (my *FileSystem) Exist() (bool, error) {
+	_, err := os.Stat(my.dir)
 	if err == nil {
 		return true, nil
 	}
@@ -154,9 +154,9 @@ func (r *FileSystem) Exist() (bool, error) {
 }
 
 // MkDir 创建文件夹
-func (r *FileSystem) MkDir() error {
-	if !r.IsExist {
-		if e := os.MkdirAll(r.dir, os.ModePerm); e != nil {
+func (my *FileSystem) MkDir() error {
+	if !my.IsExist {
+		if e := os.MkdirAll(my.dir, os.ModePerm); e != nil {
 			return e
 		}
 	}
@@ -165,44 +165,44 @@ func (r *FileSystem) MkDir() error {
 }
 
 // GetDir 获取当前路径
-func (r *FileSystem) GetDir() string {
-	return r.dir
+func (my *FileSystem) GetDir() string {
+	return my.dir
 }
 
 // CheckPathType 判断一个路径是文件还是文件夹
-func (r *FileSystem) CheckPathType() error {
-	info, e := os.Stat(r.dir)
+func (my *FileSystem) CheckPathType() error {
+	info, e := os.Stat(my.dir)
 	if e != nil {
 		return e
 	}
 
 	if info.IsDir() {
-		r.IsDir = true
-		r.IsFile = !r.IsDir
+		my.IsDir = true
+		my.IsFile = !my.IsDir
 	} else {
-		r.IsFile = true
-		r.IsDir = !r.IsFile
+		my.IsFile = true
+		my.IsDir = !my.IsFile
 	}
 
 	return nil
 }
 
 // Delete 删除文件或文件夹
-func (r *FileSystem) Delete() error {
-	if r.IsExist {
-		if r.IsDir {
-			return r.DelDir()
+func (my *FileSystem) Delete() error {
+	if my.IsExist {
+		if my.IsDir {
+			return my.DelDir()
 		}
-		if r.IsFile {
-			return r.DelFile()
+		if my.IsFile {
+			return my.DelFile()
 		}
 	}
 	return nil
 }
 
 // DelDir 删除文件夹
-func (r *FileSystem) DelDir() error {
-	err := os.RemoveAll(r.dir)
+func (my *FileSystem) DelDir() error {
+	err := os.RemoveAll(my.dir)
 	if err != nil {
 		return err
 	}
@@ -210,8 +210,8 @@ func (r *FileSystem) DelDir() error {
 }
 
 // DelFile 删除文件
-func (r *FileSystem) DelFile() error {
-	e := os.Remove(r.dir)
+func (my *FileSystem) DelFile() error {
+	e := os.Remove(my.dir)
 	if e != nil {
 		return e
 	}
@@ -219,13 +219,13 @@ func (r *FileSystem) DelFile() error {
 }
 
 // Read 读取文件
-func (r *FileSystem) Read() ([]byte, error) {
-	return os.ReadFile(r.dir)
+func (my *FileSystem) Read() ([]byte, error) {
+	return os.ReadFile(my.dir)
 }
 
 // RenameFile 修改文件名并获取新的文件对象
-func (r *FileSystem) RenameFile(newFilename string, deleteRepetition bool) (*FileSystem, error) {
-	dir, _ := filepath.Split(r.GetDir())
+func (my *FileSystem) RenameFile(newFilename string, deleteRepetition bool) (*FileSystem, error) {
+	dir, _ := filepath.Split(my.GetDir())
 	dst := FileSystemApp.NewByAbs(path.Join(dir, newFilename))
 
 	if deleteRepetition {
@@ -234,7 +234,7 @@ func (r *FileSystem) RenameFile(newFilename string, deleteRepetition bool) (*Fil
 		}
 	}
 
-	if err := os.Rename(r.GetDir(), dst.GetDir()); err != nil {
+	if err := os.Rename(my.GetDir(), dst.GetDir()); err != nil {
 		return nil, err
 	}
 
@@ -242,7 +242,7 @@ func (r *FileSystem) RenameFile(newFilename string, deleteRepetition bool) (*Fil
 }
 
 // CopyFile 拷贝单文件
-func (r *FileSystem) CopyFile(dstDir, dstFilename string, abs bool) (string, error) {
+func (my *FileSystem) CopyFile(dstDir, dstFilename string, abs bool) (string, error) {
 	var (
 		err         error
 		srcFile     *os.File
@@ -262,19 +262,19 @@ func (r *FileSystem) CopyFile(dstDir, dstFilename string, abs bool) (string, err
 	}
 
 	// 判断源是否是文件
-	if !r.IsFile {
-		return "", fmt.Errorf("源文件不存在：%s", r.GetDir())
+	if !my.IsFile {
+		return "", fmt.Errorf("源文件不存在：%s", my.GetDir())
 	}
 
 	// 打开源文件
-	srcFile, err = os.Open(r.GetDir())
+	srcFile, err = os.Open(my.GetDir())
 	if err != nil {
 		return "", err
 	}
 	defer srcFile.Close()
 
 	if dstFilename == "" {
-		srcFilename = filepath.Base(r.GetDir())
+		srcFilename = filepath.Base(my.GetDir())
 		dst.Join(srcFilename)
 	} else {
 		dst.Join(dstFilename)
@@ -338,14 +338,14 @@ func (FileSystem) CopyFiles(srcFiles []*FileSystemCopyFilesTarget, dstDir string
 }
 
 // CopyDir 拷贝目录
-func (r *FileSystem) CopyDir(dstDir string, abs bool) error {
+func (my *FileSystem) CopyDir(dstDir string, abs bool) error {
 	// 判断是否是目录
-	if !r.IsDir {
+	if !my.IsDir {
 		return errors.New("源目录不存在")
 	}
 
 	// 遍历源目录
-	err := filepath.Walk(r.GetDir(), func(srcPath string, info os.FileInfo, err error) error {
+	err := filepath.Walk(my.GetDir(), func(srcPath string, info os.FileInfo, err error) error {
 		var (
 			src         *FileSystem
 			dst         *FileSystem
@@ -386,10 +386,10 @@ func (r *FileSystem) CopyDir(dstDir string, abs bool) error {
 }
 
 // WriteBytes 写入文件：bytes
-func (r *FileSystem) WriteBytes(content []byte) (int64, error) {
+func (my *FileSystem) WriteBytes(content []byte) (int64, error) {
 	var written int
 	// 打开文件
-	file, err := os.OpenFile(r.GetDir(), os.O_RDWR|os.O_CREATE, 0644)
+	file, err := os.OpenFile(my.GetDir(), os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		return 0, err
 	}
@@ -405,13 +405,13 @@ func (r *FileSystem) WriteBytes(content []byte) (int64, error) {
 }
 
 // WriteString 写入文件：string
-func (r *FileSystem) WriteString(content string) (int64, error) {
-	return r.WriteBytes([]byte(content))
+func (my *FileSystem) WriteString(content string) (int64, error) {
+	return my.WriteBytes([]byte(content))
 }
 
 // WriteIoReader 写入文件：io.Reader
-func (r *FileSystem) WriteIoReader(content io.Reader) (written int64, err error) {
-	dst, err := os.Create(r.dir)
+func (my *FileSystem) WriteIoReader(content io.Reader) (written int64, err error) {
+	dst, err := os.Create(my.dir)
 	if err != nil {
 		return 0, err
 	}
@@ -421,10 +421,10 @@ func (r *FileSystem) WriteIoReader(content io.Reader) (written int64, err error)
 }
 
 // WriteBytesAppend 追加写入文件：bytes
-func (r *FileSystem) WriteBytesAppend(content []byte) (int64, error) {
+func (my *FileSystem) WriteBytesAppend(content []byte) (int64, error) {
 	var written int
 	// Open the file in append mode.
-	file, e := os.OpenFile(r.GetDir(), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file, e := os.OpenFile(my.GetDir(), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if e != nil {
 		return 0, e
 	}
@@ -440,14 +440,14 @@ func (r *FileSystem) WriteBytesAppend(content []byte) (int64, error) {
 }
 
 // WriteStringAppend 追加写入文件：string
-func (r *FileSystem) WriteStringAppend(content string) (int64, error) {
-	return r.WriteBytesAppend([]byte(content))
+func (my *FileSystem) WriteStringAppend(content string) (int64, error) {
+	return my.WriteBytesAppend([]byte(content))
 }
 
 // WriteIoReaderAppend 追加写入文件：io.Reader
-func (r *FileSystem) WriteIoReaderAppend(content io.Reader) (int64, error) {
+func (my *FileSystem) WriteIoReaderAppend(content io.Reader) (int64, error) {
 	var written int
-	dst, err := os.OpenFile(r.dir, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	dst, err := os.OpenFile(my.dir, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return 0, err
 	}

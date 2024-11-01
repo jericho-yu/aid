@@ -29,8 +29,8 @@ func NewReader() *Reader {
 }
 
 // AutoRead 自动读取（默认第一行是表头，从第二行开始，默认Sheet名称为：Sheet1）
-func (r *Reader) AutoRead(filename ...any) *Reader {
-	return r.
+func (my *Reader) AutoRead(filename ...any) *Reader {
+	return my.
 		OpenFile(filename...).
 		SetOriginalRow(2).
 		SetTitleRow(1).
@@ -40,8 +40,8 @@ func (r *Reader) AutoRead(filename ...any) *Reader {
 }
 
 // AutoReadBySheetName 自动读取（默认第一行是表头，从第二行开始）
-func (r *Reader) AutoReadBySheetName(sheetName string, filename ...any) *Reader {
-	return r.
+func (my *Reader) AutoReadBySheetName(sheetName string, filename ...any) *Reader {
+	return my.
 		OpenFile(filename...).
 		SetOriginalRow(2).
 		SetTitleRow(1).
@@ -51,16 +51,16 @@ func (r *Reader) AutoReadBySheetName(sheetName string, filename ...any) *Reader 
 }
 
 // Data 获取数据：有序字典
-func (r *Reader) Data() *dict.AnyOrderlyDict[uint64, *array.AnyArray[string]] {
-	return r.data
+func (my *Reader) Data() *dict.AnyOrderlyDict[uint64, *array.AnyArray[string]] {
+	return my.data
 }
 
 // DataWithTitle 获取数据：带有title的有序字典
-func (r *Reader) DataWithTitle() (*dict.AnyOrderlyDict[uint64, *dict.AnyDict[string, string]], error) {
+func (my *Reader) DataWithTitle() (*dict.AnyOrderlyDict[uint64, *dict.AnyDict[string, string]], error) {
 	newDict := dict.MakeAnyOrderlyDict[uint64, *dict.AnyDict[string, string]](0)
 
-	for idx, value := range r.data.All() {
-		newMap, err := dict.Zip[string, string](r.titles.All(), value.Value.All())
+	for idx, value := range my.data.All() {
+		newMap, err := dict.Zip[string, string](my.titles.All(), value.Value.All())
 		if err != nil {
 			return nil, err
 		}
@@ -71,162 +71,162 @@ func (r *Reader) DataWithTitle() (*dict.AnyOrderlyDict[uint64, *dict.AnyDict[str
 }
 
 // SetDataByRow 设置单行数据
-func (r *Reader) SetDataByRow(rowNumber uint64, data []string) *Reader {
-	r.data.SetByKey(rowNumber, array.NewAnyArray(data))
-	return r
+func (my *Reader) SetDataByRow(rowNumber uint64, data []string) *Reader {
+	my.data.SetByKey(rowNumber, array.NewAnyArray(data))
+	return my
 }
 
 // GetSheetName 获取工作表名称
-func (r *Reader) GetSheetName() string {
-	return r.sheetName
+func (my *Reader) GetSheetName() string {
+	return my.sheetName
 }
 
 // SetSheetName 设置工作表名称
-func (r *Reader) SetSheetName(sheetName string) *Reader {
-	r.sheetName = sheetName
-	return r
+func (my *Reader) SetSheetName(sheetName string) *Reader {
+	my.sheetName = sheetName
+	return my
 }
 
 // GetOriginalRow 获取读取起始行
-func (r *Reader) GetOriginalRow() int {
-	return r.originalRow
+func (my *Reader) GetOriginalRow() int {
+	return my.originalRow
 }
 
 // SetOriginalRow 设置读取起始行
-func (r *Reader) SetOriginalRow(originalRow int) *Reader {
-	r.originalRow = originalRow - 1
-	return r
+func (my *Reader) SetOriginalRow(originalRow int) *Reader {
+	my.originalRow = originalRow - 1
+	return my
 }
 
 // GetFinishedRow 获取读取终止行
-func (r *Reader) GetFinishedRow() int {
-	return r.finishedRow
+func (my *Reader) GetFinishedRow() int {
+	return my.finishedRow
 }
 
 // SetFinishedRow 设置读取终止行
-func (r *Reader) SetFinishedRow(finishedRow int) *Reader {
-	r.finishedRow = finishedRow - 1
-	return r
+func (my *Reader) SetFinishedRow(finishedRow int) *Reader {
+	my.finishedRow = finishedRow - 1
+	return my
 }
 
 // GetTitleRow 获取表头行
-func (r *Reader) GetTitleRow() int {
-	return r.titleRow
+func (my *Reader) GetTitleRow() int {
+	return my.titleRow
 }
 
 // SetTitleRow 设置表头行
-func (r *Reader) SetTitleRow(titleRow int) *Reader {
-	r.titleRow = titleRow - 1
-	return r
+func (my *Reader) SetTitleRow(titleRow int) *Reader {
+	my.titleRow = titleRow - 1
+	return my
 }
 
 // GetTitle 获取表头
-func (r *Reader) GetTitle() *array.AnyArray[string] {
-	return r.titles
+func (my *Reader) GetTitle() *array.AnyArray[string] {
+	return my.titles
 }
 
 // SetTitle 设置表头
-func (r *Reader) SetTitle(titles []string) *Reader {
+func (my *Reader) SetTitle(titles []string) *Reader {
 	if len(titles) == 0 {
-		r.Err = errors.New("表头不能为空")
-		return r
+		my.Err = errors.New("表头不能为空")
+		return my
 	}
-	r.titles = array.NewAnyArray[string](titles)
-	return r
+	my.titles = array.NewAnyArray[string](titles)
+	return my
 }
 
 // OpenFile 打开文件
-func (r *Reader) OpenFile(filename ...any) *Reader {
+func (my *Reader) OpenFile(filename ...any) *Reader {
 	if filename[0].(string) == "" {
-		r.Err = errors.New("文件名不能为空")
-		return r
+		my.Err = errors.New("文件名不能为空")
+		return my
 	}
 	f, err := excelize.OpenFile(fmt.Sprintf(filename[0].(string), filename[1:]...))
 	if err != nil {
-		r.Err = fmt.Errorf("打开文件错误：%s", err.Error())
-		return r
+		my.Err = fmt.Errorf("打开文件错误：%s", err.Error())
+		return my
 	}
-	r.excel = f
+	my.excel = f
 
 	defer func(r *Reader) {
 		if err = r.excel.Close(); err != nil {
 			r.Err = errors.New("文件关闭错误")
 		}
-	}(r)
+	}(my)
 
-	r.SetTitleRow(1)
-	r.SetOriginalRow(2)
-	r.data = dict.MakeAnyOrderlyDict[uint64, *array.AnyArray[string]](0)
+	my.SetTitleRow(1)
+	my.SetOriginalRow(2)
+	my.data = dict.MakeAnyOrderlyDict[uint64, *array.AnyArray[string]](0)
 
-	return r
+	return my
 }
 
 // ReadTitle 读取表头
-func (r *Reader) ReadTitle() *Reader {
-	if r.GetSheetName() == "" {
-		r.Err = errors.New("未设置工作表名称")
-		return r
+func (my *Reader) ReadTitle() *Reader {
+	if my.GetSheetName() == "" {
+		my.Err = errors.New("未设置工作表名称")
+		return my
 	}
 
-	if rows, err := r.excel.GetRows(r.GetSheetName()); err != nil {
+	if rows, err := my.excel.GetRows(my.GetSheetName()); err != nil {
 		panic(fmt.Errorf("读取表头错误：%s", err.Error()))
 	} else {
-		r.SetTitle(rows[r.GetTitleRow()])
+		my.SetTitle(rows[my.GetTitleRow()])
 	}
 
-	return r
+	return my
 }
 
 // Read 读取Excel
-func (r *Reader) Read() *Reader {
-	if r.GetSheetName() == "" {
-		r.Err = errors.New("未设置工作表名称")
-		return r
+func (my *Reader) Read() *Reader {
+	if my.GetSheetName() == "" {
+		my.Err = errors.New("未设置工作表名称")
+		return my
 	}
 
-	if rows, err := r.excel.GetRows(r.GetSheetName()); err != nil {
-		r.Err = errors.New("读取数据错误：%s")
-		return r
+	if rows, err := my.excel.GetRows(my.GetSheetName()); err != nil {
+		my.Err = errors.New("读取数据错误：%s")
+		return my
 	} else {
-		if r.finishedRow == 0 {
-			for rowNumber, values := range rows[r.GetOriginalRow():] {
-				r.SetDataByRow(uint64(rowNumber), values)
+		if my.finishedRow == 0 {
+			for rowNumber, values := range rows[my.GetOriginalRow():] {
+				my.SetDataByRow(uint64(rowNumber), values)
 			}
 		} else {
-			for rowNumber, values := range rows[r.GetOriginalRow():r.GetFinishedRow()] {
-				r.SetDataByRow(uint64(rowNumber), values)
+			for rowNumber, values := range rows[my.GetOriginalRow():my.GetFinishedRow()] {
+				my.SetDataByRow(uint64(rowNumber), values)
 			}
 		}
 	}
 
-	return r
+	return my
 }
 
 // ToDataFrameDefaultType 获取DataFrame类型数据 通过Excel表头自定义数据类型
-func (r *Reader) ToDataFrameDefaultType() dataframe.DataFrame {
+func (my *Reader) ToDataFrameDefaultType() dataframe.DataFrame {
 	titleWithType := make(map[string]series.Type)
-	for _, title := range r.GetTitle().All() {
+	for _, title := range my.GetTitle().All() {
 		titleWithType[title] = series.String
 	}
 
-	return r.ToDataFrame(titleWithType)
+	return my.ToDataFrame(titleWithType)
 }
 
 // ToDataFrame 获取DataFrame类型数据
-func (r *Reader) ToDataFrame(titleWithType map[string]series.Type) dataframe.DataFrame {
-	if r.GetSheetName() == "" {
+func (my *Reader) ToDataFrame(titleWithType map[string]series.Type) dataframe.DataFrame {
+	if my.GetSheetName() == "" {
 		panic(errors.New("未设置工作表名称"))
 	}
 
 	var _content [][]string
 
-	if rows, err := r.excel.GetRows(r.GetSheetName()); err != nil {
+	if rows, err := my.excel.GetRows(my.GetSheetName()); err != nil {
 		panic(errors.New("读取数据错误"))
 	} else {
-		if r.finishedRow == 0 {
-			_content = rows[r.GetTitleRow():]
+		if my.finishedRow == 0 {
+			_content = rows[my.GetTitleRow():]
 		} else {
-			_content = rows[r.GetTitleRow():r.GetFinishedRow()]
+			_content = rows[my.GetTitleRow():my.GetFinishedRow()]
 		}
 	}
 
@@ -239,20 +239,20 @@ func (r *Reader) ToDataFrame(titleWithType map[string]series.Type) dataframe.Dat
 }
 
 // ToDataFrameDetectType 获取DataFrame类型数据 通过自动探寻数据类型
-func (r *Reader) ToDataFrameDetectType() dataframe.DataFrame {
-	if r.GetSheetName() == "" {
+func (my *Reader) ToDataFrameDetectType() dataframe.DataFrame {
+	if my.GetSheetName() == "" {
 		panic(errors.New("未设置工作表名称"))
 	}
 
 	var _content [][]string
 
-	if rows, err := r.excel.GetRows(r.GetSheetName()); err != nil {
+	if rows, err := my.excel.GetRows(my.GetSheetName()); err != nil {
 		panic(errors.New("读取数据错误"))
 	} else {
-		if r.finishedRow == 0 {
-			_content = rows[r.GetTitleRow():]
+		if my.finishedRow == 0 {
+			_content = rows[my.GetTitleRow():]
 		} else {
-			_content = rows[r.GetTitleRow():r.GetFinishedRow()]
+			_content = rows[my.GetTitleRow():my.GetFinishedRow()]
 		}
 	}
 

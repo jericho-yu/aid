@@ -24,7 +24,7 @@ type (
 		timeout            *MessageTimeout
 	}
 
-	// PendingRequest
+	// PendingRequest 待处理请求
 	PendingRequest struct {
 		Uuid uuid.UUID
 		Chan chan []byte
@@ -54,53 +54,53 @@ func NewClient(instanceName, name, host, path string, receiveMessageFunc func(in
 }
 
 // SendMsg 发送消息：通过链接
-func (r *Client) SendMsg(msgType int, msg []byte) ([]byte, error) {
+func (my *Client) SendMsg(msgType int, msg []byte) ([]byte, error) {
 	var (
 		err error
 		res = make([]byte, 0)
 	)
-	r.syncChan = make(chan []byte)
+	my.syncChan = make(chan []byte)
 
-	if r.timeout == nil || r.timeout.interval == 0 {
+	if my.timeout == nil || my.timeout.interval == 0 {
 		clientPoolIns.Error = errors.New("同步消息，需要设置超时时间")
 		return nil, errors.New("同步消息，需要设置超时时间")
 	}
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
+	my.mu.Lock()
+	defer my.mu.Unlock()
 
-	err = r.Conn.WriteMessage(msgType, msg)
+	err = my.Conn.WriteMessage(msgType, msg)
 	if err != nil {
 		if clientPoolIns.onSendMsgErr != nil {
-			clientPoolIns.onSendMsgErr(r.InstanceName, r.Name, err)
+			clientPoolIns.onSendMsgErr(my.InstanceName, my.Name, err)
 		}
 		clientPoolIns.Error = err
 		return nil, err
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), r.timeout.interval)
+	ctx, cancel := context.WithTimeout(context.Background(), my.timeout.interval)
 	defer cancel()
 	select {
 	case <-ctx.Done():
 		clientPoolIns.Error = errors.New("请求超时")
 		return nil, errors.New("请求超时")
-	case res = <-r.syncChan:
-		if r.onReceiveMsg != nil {
-			return r.onReceiveMsg(r.InstanceName, r.Name, res)
+	case res = <-my.syncChan:
+		if my.onReceiveMsg != nil {
+			return my.onReceiveMsg(my.InstanceName, my.Name, res)
 		}
 		return res, nil
 	}
 }
 
 // Close 关闭链接
-func (r *Client) Close() error {
+func (my *Client) Close() error {
 	var err error
 
-	if err = r.Conn.Close(); err != nil {
+	if err = my.Conn.Close(); err != nil {
 		if clientPoolIns.onCloseErr != nil {
-			clientPoolIns.onCloseErr(r.InstanceName, r.Name, err)
+			clientPoolIns.onCloseErr(my.InstanceName, my.Name, err)
 		}
-		r.closeChan <- struct{}{}
+		my.closeChan <- struct{}{}
 		return err
 	}
 

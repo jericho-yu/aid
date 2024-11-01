@@ -46,22 +46,22 @@ var (
 func (Aes) New(sail string) *Aes { return &Aes{sailStr: sail} }
 
 // NewEncrypt 实例化：Aes加密密钥对象
-func (r *Aes) NewEncrypt() *Aes {
-	r.Encrypt = AesEncryptHelper.New(r.sailStr)
-	return r
+func (my *Aes) NewEncrypt() *Aes {
+	my.Encrypt = AesEncryptHelper.New(my.sailStr)
+	return my
 }
 
 // NewDecrypt 实例化：Aes解密密钥对象
-func (r *Aes) NewDecrypt(openKey string) *Aes {
-	r.Decrypt = AesDecryptHelper.New(r.sailStr, openKey)
-	return r
+func (my *Aes) NewDecrypt(openKey string) *Aes {
+	my.Decrypt = AesDecryptHelper.New(my.sailStr, openKey)
+	return my
 }
 
 // GetEncrypt 获取加密密钥
-func (r *Aes) GetEncrypt() *AesEncrypt { return r.Encrypt }
+func (my *Aes) GetEncrypt() *AesEncrypt { return my.Encrypt }
 
 // GetDecrypt 获取解密密钥
-func (r *Aes) GetDecrypt() *AesDecrypt { return r.Decrypt }
+func (my *Aes) GetDecrypt() *AesDecrypt { return my.Decrypt }
 
 // New 实例化：Aes加密密钥对象
 func (AesEncrypt) New(sailStr string) *AesEncrypt {

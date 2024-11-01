@@ -14,24 +14,24 @@ func (HttpClientMultiple) New() *HttpClientMultiple {
 }
 
 // Add 添加httpClient对象
-func (receiver *HttpClientMultiple) Add(hc *HttpClient) *HttpClientMultiple {
-	receiver.clients = append(receiver.clients, hc)
-	return receiver
+func (my *HttpClientMultiple) Add(hc *HttpClient) *HttpClientMultiple {
+	my.clients = append(my.clients, hc)
+	return my
 }
 
 // SetClients 设置httpClient对象
-func (receiver *HttpClientMultiple) SetClients(clients []*HttpClient) *HttpClientMultiple {
-	receiver.clients = clients
-	return receiver
+func (my *HttpClientMultiple) SetClients(clients []*HttpClient) *HttpClientMultiple {
+	my.clients = clients
+	return my
 }
 
 // Send 批量发送
-func (receiver *HttpClientMultiple) Send() *HttpClientMultiple {
-	if len(receiver.clients) > 0 {
+func (my *HttpClientMultiple) Send() *HttpClientMultiple {
+	if len(my.clients) > 0 {
 		var wg sync.WaitGroup
-		wg.Add(len(receiver.clients))
+		wg.Add(len(my.clients))
 
-		for _, client := range receiver.clients {
+		for _, client := range my.clients {
 			go func(client *HttpClient) {
 				defer wg.Done()
 
@@ -42,10 +42,10 @@ func (receiver *HttpClientMultiple) Send() *HttpClientMultiple {
 		wg.Wait()
 	}
 
-	return receiver
+	return my
 }
 
 // GetClients 获取链接池
-func (receiver *HttpClientMultiple) GetClients() []*HttpClient {
-	return receiver.clients
+func (my *HttpClientMultiple) GetClients() []*HttpClient {
+	return my.clients
 }

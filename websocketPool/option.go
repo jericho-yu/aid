@@ -21,25 +21,25 @@ func (Heart) New() *Heart {
 }
 
 // SetInterval 设置定时器
-func (r *Heart) SetInterval(interval time.Duration) *Heart {
-	if r.ticker != nil {
-		r.ticker.Reset(interval)
+func (my *Heart) SetInterval(interval time.Duration) *Heart {
+	if my.ticker != nil {
+		my.ticker.Reset(interval)
 	} else {
-		r.ticker = time.NewTicker(interval)
+		my.ticker = time.NewTicker(interval)
 	}
-	return r
+	return my
 }
 
 // SetFn 设置回调：定时器执行内容
-func (r *Heart) SetFn(fn func(client *Client)) *Heart {
-	r.fn = fn
-	return r
+func (my *Heart) SetFn(fn func(client *Client)) *Heart {
+	my.fn = fn
+	return my
 }
 
 // Stop 停止定时器
-func (r *Heart) Stop() *Heart {
-	r.ticker.Stop()
-	return r
+func (my *Heart) Stop() *Heart {
+	my.ticker.Stop()
+	return my
 }
 
 // Default 默认心跳：10秒

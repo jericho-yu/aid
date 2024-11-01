@@ -20,21 +20,21 @@ func (HonestMan) New(dirs ...string) *HonestMan {
 }
 
 // 读取文件
-func (r *HonestMan) readFile() []byte {
+func (my *HonestMan) readFile() []byte {
 	var (
 		fileContent []byte
 		err         error
 	)
-	fileContent, err = os.ReadFile(r.dir)
+	fileContent, err = os.ReadFile(my.dir)
 	if err != nil {
-		panic(fmt.Errorf("读取配置文件失败(%s)：%s", r.dir, err.Error()))
+		panic(fmt.Errorf("读取配置文件失败(%s)：%s", my.dir, err.Error()))
 	}
 
 	return fileContent
 }
 
 // 检查参数是否是一个指针
-func (r *HonestMan) isPtr(target any) {
+func (my *HonestMan) isPtr(target any) {
 	// 使用反射检查target是否为指针类型
 	val := reflect.ValueOf(target)
 	if val.Kind() != reflect.Ptr {
@@ -43,14 +43,14 @@ func (r *HonestMan) isPtr(target any) {
 }
 
 // LoadYaml 读取Yaml配置文件
-func (r *HonestMan) LoadYaml(target any) (err error) {
-	r.isPtr(target)
-	return yaml.Unmarshal(r.readFile(), target)
+func (my *HonestMan) LoadYaml(target any) (err error) {
+	my.isPtr(target)
+	return yaml.Unmarshal(my.readFile(), target)
 }
 
 // LoadJson 读取Json配置文件
-func (r *HonestMan) LoadJson(target any) (err error) {
-	r.isPtr(target)
+func (my *HonestMan) LoadJson(target any) (err error) {
+	my.isPtr(target)
 
-	return json.Unmarshal(r.readFile(), target)
+	return json.Unmarshal(my.readFile(), target)
 }

@@ -67,89 +67,89 @@ func NewDelete(url string) *HttpClient {
 }
 
 // SetCert 设置SSL证书
-func (r *HttpClient) SetCert(filename string) *HttpClient {
+func (my *HttpClient) SetCert(filename string) *HttpClient {
 	var e error
 
 	// 读取证书文件
-	if r.cert, e = os.ReadFile(filename); e != nil {
-		r.Err = e
+	if my.cert, e = os.ReadFile(filename); e != nil {
+		my.Err = e
 	}
-	return r
+	return my
 }
 
 // SetUrl 设置请求地址
-func (r *HttpClient) SetUrl(url string) *HttpClient {
-	r.requestUrl = url
-	return r
+func (my *HttpClient) SetUrl(url string) *HttpClient {
+	my.requestUrl = url
+	return my
 }
 
 // SetMethod 设置请求方法
-func (r *HttpClient) SetMethod(method string) *HttpClient {
-	r.requestMethod = method
-	return r
+func (my *HttpClient) SetMethod(method string) *HttpClient {
+	my.requestMethod = method
+	return my
 }
 
 // AddHeaders 设置请求头
-func (r *HttpClient) AddHeaders(headers map[string][]string) *HttpClient {
-	r.requestHeaders = headers
-	return r
+func (my *HttpClient) AddHeaders(headers map[string][]string) *HttpClient {
+	my.requestHeaders = headers
+	return my
 }
 
 // SetQueries 设置请求参数
-func (r *HttpClient) SetQueries(queries map[string]string) *HttpClient {
-	r.requestQueries = queries
-	return r
+func (my *HttpClient) SetQueries(queries map[string]string) *HttpClient {
+	my.requestQueries = queries
+	return my
 }
 
 // SetAuthorization 设置认证
-func (r *HttpClient) SetAuthorization(username, password, title string) *HttpClient {
-	r.requestHeaders["Authorization"] = []string{fmt.Sprintf("%s %s", title, base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", username, password))))}
+func (my *HttpClient) SetAuthorization(username, password, title string) *HttpClient {
+	my.requestHeaders["Authorization"] = []string{fmt.Sprintf("%s %s", title, base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", username, password))))}
 
-	return r
+	return my
 }
 
 // SetBody 设置请求体
-func (r *HttpClient) SetBody(body []byte) *HttpClient {
-	r.requestBody = body
-	return r
+func (my *HttpClient) SetBody(body []byte) *HttpClient {
+	my.requestBody = body
+	return my
 }
 
 // SetJsonBody 设置json请求体
-func (r *HttpClient) SetJsonBody(body any) *HttpClient {
-	r.SetHeaderContentType("json")
+func (my *HttpClient) SetJsonBody(body any) *HttpClient {
+	my.SetHeaderContentType("json")
 
-	r.requestBody, r.Err = json.Marshal(body)
-	return r
+	my.requestBody, my.Err = json.Marshal(body)
+	return my
 }
 
 // SetXmlBody 设置xml请求体
-func (r *HttpClient) SetXmlBody(body any) *HttpClient {
-	r.SetHeaderContentType("xml")
+func (my *HttpClient) SetXmlBody(body any) *HttpClient {
+	my.SetHeaderContentType("xml")
 
-	r.requestBody, r.Err = xml.Marshal(body)
-	return r
+	my.requestBody, my.Err = xml.Marshal(body)
+	return my
 }
 
 // SetFormBody 设置表单请求体
-func (r *HttpClient) SetFormBody(body map[string]string) *HttpClient {
-	r.SetHeaderContentType("form")
+func (my *HttpClient) SetFormBody(body map[string]string) *HttpClient {
+	my.SetHeaderContentType("form")
 
 	params := url.Values{}
 	for k, v := range body {
 		params.Add(k, v)
 	}
-	r.requestBody = []byte(params.Encode())
-	return r
+	my.requestBody = []byte(params.Encode())
+	return my
 }
 
 // SetFormDataBody 设置表单数据请求体
-func (r *HttpClient) SetFormDataBody(texts map[string]string, files map[string]string) *HttpClient {
+func (my *HttpClient) SetFormDataBody(texts map[string]string, files map[string]string) *HttpClient {
 	var (
 		e      error
 		buffer bytes.Buffer
 	)
 
-	r.SetHeaderContentType("form-data")
+	my.SetHeaderContentType("form-data")
 
 	writer := multipart.NewWriter(&buffer)
 
@@ -157,8 +157,8 @@ func (r *HttpClient) SetFormDataBody(texts map[string]string, files map[string]s
 		for k, v := range texts {
 			e = writer.WriteField(k, v)
 			if e != nil {
-				r.Err = e
-				return r
+				my.Err = e
+				return my
 			}
 		}
 	}
@@ -169,8 +169,8 @@ func (r *HttpClient) SetFormDataBody(texts map[string]string, files map[string]s
 			file, _ := os.Open(v)
 			_, e = io.Copy(fileWriter, file)
 			if e != nil {
-				r.Err = e
-				return r
+				my.Err = e
+				return my
 			}
 			defer func(file *os.File) {
 				e = file.Close()
@@ -181,49 +181,49 @@ func (r *HttpClient) SetFormDataBody(texts map[string]string, files map[string]s
 		}
 	}
 
-	r.requestBody = []byte(writer.FormDataContentType())
+	my.requestBody = []byte(writer.FormDataContentType())
 
-	return r
+	return my
 }
 
 // SetPlainBody 设置纯文本请求体
-func (r *HttpClient) SetPlainBody(text string) *HttpClient {
-	r.SetHeaderContentType("plain")
+func (my *HttpClient) SetPlainBody(text string) *HttpClient {
+	my.SetHeaderContentType("plain")
 
-	r.requestBody = []byte(text)
+	my.requestBody = []byte(text)
 
-	return r
+	return my
 }
 
 // SetHtmlBody 设置html请求体
-func (r *HttpClient) SetHtmlBody(text string) *HttpClient {
-	r.SetHeaderContentType("html")
+func (my *HttpClient) SetHtmlBody(text string) *HttpClient {
+	my.SetHeaderContentType("html")
 
-	r.requestBody = []byte(text)
+	my.requestBody = []byte(text)
 
-	return r
+	return my
 }
 
 // SetCssBody 设置Css请求体
-func (r *HttpClient) SetCssBody(text string) *HttpClient {
-	r.SetHeaderContentType("css")
+func (my *HttpClient) SetCssBody(text string) *HttpClient {
+	my.SetHeaderContentType("css")
 
-	r.requestBody = []byte(text)
+	my.requestBody = []byte(text)
 
-	return r
+	return my
 }
 
 // SetJavascriptBody 设置Javascript请求体
-func (r *HttpClient) SetJavascriptBody(text string) *HttpClient {
-	r.SetHeaderContentType("javascript")
+func (my *HttpClient) SetJavascriptBody(text string) *HttpClient {
+	my.SetHeaderContentType("javascript")
 
-	r.requestBody = []byte(text)
+	my.requestBody = []byte(text)
 
-	return r
+	return my
 }
 
 // SetSteamBody 设置二进制文件
-func (r *HttpClient) SetSteamBody(filename string) *HttpClient {
+func (my *HttpClient) SetSteamBody(filename string) *HttpClient {
 	var (
 		err  error
 		file *os.File
@@ -231,8 +231,8 @@ func (r *HttpClient) SetSteamBody(filename string) *HttpClient {
 
 	file, err = os.Open(filename)
 	if err != nil {
-		r.Err = err
-		return r
+		my.Err = err
+		return my
 	}
 	defer file.Close()
 
@@ -241,217 +241,217 @@ func (r *HttpClient) SetSteamBody(filename string) *HttpClient {
 	size := stat.Size()
 
 	// 创建RequestBodyReader用于读取文件内容
-	r.requestBody, err = io.ReadAll(file)
+	my.requestBody, err = io.ReadAll(file)
 	if err != nil {
-		r.Err = err
-		return r
+		my.Err = err
+		return my
 	}
-	r.request.Header.Set("Content-Length", fmt.Sprintf("%d", size))
+	my.request.Header.Set("Content-Length", fmt.Sprintf("%d", size))
 
-	return r
-	// r.SetHeaderContentType("steam")
+	return my
+	// my.SetHeaderContentType("steam")
 
 	// fileData, err = os.ReadFile(filename)
 	// if err != nil {
-	// 	r.Err = err
-	// 	return r
+	// 	my.Err = err
+	// 	return my
 	// }
-	// r.requestBody = fileData
+	// my.requestBody = fileData
 
-	// return r
+	// return my
 }
 
 // SetHeaderContentType 设置请求头内容类型
-func (r *HttpClient) SetHeaderContentType(key string) *HttpClient {
+func (my *HttpClient) SetHeaderContentType(key string) *HttpClient {
 	value := ContentType{}.GetValue(key)
 	if value != "" {
-		r.requestHeaders["Content-Type"] = []string{value}
+		my.requestHeaders["Content-Type"] = []string{value}
 	}
 
-	return r
+	return my
 }
 
 // SetHeaderAccept 设置请求头接受内容类型
-func (r *HttpClient) SetHeaderAccept(key string) *HttpClient {
+func (my *HttpClient) SetHeaderAccept(key string) *HttpClient {
 	value := Accept{}.GetValue(key)
 	if value != "" {
-		r.requestHeaders["Accept"] = []string{value}
+		my.requestHeaders["Accept"] = []string{value}
 	}
 
-	return r
+	return my
 }
 
 // SetTimeoutSecond 设置超时
-func (r *HttpClient) SetTimeoutSecond(timeoutSecond int64) *HttpClient {
-	r.timeoutSecond = timeoutSecond
+func (my *HttpClient) SetTimeoutSecond(timeoutSecond int64) *HttpClient {
+	my.timeoutSecond = timeoutSecond
 
-	return r
+	return my
 }
 
 // GetResponse 获取响应对象
-func (r *HttpClient) GetResponse() *http.Response {
-	return r.response
+func (my *HttpClient) GetResponse() *http.Response {
+	return my.response
 }
 
 // ParseByContentType 根据响应头Content-Type自动解析响应体
-func (r *HttpClient) ParseByContentType(target any) *HttpClient {
-	switch r.GetResponse().Header.Get("Content-Type") {
+func (my *HttpClient) ParseByContentType(target any) *HttpClient {
+	switch my.GetResponse().Header.Get("Content-Type") {
 	case ContentTypeJson:
-		r.GetResponseJsonBody(target)
+		my.GetResponseJsonBody(target)
 	case ContentTypeXml:
-		r.GetResponseXmlBody(target)
+		my.GetResponseXmlBody(target)
 	}
-	return r
+	return my
 }
 
 // GetResponseRawBody 获取原始响应体
-func (r *HttpClient) GetResponseRawBody() []byte {
-	return r.responseBody
+func (my *HttpClient) GetResponseRawBody() []byte {
+	return my.responseBody
 }
 
 // GetResponseJsonBody 获取json格式响应体
-func (r *HttpClient) GetResponseJsonBody(target any) *HttpClient {
-	if e := json.Unmarshal(r.responseBody, &target); e != nil {
-		r.Err = e
+func (my *HttpClient) GetResponseJsonBody(target any) *HttpClient {
+	if e := json.Unmarshal(my.responseBody, &target); e != nil {
+		my.Err = e
 	}
-	return r
+	return my
 }
 
 // GetResponseXmlBody 获取xml格式响应体
-func (r *HttpClient) GetResponseXmlBody(target any) *HttpClient {
-	if e := xml.Unmarshal(r.responseBody, &target); e != nil {
-		r.Err = e
+func (my *HttpClient) GetResponseXmlBody(target any) *HttpClient {
+	if e := xml.Unmarshal(my.responseBody, &target); e != nil {
+		my.Err = e
 	}
-	return r
+	return my
 }
 
 // SaveResponseSteamFile 保存二进制到文件
-func (r *HttpClient) SaveResponseSteamFile(filename string) *HttpClient {
+func (my *HttpClient) SaveResponseSteamFile(filename string) *HttpClient {
 	// 创建一个新的文件
 	file, err := os.Create(filename)
 	if err != nil {
-		r.Err = err
-		return r
+		my.Err = err
+		return my
 	}
 	defer func() { file.Close() }()
 
 	// 将二进制数据写入文件
-	_, err = file.Write(r.responseBody)
+	_, err = file.Write(my.responseBody)
 	if err != nil {
-		r.Err = err
-		return r
+		my.Err = err
+		return my
 	}
 
-	return r
+	return my
 }
 
 // GetRequest 获取请求
-func (r *HttpClient) GetRequest() *http.Request {
-	return r.request
+func (my *HttpClient) GetRequest() *http.Request {
+	return my.request
 }
 
 // GenerateRequest 生成请求对象
-func (r *HttpClient) GenerateRequest() *HttpClient {
+func (my *HttpClient) GenerateRequest() *HttpClient {
 	var e error
 
-	r.request, e = http.NewRequest(r.requestMethod, r.requestUrl, bytes.NewReader(r.requestBody))
+	my.request, e = http.NewRequest(my.requestMethod, my.requestUrl, bytes.NewReader(my.requestBody))
 	if e != nil {
-		r.Err = fmt.Errorf("生成请求对象失败：%s", e.Error())
-		return r
+		my.Err = fmt.Errorf("生成请求对象失败：%s", e.Error())
+		return my
 	}
 
 	// 设置请求头
-	r.addHeaders()
+	my.addHeaders()
 
 	// 设置url参数
-	r.setQueries()
+	my.setQueries()
 
 	// 检查请求对象
-	if r.Err = r.check(); r.Err != nil {
-		return r
+	if my.Err = my.check(); my.Err != nil {
+		return my
 	}
 
 	// 创建一个新的证书池，并将证书添加到池中
 	certPool := x509.NewCertPool()
-	certPool.AppendCertsFromPEM(r.cert)
+	certPool.AppendCertsFromPEM(my.cert)
 
 	// 创建一个新的TLS配置
 	tlsConfig := &tls.Config{RootCAs: certPool}
 
 	// 创建一个新的Transport
-	r.transport = &http.Transport{TLSClientConfig: tlsConfig}
+	my.transport = &http.Transport{TLSClientConfig: tlsConfig}
 
-	r.isReady = true
+	my.isReady = true
 
-	return r
+	return my
 }
 
 // Send 发送请求
-func (r *HttpClient) Send() *HttpClient {
-	if !r.isReady {
-		r.GenerateRequest()
-		if r.Err != nil {
-			return r
+func (my *HttpClient) Send() *HttpClient {
+	if !my.isReady {
+		my.GenerateRequest()
+		if my.Err != nil {
+			return my
 		}
 	}
 
 	// 发送新的请求
-	client := &http.Client{Transport: r.transport}
+	client := &http.Client{Transport: my.transport}
 
 	// 设置超时
-	if r.timeoutSecond > 0 {
-		client.Timeout = time.Duration(r.timeoutSecond) * time.Second
+	if my.timeoutSecond > 0 {
+		client.Timeout = time.Duration(my.timeoutSecond) * time.Second
 	}
 
-	r.response, r.Err = client.Do(r.request)
-	if r.Err != nil {
-		r.Err = fmt.Errorf("发送失败：%s", r.Err.Error())
-		return r
+	my.response, my.Err = client.Do(my.request)
+	if my.Err != nil {
+		my.Err = fmt.Errorf("发送失败：%s", my.Err.Error())
+		return my
 	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
 			panic(err)
 		}
-	}(r.response.Body)
+	}(my.response.Body)
 
 	// 读取新的响应的主体
-	r.responseBody, r.Err = io.ReadAll(r.response.Body)
-	if r.Err != nil {
-		r.Err = fmt.Errorf("读取响应体失败：%s", r.Err.Error())
-		return r
+	my.responseBody, my.Err = io.ReadAll(my.response.Body)
+	if my.Err != nil {
+		my.Err = fmt.Errorf("读取响应体失败：%s", my.Err.Error())
+		return my
 	}
 
-	r.isReady = false
+	my.isReady = false
 
-	return r
+	return my
 }
 
 // 检查条件是否满足
-func (r *HttpClient) check() error {
-	if r.requestUrl == "" {
+func (my *HttpClient) check() error {
+	if my.requestUrl == "" {
 		return errors.New("url不能为空")
 	}
-	if r.requestMethod == "" {
-		r.requestMethod = http.MethodGet
+	if my.requestMethod == "" {
+		my.requestMethod = http.MethodGet
 	}
 	return nil
 }
 
 // 设置url参数
-func (r *HttpClient) setQueries() {
-	if len(r.requestQueries) > 0 {
+func (my *HttpClient) setQueries() {
+	if len(my.requestQueries) > 0 {
 		queries := url.Values{}
-		for k, v := range r.requestQueries {
+		for k, v := range my.requestQueries {
 			queries.Add(k, v)
 		}
-		r.requestUrl += "?" + queries.Encode()
+		my.requestUrl += "?" + queries.Encode()
 	}
 }
 
 // 设置请求头
-func (r *HttpClient) addHeaders() {
-	for k, v := range r.requestHeaders {
-		r.request.Header[k] = append(r.request.Header[k], v...)
+func (my *HttpClient) addHeaders() {
+	for k, v := range my.requestHeaders {
+		my.request.Header[k] = append(my.request.Header[k], v...)
 	}
 }

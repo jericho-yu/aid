@@ -54,46 +54,46 @@ func MakeAnyOrderlyDict[K comparable, V any](size int) *AnyOrderlyDict[K, V] {
 }
 
 // SetByIndex 设置值：根据索引
-func (r *AnyOrderlyDict[K, V]) SetByIndex(index int, key K, value V) *AnyOrderlyDict[K, V] {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+func (my *AnyOrderlyDict[K, V]) SetByIndex(index int, key K, value V) *AnyOrderlyDict[K, V] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
 
-	r.data.Set(index, NewOrderlyDict(key, value))
+	my.data.Set(index, NewOrderlyDict(key, value))
 
-	return r
+	return my
 }
 
 // SetByKey 设置值：根据key
-func (r *AnyOrderlyDict[K, V]) SetByKey(key K, value V) *AnyOrderlyDict[K, V] {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+func (my *AnyOrderlyDict[K, V]) SetByKey(key K, value V) *AnyOrderlyDict[K, V] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
 
 	// 如果不存在则创建
-	if !r.keys.In(key) {
-		r.keys.Append(key)
-		r.data.Append(NewOrderlyDict(key, value))
-		return r
+	if !my.keys.In(key) {
+		my.keys.Append(key)
+		my.data.Append(NewOrderlyDict(key, value))
+		return my
 	}
 
 	// 如果存在则修改
-	for _, val := range r.data.All() {
+	for _, val := range my.data.All() {
 		if val.Key == key {
 			val.Value = value
-			return r
+			return my
 		}
 	}
 
-	return r
+	return my
 }
 
 // Get 获取值
-func (r *AnyOrderlyDict[K, V]) Get(key K) (V, bool) {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
+func (my *AnyOrderlyDict[K, V]) Get(key K) (V, bool) {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
 
 	var emptyValue V
 
-	for _, val := range r.data.All() {
+	for _, val := range my.data.All() {
 		if val.Key == key {
 			return val.Value, true
 		}
@@ -103,44 +103,44 @@ func (r *AnyOrderlyDict[K, V]) Get(key K) (V, bool) {
 }
 
 // First 获取第一个键值对
-func (r *AnyOrderlyDict[K, V]) First() *OrderlyDict[K, V] {
-	return r.data.First()
+func (my *AnyOrderlyDict[K, V]) First() *OrderlyDict[K, V] {
+	return my.data.First()
 }
 
 // FirstKey 获取第一个key
-func (r *AnyOrderlyDict[K, V]) FirstKey() K {
-	return r.data.First().Key
+func (my *AnyOrderlyDict[K, V]) FirstKey() K {
+	return my.data.First().Key
 }
 
 // FirstValue 获取第一个值
-func (r *AnyOrderlyDict[K, V]) FirstValue() V {
-	return r.data.First().Value
+func (my *AnyOrderlyDict[K, V]) FirstValue() V {
+	return my.data.First().Value
 }
 
 // Last 获取最后一个键值对
-func (r *AnyOrderlyDict[K, V]) Last() *OrderlyDict[K, V] {
-	return r.data.Last()
+func (my *AnyOrderlyDict[K, V]) Last() *OrderlyDict[K, V] {
+	return my.data.Last()
 }
 
 // LastKey 获取最后一个key
-func (r *AnyOrderlyDict[K, V]) LastKey() K {
-	return r.data.Last().Key
+func (my *AnyOrderlyDict[K, V]) LastKey() K {
+	return my.data.Last().Key
 }
 
 // LastValue 获取最后一个值
-func (r *AnyOrderlyDict[K, V]) LastValue() V {
-	return r.data.Last().Value
+func (my *AnyOrderlyDict[K, V]) LastValue() V {
+	return my.data.Last().Value
 }
 
 // Keys 获取所有key
-func (r *AnyOrderlyDict[K, V]) Keys() []K {
-	return r.keys.All()
+func (my *AnyOrderlyDict[K, V]) Keys() []K {
+	return my.keys.All()
 }
 
 // ToMap 获取map格式数据
-func (r *AnyOrderlyDict[K, V]) ToMap() map[K]V {
+func (my *AnyOrderlyDict[K, V]) ToMap() map[K]V {
 	var ret = make(map[K]V)
-	for _, datum := range r.data.All() {
+	for _, datum := range my.data.All() {
 		ret[datum.Key] = datum.Value
 	}
 
@@ -148,49 +148,49 @@ func (r *AnyOrderlyDict[K, V]) ToMap() map[K]V {
 }
 
 // All 获取所有值
-func (r *AnyOrderlyDict[K, V]) All() []*OrderlyDict[K, V] {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
+func (my *AnyOrderlyDict[K, V]) All() []*OrderlyDict[K, V] {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
 
-	return r.data.All()
+	return my.data.All()
 }
 
 // Clean 清理
-func (r *AnyOrderlyDict[K, V]) Clean() *AnyOrderlyDict[K, V] {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+func (my *AnyOrderlyDict[K, V]) Clean() *AnyOrderlyDict[K, V] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
 
-	r.data.Clean()
-	r.keys.Clean()
+	my.data.Clean()
+	my.keys.Clean()
 
-	return r
+	return my
 }
 
 // Len 长度
-func (r *AnyOrderlyDict[K, V]) Len() int {
-	return r.data.Len()
+func (my *AnyOrderlyDict[K, V]) Len() int {
+	return my.data.Len()
 }
 
 // Filter 通过条件过滤
-func (r *AnyOrderlyDict[K, V]) Filter(fn func(dict *OrderlyDict[K, V]) bool) *AnyOrderlyDict[K, V] {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+func (my *AnyOrderlyDict[K, V]) Filter(fn func(dict *OrderlyDict[K, V]) bool) *AnyOrderlyDict[K, V] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
 
 	j := 0
-	ret := make([]*OrderlyDict[K, V], r.data.Len())
-	for i := 0; i < r.data.Len(); i++ {
-		if fn(r.data.Get(i)) {
-			ret[j] = r.data.Get(i)
+	ret := make([]*OrderlyDict[K, V], my.data.Len())
+	for i := 0; i < my.data.Len(); i++ {
+		if fn(my.data.Get(i)) {
+			ret[j] = my.data.Get(i)
 			j++
 		}
 	}
 
-	r.data.Clean()
-	r.data = array.NewAnyArray[*OrderlyDict[K, V]](ret)
-	return r
+	my.data.Clean()
+	my.data = array.NewAnyArray[*OrderlyDict[K, V]](ret)
+	return my
 }
 
 // Copy 拷贝对象
-func (r *AnyOrderlyDict[K, V]) Copy() *AnyOrderlyDict[K, V] {
-	return NewAnyOrderlyDict(r.ToMap(), r.keys.All()...)
+func (my *AnyOrderlyDict[K, V]) Copy() *AnyOrderlyDict[K, V] {
+	return NewAnyOrderlyDict(my.ToMap(), my.keys.All()...)
 }

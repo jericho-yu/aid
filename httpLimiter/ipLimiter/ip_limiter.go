@@ -27,16 +27,16 @@ func (IpLimiter) New() *IpLimiter {
 }
 
 // Affirm 检查限流
-func (r *IpLimiter) Affirm(ip string, t time.Duration, maxVisitTimes uint64) (*Visit, bool) {
+func (my *IpLimiter) Affirm(ip string, t time.Duration, maxVisitTimes uint64) (*Visit, bool) {
 	if maxVisitTimes == 0 || t == 0 {
 		// 如果限流为0，直接通过
 		return nil, true
 	}
 
-	v, ok := r.visitMap[ip]
+	v, ok := my.visitMap[ip]
 	if !ok {
 		// 若该IP是首次请求，则初始化visit
-		r.visitMap[ip] = &Visit{lastVisit: time.Now(), visitTimes: 1}
+		my.visitMap[ip] = &Visit{lastVisit: time.Now(), visitTimes: 1}
 	} else {
 		// 若该IP非首次请求，且距离上次请求时间超过Time窗口，则重设visitTimes
 		if time.Since(v.lastVisit) > t {

@@ -71,7 +71,7 @@ func (FileManager) NewByBytes(srcFileBytes []byte, dstDir string, config *FileMa
 }
 
 // SetSrcDir 设置源文件
-func (r *FileManager) SetSrcDir(srcDir string) (*FileManager, error) {
+func (my *FileManager) SetSrcDir(srcDir string) (*FileManager, error) {
 	fs := FileSystemApp.NewByAbs(srcDir)
 	if !fs.IsExist {
 		return nil, errors.New("目标文件不存在")
@@ -82,87 +82,87 @@ func (r *FileManager) SetSrcDir(srcDir string) (*FileManager, error) {
 		return nil, err
 	}
 
-	r.srcDir = fs.GetDir()
-	r.fileBytes = fileBytes
-	r.fileSize = int64(len(fileBytes))
+	my.srcDir = fs.GetDir()
+	my.fileBytes = fileBytes
+	my.fileSize = int64(len(fileBytes))
 
-	return r, nil
+	return my, nil
 }
 
 // SetDstDir 设置目标目录
-func (r *FileManager) SetDstDir(dstDir string) *FileManager {
-	r.dstDir = dstDir
-	return r
+func (my *FileManager) SetDstDir(dstDir string) *FileManager {
+	my.dstDir = dstDir
+	return my
 }
 
 // Upload 上传文件
-func (r *FileManager) Upload() (int64, error) {
-	switch r.config.Driver {
+func (my *FileManager) Upload() (int64, error) {
+	switch my.config.Driver {
 	case FileManagerConfigDriverLocal:
-		return r.uploadToLocal()
+		return my.uploadToLocal()
 	case FileManagerConfigDriverNexus:
-		return r.uploadToNexus()
+		return my.uploadToNexus()
 	case FileManagerConfigDriverOss:
-		return r.uploadToOss()
+		return my.uploadToOss()
 	}
 
-	return 0, fmt.Errorf("不支持的驱动类型：%s", r.config.Driver)
+	return 0, fmt.Errorf("不支持的驱动类型：%s", my.config.Driver)
 }
 
 // Delete 删除文件
-func (r *FileManager) Delete() error {
-	switch r.config.Driver {
+func (my *FileManager) Delete() error {
+	switch my.config.Driver {
 	case FileManagerConfigDriverLocal:
-		return r.deleteFromLocal()
+		return my.deleteFromLocal()
 	case FileManagerConfigDriverNexus:
-		return r.deleteFromNexus()
+		return my.deleteFromNexus()
 	case FileManagerConfigDriverOss:
-		return r.deleteFromOss()
+		return my.deleteFromOss()
 	}
-	return fmt.Errorf("不支持的驱动类型：%s", r.config.Driver)
+	return fmt.Errorf("不支持的驱动类型：%s", my.config.Driver)
 }
 
 // 上传到本地
-func (r *FileManager) uploadToLocal() (int64, error) {
-	dst := FileSystemApp.NewByAbs(r.dstDir)
-	return dst.WriteBytes(r.fileBytes)
+func (my *FileManager) uploadToLocal() (int64, error) {
+	dst := FileSystemApp.NewByAbs(my.dstDir)
+	return dst.WriteBytes(my.fileBytes)
 }
 
 // 上传到nexus
-func (r *FileManager) uploadToNexus() (int64, error) {
-	client := httpClient.NewPut(r.dstDir).
-		SetAuthorization(r.config.Username, r.config.Password, r.config.AuthTitle).
+func (my *FileManager) uploadToNexus() (int64, error) {
+	client := httpClient.NewPut(my.dstDir).
+		SetAuthorization(my.config.Username, my.config.Password, my.config.AuthTitle).
 		AddHeaders(map[string][]string{
-			"Content-Length": {fmt.Sprintf("%d", r.fileSize)},
+			"Content-Length": {fmt.Sprintf("%d", my.fileSize)},
 		}).
-		SetBody(r.fileBytes).
+		SetBody(my.fileBytes).
 		Send()
 
 	if client.Err != nil {
 		return 0, client.Err
 	}
 
-	return int64(len(r.fileBytes)), nil
+	return int64(len(my.fileBytes)), nil
 }
 
 // 上传到oss
-func (r *FileManager) uploadToOss() (int64, error) {
+func (my *FileManager) uploadToOss() (int64, error) {
 	return 0, errors.New("暂不支持oss方式")
 }
 
 // 从本地删除文件
-func (r *FileManager) deleteFromLocal() error {
-	return FileSystemApp.NewByAbs(r.dstDir).DelFile()
+func (my *FileManager) deleteFromLocal() error {
+	return FileSystemApp.NewByAbs(my.dstDir).DelFile()
 }
 
 // 从nexus删除文件
-func (r *FileManager) deleteFromNexus() error {
-	return httpClient.NewDelete(r.dstDir).
-		SetAuthorization(r.config.Username, r.config.Password, r.config.AuthTitle).
+func (my *FileManager) deleteFromNexus() error {
+	return httpClient.NewDelete(my.dstDir).
+		SetAuthorization(my.config.Username, my.config.Password, my.config.AuthTitle).
 		Send().Err
 }
 
 // 从oss删除文件
-func (r *FileManager) deleteFromOss() error {
+func (my *FileManager) deleteFromOss() error {
 	return errors.New("暂不支持oss方式")
 }

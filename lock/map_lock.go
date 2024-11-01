@@ -42,23 +42,23 @@ func (MapLock) Once() *MapLock {
 }
 
 // Set 创建锁
-func (r *MapLock) Set(key string, val any) error {
-	_, exists := r.locks.Get(key)
+func (my *MapLock) Set(key string, val any) error {
+	_, exists := my.locks.Get(key)
 	if exists {
 		return fmt.Errorf("锁[%s]已存在", key)
 	} else {
-		r.locks.Set(key, &itemLock{val: val})
+		my.locks.Set(key, &itemLock{val: val})
 	}
 
 	return nil
 }
 
 // SetMany 批量创建锁
-func (r *MapLock) SetMany(items map[string]any) error {
+func (my *MapLock) SetMany(items map[string]any) error {
 	for idx, item := range items {
-		err := r.Set(idx, item)
+		err := my.Set(idx, item)
 		if err != nil {
-			r.DestroyAll()
+			my.DestroyAll()
 			return err
 		}
 	}
@@ -75,23 +75,23 @@ func (r *itemLock) Release() {
 }
 
 // Destroy 删除锁
-func (r *MapLock) Destroy(key string) {
-	if il, ok := r.locks.Get(key); ok {
+func (my *MapLock) Destroy(key string) {
+	if il, ok := my.locks.Get(key); ok {
 		il.Release()
-		r.locks.RemoveByKey(key) // 删除键值对，以便垃圾回收
+		my.locks.RemoveByKey(key) // 删除键值对，以便垃圾回收
 	}
 }
 
 // DestroyAll 删除所有锁
-func (r *MapLock) DestroyAll() {
-	for key := range r.locks.All() {
-		r.Destroy(key)
+func (my *MapLock) DestroyAll() {
+	for key := range my.locks.All() {
+		my.Destroy(key)
 	}
 }
 
 // Lock 获取锁
-func (r *MapLock) Lock(key string, timeout time.Duration) (*itemLock, error) {
-	if item, exists := r.locks.Get(key); !exists {
+func (my *MapLock) Lock(key string, timeout time.Duration) (*itemLock, error) {
+	if item, exists := my.locks.Get(key); !exists {
 		return nil, fmt.Errorf("锁[%s]不存在", key)
 	} else {
 		if item.inUse {
@@ -105,7 +105,7 @@ func (r *MapLock) Lock(key string, timeout time.Duration) (*itemLock, error) {
 		if timeout > 0 {
 			item.timeout = timeout
 			item.timer = time.AfterFunc(timeout, func() {
-				if il, ok := r.locks.Get(key); ok {
+				if il, ok := my.locks.Get(key); ok {
 					if il.timer != nil {
 						il.Release()
 					}
@@ -118,8 +118,8 @@ func (r *MapLock) Lock(key string, timeout time.Duration) (*itemLock, error) {
 }
 
 // Try 尝试获取锁
-func (r *MapLock) Try(key string) error {
-	if item, exist := r.locks.Get(key); !exist {
+func (my *MapLock) Try(key string) error {
+	if item, exist := my.locks.Get(key); !exist {
 		return fmt.Errorf("锁[%s]不存在", key)
 	} else {
 		if item.inUse {

@@ -17,24 +17,24 @@ func NewTransfer(original string) *Transfer {
 }
 
 // PascalToCamel 大驼峰 -> 小驼峰
-func (r *Transfer) PascalToCamel() string {
-	if len(r.original) == 0 {
-		return r.original
+func (my *Transfer) PascalToCamel() string {
+	if len(my.original) == 0 {
+		return my.original
 	}
 	// 将第一个字符转换为小写
-	firstRune := []rune(r.original)[0]
+	firstRune := []rune(my.original)[0]
 	if unicode.IsUpper(firstRune) {
 		firstRune = unicode.ToLower(firstRune)
 	}
 	// 拼接第一个字符和剩余部分
-	return string(firstRune) + r.original[1:]
+	return string(firstRune) + my.original[1:]
 }
 
 // PascalToSnake 大驼峰 -> 下划线
-func (r *Transfer) PascalToSnake() string {
+func (my *Transfer) PascalToSnake() string {
 	var result strings.Builder
 
-	for i, r := range r.original {
+	for i, r := range my.original {
 		if unicode.IsUpper(r) && i > 0 {
 			result.WriteRune('_')
 		}
@@ -44,11 +44,11 @@ func (r *Transfer) PascalToSnake() string {
 	return result.String()
 }
 
-// PascalToSnake 大驼峰 -> babel
-func (r *Transfer) PascalToBabel() string {
+// PascalToBabel 大驼峰 -> babel
+func (my *Transfer) PascalToBabel() string {
 	var result strings.Builder
 
-	for i, r := range r.original {
+	for i, r := range my.original {
 		if unicode.IsUpper(r) && i > 0 {
 			result.WriteRune('-')
 		}
@@ -59,22 +59,22 @@ func (r *Transfer) PascalToBabel() string {
 }
 
 // CamelToPascal 小驼峰 -> 大驼峰
-func (r *Transfer) CamelToPascal() string {
-	if len(r.original) == 0 {
-		return r.original
+func (my *Transfer) CamelToPascal() string {
+	if len(my.original) == 0 {
+		return my.original
 	}
-	firstRune := []rune(r.original)[0]
+	firstRune := []rune(my.original)[0]
 	if unicode.IsLower(firstRune) {
 		firstRune = unicode.ToUpper(firstRune)
 	}
-	return string(firstRune) + r.original[1:]
+	return string(firstRune) + my.original[1:]
 }
 
 // CamelToSnake 小驼峰 -> 下划线
-func (r *Transfer) CamelToSnake() string {
+func (my *Transfer) CamelToSnake() string {
 	var result strings.Builder
 
-	for idx, ite := range r.original {
+	for idx, ite := range my.original {
 		if unicode.IsUpper(ite) && idx > 0 {
 			result.WriteRune('_')
 		}
@@ -85,10 +85,10 @@ func (r *Transfer) CamelToSnake() string {
 }
 
 // CamelToSnake 小驼峰 -> babel
-func (r *Transfer) CamelToBabel() string {
+func (my *Transfer) CamelToBabel() string {
 	var result strings.Builder
 
-	for idx, ite := range r.original {
+	for idx, ite := range my.original {
 		if unicode.IsUpper(ite) && idx > 0 {
 			result.WriteRune('-')
 		}
@@ -99,9 +99,9 @@ func (r *Transfer) CamelToBabel() string {
 }
 
 // SnakeToPascal 下划线 -> 大驼峰
-func (r *Transfer) SnakeToPascal() string {
+func (my *Transfer) SnakeToPascal() string {
 	// 将下划线分割成单词
-	words := strings.Split(r.original, "_")
+	words := strings.Split(my.original, "_")
 
 	// 处理每个单词，将首字母大写
 	for i, word := range words {
@@ -119,9 +119,9 @@ func (r *Transfer) SnakeToPascal() string {
 }
 
 // SnakeToPascal 下划线 -> 小驼峰
-func (r *Transfer) SnakeToCamel() string {
+func (my *Transfer) SnakeToCamel() string {
 	// 将下划线分割成单词
-	words := strings.Split(r.original, "_")
+	words := strings.Split(my.original, "_")
 
 	// 处理每个单词，将首字母大写
 	for i, word := range words {
@@ -139,13 +139,13 @@ func (r *Transfer) SnakeToCamel() string {
 }
 
 // SnakeToBabel 下划线 -> babel
-func (r *Transfer) SnakeToBabel() string {
-	return strings.ReplaceAll(r.original, "_", "-")
+func (my *Transfer) SnakeToBabel() string {
+	return strings.ReplaceAll(my.original, "_", "-")
 }
 
 // BabelToPascal babel -> 大驼峰
-func (r *Transfer) BabelToPascal() string {
-	words := strings.Split(r.original, "-")
+func (my *Transfer) BabelToPascal() string {
+	words := strings.Split(my.original, "-")
 	for i, word := range words {
 		if len(word) > 0 {
 			runes := []rune(word)
@@ -158,9 +158,9 @@ func (r *Transfer) BabelToPascal() string {
 }
 
 // KebabToCamel babel -> 小驼峰
-func (r *Transfer) KebabToCamel() string {
+func (my *Transfer) KebabToCamel() string {
 	// 将 kebab-case 分割成单词
-	words := strings.Split(r.original, "-")
+	words := strings.Split(my.original, "-")
 
 	// 处理每个单词，除了第一个单词外，将每个单词的首字母大写
 	for i := 1; i < len(words); i++ {
@@ -185,32 +185,32 @@ func (r *Transfer) KebabToCamel() string {
 }
 
 // BabelToSnake babel -> 下划线
-func (r *Transfer) BabelToSnake() string {
-	return strings.ReplaceAll(r.original, "_", "-")
+func (my *Transfer) BabelToSnake() string {
+	return strings.ReplaceAll(my.original, "_", "-")
 }
 
 // Pluralize 单数变复数
-func (r *Transfer) Pluralize() string {
+func (my *Transfer) Pluralize() string {
 	// 定义正则表达式
 	sXChSh := regexp.MustCompile(`[sxz]|[cs]h$`)
 	yEnding := regexp.MustCompile(`[^aeiou]y$`)
 	fFeEnding := regexp.MustCompile(`[f]e?$`)
 
 	// 处理以 s, x, ch, sh 结尾的名词
-	if sXChSh.MatchString(r.original) {
-		return r.original + "es"
+	if sXChSh.MatchString(my.original) {
+		return my.original + "es"
 	}
 
 	// 处理以辅音字母 + y 结尾的名词
-	if yEnding.MatchString(r.original) {
-		return yEnding.ReplaceAllString(r.original, "ies")
+	if yEnding.MatchString(my.original) {
+		return yEnding.ReplaceAllString(my.original, "ies")
 	}
 
 	// 处理以 f 或 fe 结尾的名词
-	if fFeEnding.MatchString(r.original) {
-		return fFeEnding.ReplaceAllString(r.original, "ves")
+	if fFeEnding.MatchString(my.original) {
+		return fFeEnding.ReplaceAllString(my.original, "ves")
 	}
 
 	// 默认情况下，直接加 s
-	return r.original + "s"
+	return my.original + "s"
 }

@@ -419,7 +419,7 @@ func ToFloat32(original any) float32 {
 	}
 }
 
-// Float64 converts `any` to float64.
+// ToFloat64 converts `any` to float64.
 func ToFloat64(original any) float64 {
 	if original == nil {
 		return 0
@@ -572,6 +572,20 @@ func ToBool(original any) bool {
 			return true
 		}
 	}
+}
+
+// ToStruct 任意类型转结构体
+func ToStruct(v any, r any) error {
+	var (
+		e        error
+		jsonByte []byte
+	)
+	jsonByte, e = json.Marshal(v)
+	if e != nil {
+		return e
+	}
+
+	return json.Unmarshal(jsonByte, &r)
 }
 
 func LeEncode(values ...any) []byte {

@@ -23,7 +23,7 @@ var RsaHelper Rsa
 func (Rsa) New() *Rsa { return &RsaHelper }
 
 // EncryptByBase64 通过base64公钥加密
-func (r Rsa) EncryptByBase64(base64PublicKey string, plainText []byte) ([]byte, error) {
+func (my Rsa) EncryptByBase64(base64PublicKey string, plainText []byte) ([]byte, error) {
 	var (
 		pemBase64 *PemBase64
 		err       error
@@ -37,11 +37,11 @@ func (r Rsa) EncryptByBase64(base64PublicKey string, plainText []byte) ([]byte, 
 		return nil, err
 	}
 
-	return r.EncryptByPem(pemBase64.GetPemPublicKey(), plainText)
+	return my.EncryptByPem(pemBase64.GetPemPublicKey(), plainText)
 }
 
 // EncryptByPem 通过pem公钥加密
-func (r Rsa) EncryptByPem(pemPublicKey []byte, plainText []byte) ([]byte, error) {
+func (my Rsa) EncryptByPem(pemPublicKey []byte, plainText []byte) ([]byte, error) {
 	var (
 		err                error
 		block              *pem.Block
@@ -65,7 +65,7 @@ func (r Rsa) EncryptByPem(pemPublicKey []byte, plainText []byte) ([]byte, error)
 
 	if len(plainText) > publicKey.N.BitLen()/8-11 {
 		// 密文长度超过密钥长度，需要分段加密
-		cipherText, err = r.encryptWithTooLong(publicKey, plainText)
+		cipherText, err = my.encryptWithTooLong(publicKey, plainText)
 	} else {
 		// 对明文进行加密
 		cipherText, err = rsa.EncryptPKCS1v15(rand.Reader, publicKey, plainText)
@@ -79,7 +79,7 @@ func (r Rsa) EncryptByPem(pemPublicKey []byte, plainText []byte) ([]byte, error)
 }
 
 // encryptWithTooLong 分段加密处理
-func (r Rsa) encryptWithTooLong(publicKey *rsa.PublicKey, plainText []byte) ([]byte, error) {
+func (my Rsa) encryptWithTooLong(publicKey *rsa.PublicKey, plainText []byte) ([]byte, error) {
 	var (
 		maxChunkSize = publicKey.N.BitLen()/8 - 11 // 计算每个分段的最大长度
 		cipherTexts  [][]byte                      // 存储每个分段加密后的结果
@@ -109,7 +109,7 @@ func (r Rsa) encryptWithTooLong(publicKey *rsa.PublicKey, plainText []byte) ([]b
 }
 
 // DecryptByBase64 通过base64私钥解密
-func (r Rsa) DecryptByBase64(base64PrivateKey string, cipherText []byte) ([]byte, error) {
+func (my Rsa) DecryptByBase64(base64PrivateKey string, cipherText []byte) ([]byte, error) {
 	var (
 		pemBase64 *PemBase64
 		err       error
@@ -120,11 +120,11 @@ func (r Rsa) DecryptByBase64(base64PrivateKey string, cipherText []byte) ([]byte
 		return nil, err
 	}
 
-	return r.DecryptByPem(pemBase64.GetPemPrivateKey(), cipherText)
+	return my.DecryptByPem(pemBase64.GetPemPrivateKey(), cipherText)
 }
 
 // DecryptByPem 使用PEM私钥进行RSA解密
-func (r Rsa) DecryptByPem(pemPrivateKey []byte, cipherText []byte) ([]byte, error) {
+func (my Rsa) DecryptByPem(pemPrivateKey []byte, cipherText []byte) ([]byte, error) {
 	var (
 		err                       error
 		block                     *pem.Block
@@ -158,7 +158,7 @@ func (r Rsa) DecryptByPem(pemPrivateKey []byte, cipherText []byte) ([]byte, erro
 
 	if len(plainText) > privateKey.PublicKey.N.BitLen() {
 		// 分段解密
-		r.decryptWithTooLong(privateKey, cipherText)
+		my.decryptWithTooLong(privateKey, cipherText)
 	} else {
 		// 解密数据
 		plainText, err = rsa.DecryptPKCS1v15(rand.Reader, privateKey, cipherText)
@@ -171,7 +171,7 @@ func (r Rsa) DecryptByPem(pemPrivateKey []byte, cipherText []byte) ([]byte, erro
 }
 
 // decryptWithTooLong 分段解密
-func (r Rsa) decryptWithTooLong(privateKey *rsa.PrivateKey, cipherText []byte) ([]byte, error) {
+func (my Rsa) decryptWithTooLong(privateKey *rsa.PrivateKey, cipherText []byte) ([]byte, error) {
 	var (
 		maxChunkSize int
 		plainTexts   [][]byte
@@ -271,7 +271,7 @@ func (Rsa) DemoDecryptRsa(base64Encrypted string) string {
 	return string(decrypted)
 }
 
-func (r Rsa) Demo() {
+func (my Rsa) Demo() {
 	var (
 		unEncrypt = UnEncrypt{
 			Username: "cbit",
@@ -295,10 +295,10 @@ func (r Rsa) Demo() {
 		str.NewTerminalLog("[RSA] zip failed：%v").Error(zipErr)
 	}
 
-	base64Encrypted := r.DemoEncryptRsa(zipByte) // 加密
+	base64Encrypted := my.DemoEncryptRsa(zipByte) // 加密
 	str.NewTerminalLog("[RSA] encrypting: %s").Success(base64Encrypted)
 
-	decrypted := r.DemoDecryptRsa(base64Encrypted) // 解密
+	decrypted := my.DemoDecryptRsa(base64Encrypted) // 解密
 	str.NewTerminalLog("[RSA] decrypted").Info()
 
 	// 解密后解压缩

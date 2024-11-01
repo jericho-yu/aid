@@ -22,21 +22,21 @@ type (
 func NewStr(original string) *Str { return &Str{original: original} }
 
 // PadLeftZeros 前置补零
-func (r *Str) PadLeftZeros(length int) (string, error) {
+func (my *Str) PadLeftZeros(length int) (string, error) {
 	var (
 		err error
 		res strings.Builder = strings.Builder{}
 	)
 
-	if len(r.original) >= length {
-		return r.original, nil
+	if len(my.original) >= length {
+		return my.original, nil
 	}
 
-	for i := 0; i < length-len(r.original); i++ {
+	for i := 0; i < length-len(my.original); i++ {
 		res.WriteRune('0')
 	}
 
-	if _, err = res.WriteString(r.original); err != nil {
+	if _, err = res.WriteString(my.original); err != nil {
 		return "", err
 	}
 
@@ -44,21 +44,21 @@ func (r *Str) PadLeftZeros(length int) (string, error) {
 }
 
 // PadRightZeros 后置补零
-func (r *Str) PadRightZeros(length int) (string, error) {
+func (my *Str) PadRightZeros(length int) (string, error) {
 	var (
 		err error
 		res strings.Builder = strings.Builder{}
 	)
 
-	if len(r.original) >= length {
-		return r.original, nil
+	if len(my.original) >= length {
+		return my.original, nil
 	}
 
-	if _, err = res.WriteString(r.original); err != nil {
+	if _, err = res.WriteString(my.original); err != nil {
 		return "", err
 	}
 
-	for i := 0; i < length-len(r.original); i++ {
+	for i := 0; i < length-len(my.original); i++ {
 		res.WriteRune('0')
 	}
 
@@ -66,15 +66,15 @@ func (r *Str) PadRightZeros(length int) (string, error) {
 }
 
 // PadRight 后置填充
-func (r *Str) PadRight(length int, s string) string {
-	r.original += strings.Repeat(s, length-(len(r.original)%length))
-	return r.original
+func (my *Str) PadRight(length int, s string) string {
+	my.original += strings.Repeat(s, length-(len(my.original)%length))
+	return my.original
 }
 
 // PadLeft 前置补充
-func (r *Str) PadLeft(length int, s string) string {
-	r.original = strings.Repeat(s, length-(len(r.original)%length)) + s
-	return r.original
+func (my *Str) PadLeft(length int, s string) string {
+	my.original = strings.Repeat(s, length-(len(my.original)%length)) + s
+	return my.original
 }
 
 // NewTerminalLog 实例化：控制台日志

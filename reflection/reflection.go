@@ -116,23 +116,23 @@ func NewByReflectValue(refValue reflect.Value) *Reflection {
 }
 
 // GetValue 获取reflect.Value
-func (r *Reflection) GetValue() reflect.Value { return r.refValue }
+func (my *Reflection) GetValue() reflect.Value { return my.refValue }
 
 // GetType 获取reflect.Type
-func (r *Reflection) GetType() reflect.Type { return r.refType }
+func (my *Reflection) GetType() reflect.Type { return my.refType }
 
 // GetReflectionType 获取Reflection类型
-func (r *Reflection) GetReflectionType() ReflectionType {
-	var ref reflect.Value = reflect.ValueOf(r.original)
+func (my *Reflection) GetReflectionType() ReflectionType {
+	var ref reflect.Value = reflect.ValueOf(my.original)
 
 	if ref.Kind() != reflect.Ptr {
 		var is64 bool = unsafe.Sizeof(uintptr(0)) == 8
 
-		if r.IsSame(time.Time{}) {
+		if my.IsSame(time.Time{}) {
 			return Datetime
 		}
 
-		switch r.GetType().Kind() {
+		switch my.GetType().Kind() {
 		case reflect.Int:
 			return operation.Ternary[ReflectionType](is64, Int64, Int32)
 		case reflect.Int8:
@@ -217,21 +217,21 @@ func (r *Reflection) GetReflectionType() ReflectionType {
 }
 
 // IsSame 判断两个类型是否相等
-func (r *Reflection) IsSame(value any) bool {
-	return r.refType == reflect.TypeOf(value)
+func (my *Reflection) IsSame(value any) bool {
+	return my.refType == reflect.TypeOf(value)
 }
 
 // IsSameDeepEqual 判断两个值是否相等
-func (r *Reflection) IsSameDeepEqual(value any) bool {
-	return reflect.DeepEqual(r.refValue.Interface(), value)
+func (my *Reflection) IsSameDeepEqual(value any) bool {
+	return reflect.DeepEqual(my.refValue.Interface(), value)
 }
 
 // CallMethodByName 通过名称调用方法
-func (r *Reflection) CallMethodByName(
+func (my *Reflection) CallMethodByName(
 	methodName string,
 	values ...reflect.Value,
 ) []reflect.Value {
-	method := r.GetValue().MethodByName(methodName)
+	method := my.GetValue().MethodByName(methodName)
 	if method.IsValid() {
 		return method.Call(values)
 	}
@@ -240,13 +240,13 @@ func (r *Reflection) CallMethodByName(
 }
 
 // FindFieldAndFill 递归查找字段并填充
-func (r *Reflection) FindFieldAndFill(
+func (my *Reflection) FindFieldAndFill(
 	target,
 	tagTitle,
 	tagField string,
 	process func(val reflect.Value),
 ) {
-	findFieldAndFill(r.original, target, tagTitle, tagField, process)
+	findFieldAndFill(my.original, target, tagTitle, tagField, process)
 }
 
 // findFieldAndFill 递归查找字段并填充

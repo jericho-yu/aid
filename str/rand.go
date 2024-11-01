@@ -46,7 +46,7 @@ func NewRand() *Rand {
 // asyncProducingRandomBufferBytes is a named goroutine, which uses an asynchronous goroutine
 // to produce the random bytes, and a buffer chan to store the random bytes.
 // So it has high performance to generate random numbers.
-func (r *Rand) asyncProducingRandomBufferBytesLoop() {
+func (my *Rand) asyncProducingRandomBufferBytesLoop() {
 	var step int
 	for {
 		buffer := make([]byte, 1024)
@@ -60,18 +60,18 @@ func (r *Rand) asyncProducingRandomBufferBytesLoop() {
 			// for _, step = range []int{4, 5, 6, 7} {
 			for _, step = range []int{4} {
 				for i := 0; i <= n-4; i += step {
-					r.bufferChan <- buffer[i : i+4]
+					my.bufferChan <- buffer[i : i+4]
 				}
 			}
 		}
 	}
 }
 
-func (r *Rand) Intn(max int) int {
+func (my *Rand) Intn(max int) int {
 	if max <= 0 {
 		return max
 	}
-	n := int(binary.LittleEndian.Uint32(<-r.bufferChan)) % max
+	n := int(binary.LittleEndian.Uint32(<-my.bufferChan)) % max
 	if (max > 0 && n < 0) || (max < 0 && n > 0) {
 		return -n
 	}
@@ -79,14 +79,14 @@ func (r *Rand) Intn(max int) int {
 }
 
 // B retrieves and returns random bytes of given length `n`.
-func (r *Rand) B(n int) []byte {
+func (my *Rand) B(n int) []byte {
 	if n <= 0 {
 		return nil
 	}
 	i := 0
 	b := make([]byte, n)
 	for {
-		copy(b[i:], <-r.bufferChan)
+		copy(b[i:], <-my.bufferChan)
 		i += 4
 		if i >= n {
 			break
@@ -97,30 +97,30 @@ func (r *Rand) B(n int) []byte {
 
 // N returns a random int between min and max: [min, max].
 // The `min` and `max` also support negative numbers.
-func (r *Rand) N(min, max int) int {
+func (my *Rand) N(min, max int) int {
 	if min >= max {
 		return min
 	}
 	if min >= 0 {
-		return r.Intn(max-min+1) + min
+		return my.Intn(max-min+1) + min
 	}
 	// As `Intn` dose not support negative number,
 	// so we should first shift the value to right,
 	// then call `Intn` to produce the random number,
 	// and finally shift the result back to left.
-	return r.Intn(max+(0-min)+1) - (0 - min)
+	return my.Intn(max+(0-min)+1) - (0 - min)
 }
 
 // S returns a random str which contains digits and letters, and its length is `n`.
 // The optional parameter `symbols` specifies whether the result could contain symbols,
 // which is false in default.
-func (r *Rand) S(n int, symbols ...bool) string {
+func (my *Rand) S(n int, symbols ...bool) string {
 	if n <= 0 {
 		return ""
 	}
 	var (
 		b           = make([]byte, n)
-		numberBytes = r.B(n)
+		numberBytes = my.B(n)
 	)
 	for i := range b {
 		if len(symbols) > 0 && symbols[0] {
@@ -133,7 +133,7 @@ func (r *Rand) S(n int, symbols ...bool) string {
 }
 
 // D returns a random time.Duration between min and max: [min, max].
-func (r *Rand) D(min, max time.Duration) time.Duration {
+func (my *Rand) D(min, max time.Duration) time.Duration {
 	multiple := int64(1)
 	if min != 0 {
 		for min%10 == 0 {
@@ -142,13 +142,13 @@ func (r *Rand) D(min, max time.Duration) time.Duration {
 			max /= 10
 		}
 	}
-	n := int64(r.N(int(min), int(max)))
+	n := int64(my.N(int(min), int(max)))
 	return time.Duration(n * multiple)
 }
 
 // GetString randomly picks and returns `n` count of chars from given str `s`.
 // It also supports unicode str like Chinese/Russian/Japanese, etc.
-func (r *Rand) GetString(s string, n int) string {
+func (my *Rand) GetString(s string, n int) string {
 	if n <= 0 {
 		return ""
 	}
@@ -157,26 +157,26 @@ func (r *Rand) GetString(s string, n int) string {
 		runes = []rune(s)
 	)
 	if len(runes) <= 255 {
-		numberBytes := r.B(n)
+		numberBytes := my.B(n)
 		for i := range b {
 			b[i] = runes[int(numberBytes[i])%len(runes)]
 		}
 	} else {
 		for i := range b {
-			b[i] = runes[r.Intn(len(runes))]
+			b[i] = runes[my.Intn(len(runes))]
 		}
 	}
 	return string(b)
 }
 
 // GetDigits returns a random str which contains only digits, and its length is `n`.
-func (r *Rand) GetDigits(n int) string {
+func (my *Rand) GetDigits(n int) string {
 	if n <= 0 {
 		return ""
 	}
 	var (
 		b           = make([]byte, n)
-		numberBytes = r.B(n)
+		numberBytes = my.B(n)
 	)
 	for i := range b {
 		b[i] = Digits[numberBytes[i]%10]
@@ -185,13 +185,13 @@ func (r *Rand) GetDigits(n int) string {
 }
 
 // GetLetters returns a random str which contains only letters, and its length is `n`.
-func (r *Rand) GetLetters(n int) string {
+func (my *Rand) GetLetters(n int) string {
 	if n <= 0 {
 		return ""
 	}
 	var (
 		b           = make([]byte, n)
-		numberBytes = r.B(n)
+		numberBytes = my.B(n)
 	)
 	for i := range b {
 		b[i] = Letters[numberBytes[i]%52]
@@ -200,13 +200,13 @@ func (r *Rand) GetLetters(n int) string {
 }
 
 // GetSymbols returns a random str which contains only symbols, and its length is `n`.
-func (r *Rand) GetSymbols(n int) string {
+func (my *Rand) GetSymbols(n int) string {
 	if n <= 0 {
 		return ""
 	}
 	var (
 		b           = make([]byte, n)
-		numberBytes = r.B(n)
+		numberBytes = my.B(n)
 	)
 	for i := range b {
 		b[i] = Symbols[numberBytes[i]%32]
@@ -216,10 +216,10 @@ func (r *Rand) GetSymbols(n int) string {
 
 // Perm returns, as a slice of n int numbers, a pseudo-random permutation of the integers [0,n).
 // TODO performance improving for large slice producing.
-func (r *Rand) Perm(n int) []int {
+func (my *Rand) Perm(n int) []int {
 	m := make([]int, n)
 	for i := 0; i < n; i++ {
-		j := r.Intn(i + 1)
+		j := my.Intn(i + 1)
 		m[i] = m[j]
 		m[j] = i
 	}
@@ -227,11 +227,11 @@ func (r *Rand) Perm(n int) []int {
 }
 
 // Meet randomly calculate whether the given probability `num`/`total` is met.
-func (r *Rand) Meet(num, total int) bool {
-	return r.Intn(total) < num
+func (my *Rand) Meet(num, total int) bool {
+	return my.Intn(total) < num
 }
 
 // MeetProb randomly calculate whether the given probability is met.
-func (r *Rand) MeetProb(prob float32) bool {
-	return r.Intn(1e7) < int(prob*1e7)
+func (my *Rand) MeetProb(prob float32) bool {
+	return my.Intn(1e7) < int(prob*1e7)
 }

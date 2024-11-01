@@ -94,13 +94,13 @@ func (SqlServerPool) Once(dbSetting *DbSetting) GormPool {
 	return sqlServerPoolIns
 }
 
-// GetMain 获取主数据库链接
-func (r *SqlServerPool) GetConn() *gorm.DB {
-	return r.mainConn
+// GetConn 获取主数据库链接
+func (my *SqlServerPool) GetConn() *gorm.DB {
+	return my.mainConn
 }
 
 // getRws 获取带有读写分离的数据库链接
-func (r *SqlServerPool) getRws() *gorm.DB {
+func (my *SqlServerPool) getRws() *gorm.DB {
 	var (
 		err                                 error
 		sourceDialectors, replicaDialectors []gorm.Dialector
@@ -108,9 +108,9 @@ func (r *SqlServerPool) getRws() *gorm.DB {
 		replicas                            []*Dsn
 	)
 	// 配置写库
-	if len(r.sources) > 0 {
+	if len(my.sources) > 0 {
 		sources = make([]*Dsn, 0)
-		for idx, item := range r.sources {
+		for idx, item := range my.sources {
 			sources = append(sources, &Dsn{
 				Name: idx,
 				Content: fmt.Sprintf(
@@ -126,9 +126,9 @@ func (r *SqlServerPool) getRws() *gorm.DB {
 	}
 
 	// 配置读库
-	if len(r.replicas) > 0 {
+	if len(my.replicas) > 0 {
 		replicas = make([]*Dsn, 0)
-		for idx, item := range r.replicas {
+		for idx, item := range my.replicas {
 			replicas = append(replicas, &Dsn{
 				Name: idx,
 				Content: fmt.Sprintf(
@@ -157,29 +157,29 @@ func (r *SqlServerPool) getRws() *gorm.DB {
 		}
 	}
 
-	err = r.mainConn.Use(
+	err = my.mainConn.Use(
 		dbresolver.Register(dbresolver.Config{
 			Sources:           sourceDialectors,          // 写库
 			Replicas:          replicaDialectors,         // 读库
 			Policy:            dbresolver.RandomPolicy{}, // 策略
 			TraceResolverMode: true,
 		}).
-			SetConnMaxIdleTime(time.Duration(r.maxIdleTime) * time.Hour).
-			SetConnMaxLifetime(time.Duration(r.maxLifetime) * time.Hour).
-			SetMaxIdleConns(r.maxIdleConns).
-			SetMaxOpenConns(r.maxOpenConns),
+			SetConnMaxIdleTime(time.Duration(my.maxIdleTime) * time.Hour).
+			SetConnMaxLifetime(time.Duration(my.maxLifetime) * time.Hour).
+			SetMaxIdleConns(my.maxIdleConns).
+			SetMaxOpenConns(my.maxOpenConns),
 	)
 	if err != nil {
 		panic(fmt.Errorf("数据库链接错误：%s", err.Error()))
 	}
 
-	return r.mainConn
+	return my.mainConn
 }
 
 // Close 关闭数据库链接
-func (r *SqlServerPool) Close() error {
-	if r.mainConn != nil {
-		db, err := r.mainConn.DB()
+func (my *SqlServerPool) Close() error {
+	if my.mainConn != nil {
+		db, err := my.mainConn.DB()
 		if err != nil {
 			return fmt.Errorf("关闭数据库链接失败：获取数据库链接失败 %s", err.Error())
 		}
