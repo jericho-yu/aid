@@ -53,7 +53,7 @@ const (
 	PtrStruct         ReflectionType = "*S"
 	PtrPtrStruct      ReflectionType = "**S"
 	PtrPtrMap         ReflectionType = "**M"
-	PtrMap            ReflectionType = "*M"
+	PtrMap            ReflectionType = "*M" // 1
 	Any               ReflectionType = "ANY"
 	UnKnowType        ReflectionType = "UKT"
 )
