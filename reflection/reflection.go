@@ -36,26 +36,26 @@ const (
 	Uint16            ReflectionType = "U16"
 	Uint32            ReflectionType = "U32"
 	Uint64            ReflectionType = "U64"
-	String            ReflectionType = "S"
+	String            ReflectionType = "STR"
 	Float32           ReflectionType = "F32"
 	Float64           ReflectionType = "F64"
 	Datetime          ReflectionType = "DT"
-	Bool              ReflectionType = "BOOL"
-	Array             ReflectionType = "ARR"
-	Dict              ReflectionType = "DICT"
-	Struct            ReflectionType = "STR"
+	Bool              ReflectionType = "B"
+	Array             ReflectionType = "A"
+	Map               ReflectionType = "M"
+	Struct            ReflectionType = "S"
 	Nil               ReflectionType = "N"
 	PtrSliceAny       ReflectionType = "*[]ANY"
-	PtrSlicePtrStruct ReflectionType = "*[]*STRUCT"
-	PtrSliceStruct    ReflectionType = "*[]STRUCT"
-	PtrSlicePtrMap    ReflectionType = "*[]*MAP"
-	PtrSliceMap       ReflectionType = "*[]MAP"
-	PtrStruct         ReflectionType = "*STRUCT"
-	PtrPtrStruct      ReflectionType = "**STRUCT"
-	PtrMap            ReflectionType = "**MAP"
-	Map               ReflectionType = "*MAP"
+	PtrSlicePtrStruct ReflectionType = "*[]*S"
+	PtrSliceStruct    ReflectionType = "*[]S"
+	PtrSlicePtrMap    ReflectionType = "*[]*M"
+	PtrSliceMap       ReflectionType = "*[]M"
+	PtrStruct         ReflectionType = "*S"
+	PtrPtrStruct      ReflectionType = "**S"
+	PtrPtrMap         ReflectionType = "**M"
+	PtrMap            ReflectionType = "*M"
 	Any               ReflectionType = "ANY"
-	UnKnowType        ReflectionType = "UN-KNOW-TYPE"
+	UnKnowType        ReflectionType = "UKT"
 )
 
 // New 实例化：反射帮助
@@ -91,7 +91,7 @@ func New(object any) *Reflection {
 
 	if ins.refType == reflect.TypeOf(reflect.Value{}) {
 		ins.IsZero = true
-	} else if ins.GetReflectionType() == Array || ins.GetReflectionType() == Dict {
+	} else if ins.GetReflectionType() == Array || ins.GetReflectionType() == Map {
 		ins.IsZero = ins.refValue.Len() == 0
 	} else {
 		if !ins.IsZero {
@@ -164,7 +164,7 @@ func (r *Reflection) GetReflectionType() ReflectionType {
 		case reflect.Array, reflect.Slice:
 			return Array
 		case reflect.Map:
-			return Dict
+			return Map
 		case reflect.Struct:
 			return Struct
 		default:
@@ -207,8 +207,8 @@ func (r *Reflection) GetReflectionType() ReflectionType {
 		elemType = elem.Type().Elem()
 		if elemType.Kind() == reflect.Struct { // **struct
 			return PtrPtrStruct
-		} else if elemType.Kind() == reflect.Map {
-			return Map
+		} else if elemType.Kind() == reflect.Map { // **map
+			return PtrPtrMap
 		} else {
 			return Any
 		}
