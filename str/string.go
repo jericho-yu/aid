@@ -79,7 +79,7 @@ func (my *Str) PadLeft(length int, s string) string {
 
 // NewTerminalLog 实例化：控制台日志
 func NewTerminalLog(format string) *TerminalLog {
-	return &TerminalLog{format: format, enable: common.ToBool(os.Getenv("AID.STR.TERMINAL-LOG.ENABLE"))}
+	return &TerminalLog{format: format, enable: common.ToBool(os.Getenv("AID__STR__TERMINAL_LOG__ENABLE"))}
 }
 
 // Info 打印日志行
