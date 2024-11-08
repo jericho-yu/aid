@@ -1,9 +1,10 @@
 package str
 
 import (
-	"log"
+	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/jericho-yu/aid/common"
 )
@@ -88,7 +89,7 @@ func (r *TerminalLog) Info(v ...any) {
 		return
 	}
 
-	log.Printf("：\n--------------------[INFO]--------------------\n"+r.format+"\n-----------------[INFO FINISH]-----------------\n", v...)
+	fmt.Printf("「INFO " + time.Now().Format(time.DateTime) + "」======================================->\n" + fmt.Sprintf(r.format, v...))
 }
 
 // Success 打印成功
@@ -97,7 +98,7 @@ func (r *TerminalLog) Success(v ...any) {
 		return
 	}
 
-	log.Printf("：\n--------------------[SUCCESS]--------------------\n"+r.format+"\n-----------------[SUCCESS FINISH]-----------------\n", v...)
+	fmt.Printf("「SUCCESS " + time.Now().Format(time.DateTime) + "」======================================->\n" + fmt.Sprintf(r.format, v...))
 }
 
 // Wrong 打印错误
@@ -106,7 +107,7 @@ func (r *TerminalLog) Wrong(v ...any) {
 		return
 	}
 
-	log.Printf("：\n--------------------[WRONG]--------------------\n"+r.format+"\n-----------------[WRONG FINISH]-----------------\n", v...)
+	fmt.Printf("「WRONG " + time.Now().Format(time.DateTime) + "」======================================->\n" + fmt.Sprintf(r.format, v...))
 }
 
 // Error 打印错误并终止程序
@@ -115,5 +116,5 @@ func (r *TerminalLog) Error(v ...any) {
 		return
 	}
 
-	log.Fatalf("：\n--------------------[ERROR]--------------------\n"+r.format+"\n-----------------[ERROR FINISH]-----------------\n", v...)
+	fmt.Printf("「ERROR " + time.Now().Format(time.DateTime) + "」======================================->\n" + fmt.Sprintf(r.format, v...))
 }
