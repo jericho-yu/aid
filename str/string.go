@@ -18,6 +18,20 @@ type (
 		format string
 		enable bool
 	}
+
+	TerminalLogColor string
+)
+
+const (
+	TerminalLogColorBlack   TerminalLogColor = "\033[30m"
+	TerminalLogColorRed     TerminalLogColor = "\033[31m"
+	TerminalLogColorGreen   TerminalLogColor = "\033[32m"
+	TerminalLogColorYellow  TerminalLogColor = "\033[33m"
+	TerminalLogColorBlue    TerminalLogColor = "\033[34m"
+	TerminalLogColorMagenta TerminalLogColor = "\033[35m"
+	TerminalLogColorCyan    TerminalLogColor = "\033[36m"
+	TerminalLogColorWhite   TerminalLogColor = "\033[37m"
+	TerminalLogColorReset   TerminalLogColor = "\033[0m"
 )
 
 func NewStr(original string) *Str { return &Str{original: original} }
@@ -89,7 +103,8 @@ func (r *TerminalLog) Info(v ...any) {
 		return
 	}
 
-	fmt.Printf("「INFO " + time.Now().Format(time.DateTime) + "」======================================->\n" + fmt.Sprintf(r.format, v...))
+	fmt.Println(string(TerminalLogColorMagenta) + "「" + time.Now().Format(time.DateTime) + "」======================================->" + string(TerminalLogColorReset))
+	fmt.Printf(string(TerminalLogColorMagenta)+r.format+string(TerminalLogColorReset)+"\n\n", v...)
 }
 
 // Success 打印成功
@@ -98,7 +113,8 @@ func (r *TerminalLog) Success(v ...any) {
 		return
 	}
 
-	fmt.Printf("「SUCCESS " + time.Now().Format(time.DateTime) + "」======================================->\n" + fmt.Sprintf(r.format, v...))
+	fmt.Println(string(TerminalLogColorGreen) + "「" + time.Now().Format(time.DateTime) + "」======================================->" + string(TerminalLogColorReset))
+	fmt.Printf(string(TerminalLogColorGreen)+r.format+string(TerminalLogColorReset)+"\n\n", v...)
 }
 
 // Wrong 打印错误
@@ -107,7 +123,8 @@ func (r *TerminalLog) Wrong(v ...any) {
 		return
 	}
 
-	fmt.Printf("「WRONG " + time.Now().Format(time.DateTime) + "」======================================->\n" + fmt.Sprintf(r.format, v...))
+	fmt.Println(string(TerminalLogColorRed) + "「" + time.Now().Format(time.DateTime) + "」======================================->" + string(TerminalLogColorReset))
+	fmt.Printf(string(TerminalLogColorRed)+r.format+string(TerminalLogColorReset)+"\n\n", v...)
 }
 
 // Error 打印错误并终止程序
@@ -116,5 +133,7 @@ func (r *TerminalLog) Error(v ...any) {
 		return
 	}
 
-	fmt.Printf("「ERROR " + time.Now().Format(time.DateTime) + "」======================================->\n" + fmt.Sprintf(r.format, v...))
+	fmt.Println(string(TerminalLogColorRed) + "「" + time.Now().Format(time.DateTime) + "」======================================->" + string(TerminalLogColorReset))
+	fmt.Printf(string(TerminalLogColorRed)+r.format+string(TerminalLogColorReset)+"\n\n", v...)
+	os.Exit(-1)
 }

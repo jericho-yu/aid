@@ -1,12 +1,9 @@
 package main
 
 import (
-	"github.com/jericho-yu/aid/reflection"
+	"github.com/jericho-yu/aid/str"
 )
 
-type Example struct{}
-
 func main() {
-	var exa *Example
-	println(reflection.New(&exa).GetReflectionType())
+	str.NewTerminalLog("Hello, %s").Error("aaa")
 }
