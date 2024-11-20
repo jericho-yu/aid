@@ -36,24 +36,24 @@ const (
 	Uint16            ReflectionType = "U16"
 	Uint32            ReflectionType = "U32"
 	Uint64            ReflectionType = "U64"
-	String            ReflectionType = "STR"
+	String            ReflectionType = "STRING"
 	Float32           ReflectionType = "F32"
 	Float64           ReflectionType = "F64"
-	Datetime          ReflectionType = "DT"
-	Bool              ReflectionType = "B"
-	Array             ReflectionType = "A"
-	Map               ReflectionType = "M"
-	Struct            ReflectionType = "S"
-	Nil               ReflectionType = "N"
+	Datetime          ReflectionType = "DATETIME"
+	Bool              ReflectionType = "BOOL"
+	Array             ReflectionType = "ARRAY"
+	Map               ReflectionType = "MAP"
+	Struct            ReflectionType = "STRUCT"
+	Nil               ReflectionType = "NIL"
 	PtrSliceAny       ReflectionType = "*[]ANY"
-	PtrSlicePtrStruct ReflectionType = "*[]*S"
-	PtrSliceStruct    ReflectionType = "*[]S"
-	PtrSlicePtrMap    ReflectionType = "*[]*M"
-	PtrSliceMap       ReflectionType = "*[]M"
-	PtrStruct         ReflectionType = "*S"
-	PtrPtrStruct      ReflectionType = "**S"
-	PtrPtrMap         ReflectionType = "**M"
-	PtrMap            ReflectionType = "*M" // 1
+	PtrSlicePtrStruct ReflectionType = "*[]*STRUCT"
+	PtrSliceStruct    ReflectionType = "*[]STRUCT"
+	PtrSlicePtrMap    ReflectionType = "*[]*MAP"
+	PtrSliceMap       ReflectionType = "*[]MAP"
+	PtrStruct         ReflectionType = "*STRUCT"
+	PtrPtrStruct      ReflectionType = "**STRUCT"
+	PtrPtrMap         ReflectionType = "**MAP"
+	PtrMap            ReflectionType = "*MAP" // 1
 	Any               ReflectionType = "ANY"
 	UnKnowType        ReflectionType = "UKT"
 )
@@ -310,4 +310,23 @@ func compareTagAndTarget(
 	} else {
 		return tagValue == target
 	}
+}
+
+// HasField 判断结构体是否有某个字段
+func (my *Reflection) HasField(fieldName string) bool {
+	return my.hasField(my.original, fieldName)
+}
+
+// hasField 判断结构体是否有某个字段
+func (my *Reflection) hasField(v interface{}, fieldName string) bool {
+	val := reflect.ValueOf(v)
+	if val.Kind() == reflect.Ptr {
+		val = val.Elem()
+		return my.hasField(val.Interface(), fieldName)
+	}
+	if val.Kind() != reflect.Struct {
+		return false
+	}
+	field := val.FieldByName(fieldName)
+	return field.IsValid()
 }
