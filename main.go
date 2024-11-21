@@ -1,13 +1,13 @@
 package main
 
 import (
-	"github.com/jericho-yu/aid/str"
+	"github.com/jericho-yu/aid/log"
 )
 
 func main() {
-	str.NewTerminalLog("Hello, %s").Default("aaa")
-	str.NewTerminalLog("Hello, %s").Info("aaa")
-	str.NewTerminalLog("Hello, %s").Success("aaa")
-	str.NewTerminalLog("Hello, %s").Wrong("aaa")
-	str.NewTerminalLog("Hello, %s").Error("aaa")
+
+	log.NewZapProvider("logs", false).Info("info")
+	log.NewZapProvider("logs", true).Debug("debug")
+	log.NewZapProvider("logs", true).Error("error")
+
 }

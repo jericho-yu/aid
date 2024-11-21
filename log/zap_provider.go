@@ -15,7 +15,10 @@ import (
 
 // ZapProvider Zap日志服务提供者
 type (
-	ZapProvider    struct{ path string }
+	ZapProvider struct {
+		path      string
+		inConsole bool
+	}
 	fileRotateLogs struct{}
 	Cutter         struct {
 		level    string        // 日志级别(debug, info, warn, error, dpanic, panic, fatal)
@@ -129,7 +132,7 @@ func NewZapProvider(path string, inConsole bool) *zap.Logger {
 	)
 
 	if zapProvider == nil {
-		zapProvider = &ZapProvider{path: path}
+		zapProvider = &ZapProvider{path: path, inConsole: inConsole}
 	}
 
 	fs = filesystem.FileSystemApp.NewByRelative(path)
@@ -141,13 +144,13 @@ func NewZapProvider(path string, inConsole bool) *zap.Logger {
 	}
 
 	for _, level := range []zapcore.Level{
-		zapcore.InfoLevel,
-		// zapcore.WarnLevel,
-		zapcore.ErrorLevel,
-		// zapcore.DPanicLevel,
-		// zapcore.PanicLevel,
-		// zapcore.FatalLevel,
 		zapcore.DebugLevel,
+		zapcore.InfoLevel,
+		zapcore.WarnLevel,
+		zapcore.ErrorLevel,
+		zapcore.DPanicLevel,
+		zapcore.PanicLevel,
+		zapcore.FatalLevel,
 	} {
 		writer := FileRotateLogs.GetWriteSync(path, level.String(), inConsole)
 		zapCores = append(zapCores, zapcore.NewCore(zapcore.NewJSONEncoder(zapcore.EncoderConfig{
@@ -168,6 +171,9 @@ func NewZapProvider(path string, inConsole bool) *zap.Logger {
 	zapLogger = zap.New(zapcore.NewTee(zapCores...))
 
 	defer func() {
+		if inConsole {
+			return
+		}
 		e = zapLogger.Sync()
 		if e != nil {
 			panic(e)
