@@ -154,15 +154,17 @@ func NewZapProvider(path string, inConsole bool) *zap.Logger {
 	} {
 		writer := FileRotateLogs.GetWriteSync(path, level.String(), inConsole)
 		zapCores = append(zapCores, zapcore.NewCore(zapcore.NewJSONEncoder(zapcore.EncoderConfig{
-			MessageKey:     "message",
-			LevelKey:       "level",
-			TimeKey:        "time",
-			NameKey:        "logger",
-			CallerKey:      "caller",
-			StacktraceKey:  "stacktrace",
-			LineEnding:     zapcore.DefaultLineEnding,
-			EncodeLevel:    zapcore.LowercaseLevelEncoder,
-			EncodeTime:     CustomTimeEncoder,
+			MessageKey:    "message",
+			LevelKey:      "level",
+			TimeKey:       "time",
+			NameKey:       "logger",
+			CallerKey:     "caller",
+			StacktraceKey: "stacktrace",
+			LineEnding:    zapcore.DefaultLineEnding,
+			EncodeLevel:   zapcore.LowercaseLevelEncoder,
+			EncodeTime: func(t time.Time, encoder zapcore.PrimitiveArrayEncoder) {
+				encoder.AppendString(t.Format(time.DateTime + ".000"))
+			},
 			EncodeDuration: zapcore.SecondsDurationEncoder,
 			EncodeCaller:   zapcore.FullCallerEncoder,
 		}), writer, level))
@@ -184,5 +186,5 @@ func NewZapProvider(path string, inConsole bool) *zap.Logger {
 }
 
 func CustomTimeEncoder(t time.Time, encoder zapcore.PrimitiveArrayEncoder) {
-	encoder.AppendString(t.Format("2006/01/02 - 15:04:05.000"))
+	encoder.AppendString(t.Format(time.DateTime + ".000"))
 }
