@@ -28,6 +28,13 @@ type (
 		mutex    *sync.RWMutex // 读写锁
 	}
 	CutterOption func(*Cutter)
+
+	ZapLoggerEncoderType string
+)
+
+const (
+	ZapLoggerEncoderTypeConsole ZapLoggerEncoderType = "console"
+	ZapLoggerEncoderTypeJson    ZapLoggerEncoderType = "json"
 )
 
 // WithCutterFormat 设置时间格式
@@ -123,12 +130,31 @@ func (r *fileRotateLogs) GetWriteSync(path, level string, inConsole bool) zapcor
 }
 
 // NewZapProvider 实例化：Zap日志服务提供者
-func NewZapProvider(path string, inConsole bool) *zap.Logger {
+func NewZapProvider(path string, inConsole bool, encoderType ZapLoggerEncoderType) *zap.Logger {
 	var (
-		e         error
-		fs        *filesystem.FileSystem
-		zapLogger *zap.Logger
-		zapCores  = make([]zapcore.Core, 0, 7)
+		e               error
+		fs              *filesystem.FileSystem
+		zapLogger       *zap.Logger
+		zapCores        = make([]zapcore.Core, 0, 7)
+		zapLoggerConfig = zapcore.EncoderConfig{
+			MessageKey:    "message",
+			LevelKey:      "level",
+			TimeKey:       "time",
+			NameKey:       "logger",
+			CallerKey:     "caller",
+			StacktraceKey: "stacktrace",
+			LineEnding:    zapcore.DefaultLineEnding,
+			EncodeLevel:   zapcore.LowercaseLevelEncoder,
+			EncodeTime: func(t time.Time, encoder zapcore.PrimitiveArrayEncoder) {
+				encoder.AppendString(t.Format(time.DateTime + ".000"))
+			},
+			EncodeDuration: zapcore.SecondsDurationEncoder,
+			EncodeCaller:   zapcore.FullCallerEncoder,
+		}
+		zapLoggerEncoderTypes = map[ZapLoggerEncoderType]func(cfg zapcore.EncoderConfig) zapcore.Encoder{
+			ZapLoggerEncoderTypeJson:    zapcore.NewJSONEncoder,
+			ZapLoggerEncoderTypeConsole: zapcore.NewConsoleEncoder,
+		}
 	)
 
 	if zapProvider == nil {
@@ -153,21 +179,7 @@ func NewZapProvider(path string, inConsole bool) *zap.Logger {
 		zapcore.FatalLevel,
 	} {
 		writer := FileRotateLogs.GetWriteSync(path, level.String(), inConsole)
-		zapCores = append(zapCores, zapcore.NewCore(zapcore.NewJSONEncoder(zapcore.EncoderConfig{
-			MessageKey:    "message",
-			LevelKey:      "level",
-			TimeKey:       "time",
-			NameKey:       "logger",
-			CallerKey:     "caller",
-			StacktraceKey: "stacktrace",
-			LineEnding:    zapcore.DefaultLineEnding,
-			EncodeLevel:   zapcore.LowercaseLevelEncoder,
-			EncodeTime: func(t time.Time, encoder zapcore.PrimitiveArrayEncoder) {
-				encoder.AppendString(t.Format(time.DateTime + ".000"))
-			},
-			EncodeDuration: zapcore.SecondsDurationEncoder,
-			EncodeCaller:   zapcore.FullCallerEncoder,
-		}), writer, level))
+		zapCores = append(zapCores, zapcore.NewCore(zapLoggerEncoderTypes[encoderType](zapLoggerConfig), writer, level))
 	}
 
 	zapLogger = zap.New(zapcore.NewTee(zapCores...))
