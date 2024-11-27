@@ -29,12 +29,12 @@ type (
 	}
 	CutterOption func(*Cutter)
 
-	ZapLoggerEncoderType string
+	EncoderType string
 )
 
 const (
-	ZapLoggerEncoderTypeConsole ZapLoggerEncoderType = "console"
-	ZapLoggerEncoderTypeJson    ZapLoggerEncoderType = "json"
+	EncoderTypeConsole EncoderType = "CONSOLE"
+	EncoderTypeJson    EncoderType = "JSON"
 )
 
 // WithCutterFormat 设置时间格式
@@ -130,7 +130,7 @@ func (r *fileRotateLogs) GetWriteSync(path, level string, inConsole bool) zapcor
 }
 
 // NewZapProvider 实例化：Zap日志服务提供者
-func NewZapProvider(path string, inConsole bool, encoderType ZapLoggerEncoderType) *zap.Logger {
+func NewZapProvider(path string, inConsole bool, encoderType EncoderType) *zap.Logger {
 	var (
 		e               error
 		fs              *filesystem.FileSystem
@@ -151,9 +151,9 @@ func NewZapProvider(path string, inConsole bool, encoderType ZapLoggerEncoderTyp
 			EncodeDuration: zapcore.SecondsDurationEncoder,
 			EncodeCaller:   zapcore.FullCallerEncoder,
 		}
-		zapLoggerEncoderTypes = map[ZapLoggerEncoderType]func(cfg zapcore.EncoderConfig) zapcore.Encoder{
-			ZapLoggerEncoderTypeJson:    zapcore.NewJSONEncoder,
-			ZapLoggerEncoderTypeConsole: zapcore.NewConsoleEncoder,
+		encoderTypes = map[EncoderType]func(cfg zapcore.EncoderConfig) zapcore.Encoder{
+			EncoderTypeJson:    zapcore.NewJSONEncoder,
+			EncoderTypeConsole: zapcore.NewConsoleEncoder,
 		}
 	)
 
@@ -179,7 +179,7 @@ func NewZapProvider(path string, inConsole bool, encoderType ZapLoggerEncoderTyp
 		zapcore.FatalLevel,
 	} {
 		writer := FileRotateLogs.GetWriteSync(path, level.String(), inConsole)
-		zapCores = append(zapCores, zapcore.NewCore(zapLoggerEncoderTypes[encoderType](zapLoggerConfig), writer, level))
+		zapCores = append(zapCores, zapcore.NewCore(encoderTypes[encoderType](zapLoggerConfig), writer, level))
 	}
 
 	zapLogger = zap.New(zapcore.NewTee(zapCores...))
