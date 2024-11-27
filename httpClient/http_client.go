@@ -410,16 +410,18 @@ func (my *HttpClient) Send() *HttpClient {
 	}(my.response.Body)
 
 	// 读取新的响应的主体
-	// if _, my.Err = io.Copy(my.responseBodyBuffer, my.response.Body); my.Err != nil {
-	// 	my.Err = fmt.Errorf("读取响应体失败：%s", my.Err.Error())
-	// 	return my
-	// }
-	// my.responseBody = my.responseBodyBuffer.Bytes()
-
-	my.responseBody, my.Err = io.ReadAll(my.response.Body)
-	if my.Err != nil {
-		my.Err = fmt.Errorf("读取响应体失败：%s", my.Err.Error())
-		return my
+	if my.response.ContentLength > 1*1024*1024 { // 1MB
+		if _, my.Err = io.Copy(my.responseBodyBuffer, my.response.Body); my.Err != nil {
+			my.Err = fmt.Errorf("读取响应体失败：%s", my.Err.Error())
+			return my
+		}
+		my.responseBody = my.responseBodyBuffer.Bytes()
+	} else {
+		my.responseBody, my.Err = io.ReadAll(my.response.Body)
+		if my.Err != nil {
+			my.Err = fmt.Errorf("读取响应体失败：%s", my.Err.Error())
+			return my
+		}
 	}
 
 	my.isReady = false
