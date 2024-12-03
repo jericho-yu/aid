@@ -13,10 +13,6 @@ import (
 
 type Cbc struct{}
 
-var CbcHelper Cbc
-
-func (Cbc) New() *Cbc { return &CbcHelper }
-
 func (Cbc) padPKCS7(src []byte, blockSize int) []byte {
 	padding := blockSize - len(src)%blockSize
 	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
@@ -54,7 +50,7 @@ func (Cbc) Encrypt(plainText, key, iv []byte, ivs ...[]byte) ([]byte, error) {
 		return nil, err
 	}
 	blockSize := block.BlockSize()
-	plainText = CbcHelper.padPKCS7(plainText, blockSize)
+	plainText = Cbc{}.padPKCS7(plainText, blockSize)
 	ivValue := ([]byte)(nil)
 	if len(ivs) > 0 {
 		ivValue = ivs[0]
@@ -89,7 +85,7 @@ func (Cbc) Decrypt(cipherText, key, iv []byte, ivs ...[]byte) ([]byte, error) {
 	blockModel := cipher.NewCBCDecrypter(block, ivValue)
 	plainText := make([]byte, len(cipherText))
 	blockModel.CryptBlocks(plainText, cipherText)
-	plainText, e := CbcHelper.unPadPKCS7(plainText, blockSize)
+	plainText, e := Cbc{}.unPadPKCS7(plainText, blockSize)
 	if e != nil {
 		return nil, e
 	}
@@ -100,18 +96,12 @@ func (Cbc) Demo() {
 	key := "tjp5OPIU1ETF5s33fsLWdA=="
 	iv := "0987654321098765"
 
-	encrypted, err := CbcHelper.
-		New().
-		Encrypt(
-			[]byte("abcdefghijklmnopqrstuvwxyz"),
-			[]byte(key),
-			[]byte(iv),
-		)
+	encrypted, err := Cbc{}.Encrypt([]byte("abcdefghijklmnopqrstuvwxyz"), []byte(key), []byte(iv))
 	if err != nil {
 		str.NewTerminalLog("[CBC] encrypt: %v").Error(err)
 	}
 
-	base64Encoded := base64.StdEncoding.EncodeToString([]byte(encrypted))
+	base64Encoded := base64.StdEncoding.EncodeToString(encrypted)
 	str.NewTerminalLog("[CBC] base64 encoded: %s").Success(base64Encoded)
 
 	base64Decoded, base64DecodeErr := base64.StdEncoding.DecodeString(base64Encoded)
@@ -119,13 +109,7 @@ func (Cbc) Demo() {
 		str.NewTerminalLog("[CBC] base64 decode %v").Error(base64DecodeErr)
 	}
 
-	decryptCBC, err := CbcHelper.
-		New().
-		Decrypt(
-			base64Decoded,
-			[]byte(key),
-			[]byte(iv),
-		)
+	decryptCBC, err := Cbc{}.Decrypt(base64Decoded, []byte(key), []byte(iv))
 	if err != nil {
 		str.NewTerminalLog("[CBC] decrypt: %v").Error(err)
 	}
