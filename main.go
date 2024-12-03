@@ -1,13 +1,12 @@
 package main
 
 import (
-	"github.com/jericho-yu/aid/log"
+	"github.com/jericho-yu/aid/common"
+	"log"
 )
 
 func main() {
 
-	log.NewZapProvider("logs", false).Info("info")
-	log.NewZapProvider("logs", true).Debug("debug")
-	log.NewZapProvider("logs", true).Error("error")
+	log.Printf("%#v", common.ToDatetimeUnixMilli("946684800000"))
 
 }

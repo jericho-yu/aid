@@ -398,7 +398,7 @@ func ToDatetimeUnixMilli(original any) time.Time {
 	return time.UnixMilli(ToInt64(original))
 }
 
-// Float32 converts `any` to float32.
+// ToFloat32 converts `any` to float32.
 func ToFloat32(original any) float32 {
 	if original == nil {
 		return 0

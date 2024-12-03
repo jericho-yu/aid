@@ -1,16 +1,14 @@
-package routeLimiter
+package httpLimiter
 
 import (
 	"sync"
 	"time"
-
-	"github.com/jericho-yu/aid/httpLimiter/ipLimiter"
 )
 
 type (
 	// visitor 访问者对象
 	visitor struct {
-		ipLimiter     *ipLimiter.IpLimiter
+		ipLimiter     *IpLimiter
 		t             time.Duration
 		maxVisitTimes uint64
 	}
@@ -24,11 +22,10 @@ type (
 var (
 	routerLimiterOnce = sync.Once{}
 	routerLimiterIns  *RouteLimiter
-	App               RouteLimiter
 )
 
-// Once 单例化：路由限流
-func (RouteLimiter) Once() *RouteLimiter {
+// OnceRouteLimiter 单例化：路由限流
+func OnceRouteLimiter() *RouteLimiter {
 	routerLimiterOnce.Do(func() { routerLimiterIns = &RouteLimiter{RouteSetMap: &sync.Map{}} })
 	return routerLimiterIns
 }
@@ -39,12 +36,12 @@ func (my *RouteLimiter) Add(router string, t time.Duration, maxVisitTimes uint64
 	if _, exist := my.RouteSetMap.Load(router); exist {
 		my.RouteSetMap.Delete(router)
 	}
-	my.RouteSetMap.Store(router, &visitor{ipLimiter: ipLimiter.App.New(), t: t, maxVisitTimes: maxVisitTimes})
+	my.RouteSetMap.Store(router, &visitor{ipLimiter: NewIpLimiter(), t: t, maxVisitTimes: maxVisitTimes})
 	return my
 }
 
 // Affirm 检查是否通过限流
-func (my *RouteLimiter) Affirm(router, ip string) (*ipLimiter.Visit, bool) {
+func (my *RouteLimiter) Affirm(router, ip string) (*Visit, bool) {
 	if val, exist := my.RouteSetMap.Load(router); exist {
 		v := val.(*visitor)
 		return v.ipLimiter.Affirm(ip, v.t, v.maxVisitTimes)
