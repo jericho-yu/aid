@@ -137,7 +137,7 @@ func (my *Writer) SetColumnWidthByText(col string, width float64) *Writer {
 	return my
 }
 
-// SetColumnsWidthByText 设置多列宽：通过列索引
+// SetColumnsWidthByIndex 设置多列宽：通过列索引
 func (my *Writer) SetColumnsWidthByIndex(startCol, endCol int, width float64) *Writer {
 	startColText, err := ColumnNumberToText(startCol)
 	if err != nil {

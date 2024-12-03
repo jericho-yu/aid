@@ -20,29 +20,31 @@ import (
 type (
 	// HttpClient http客户端
 	HttpClient struct {
-		Err            error
-		requestUrl     string
-		requestQueries map[string]string
-		requestMethod  string
-		requestBody    []byte
-		requestHeaders map[string][]string
-		request        *http.Request
-		response       *http.Response
-		responseBody   []byte
-		isReady        bool
-		cert           []byte
-		transport      *http.Transport
-		timeoutSecond  int64
+		Err                error
+		requestUrl         string
+		requestQueries     map[string]string
+		requestMethod      string
+		requestBody        []byte
+		requestHeaders     map[string][]string
+		request            *http.Request
+		response           *http.Response
+		responseBody       []byte
+		responseBodyBuffer *bytes.Buffer
+		isReady            bool
+		cert               []byte
+		transport          *http.Transport
+		timeoutSecond      int64
 	}
 )
 
 // New 实例化：http客户端
 func New(url string) *HttpClient {
 	return &HttpClient{
-		requestUrl:     url,
-		requestQueries: map[string]string{},
-		requestHeaders: map[string][]string{},
-		responseBody:   []byte{},
+		requestUrl:         url,
+		requestQueries:     map[string]string{},
+		requestHeaders:     map[string][]string{},
+		responseBody:       []byte{},
+		responseBodyBuffer: bytes.NewBuffer([]byte{}),
 	}
 }
 
@@ -249,16 +251,6 @@ func (my *HttpClient) SetSteamBody(filename string) *HttpClient {
 	my.request.Header.Set("Content-Length", fmt.Sprintf("%d", size))
 
 	return my
-	// my.SetHeaderContentType("steam")
-
-	// fileData, err = os.ReadFile(filename)
-	// if err != nil {
-	// 	my.Err = err
-	// 	return my
-	// }
-	// my.requestBody = fileData
-
-	// return my
 }
 
 // SetHeaderContentType 设置请求头内容类型
@@ -395,6 +387,8 @@ func (my *HttpClient) Send() *HttpClient {
 		}
 	}
 
+	my.responseBodyBuffer.Reset() // 重置响应体缓存
+
 	// 发送新的请求
 	client := &http.Client{Transport: my.transport}
 
@@ -416,10 +410,18 @@ func (my *HttpClient) Send() *HttpClient {
 	}(my.response.Body)
 
 	// 读取新的响应的主体
-	my.responseBody, my.Err = io.ReadAll(my.response.Body)
-	if my.Err != nil {
-		my.Err = fmt.Errorf("读取响应体失败：%s", my.Err.Error())
-		return my
+	if my.response.ContentLength > 1*1024*1024 { // 1MB
+		if _, my.Err = io.Copy(my.responseBodyBuffer, my.response.Body); my.Err != nil {
+			my.Err = fmt.Errorf("读取响应体失败：%s", my.Err.Error())
+			return my
+		}
+		my.responseBody = my.responseBodyBuffer.Bytes()
+	} else {
+		my.responseBody, my.Err = io.ReadAll(my.response.Body)
+		if my.Err != nil {
+			my.Err = fmt.Errorf("读取响应体失败：%s", my.Err.Error())
+			return my
+		}
 	}
 
 	my.isReady = false
