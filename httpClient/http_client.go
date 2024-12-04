@@ -239,12 +239,6 @@ func (my *Client) SetSteamBody(filename string) *Client {
 		my.Err = err
 		return my
 	}
-	defer func(file *os.File) {
-		my.Err = file.Close()
-	}(file)
-	if my.Err != nil {
-		return my
-	}
 
 	// 获取文件大小
 	stat, _ := file.Stat()
@@ -266,6 +260,8 @@ func (my *Client) SetSteamBody(filename string) *Client {
 	}
 
 	my.request.Header.Set("Content-Length", fmt.Sprintf("%d", size))
+
+	my.Err = file.Close()
 
 	return my
 }
@@ -338,7 +334,7 @@ func (my *Client) GetResponse() *http.Response {
 
 // ParseByContentType 根据响应头Content-Type自动解析响应体
 func (my *Client) ParseByContentType(target any) *Client {
-	switch my.GetResponse().Header.Get("Content-Type") {
+	switch ContentType(my.GetResponse().Header.Get("Content-Type")) {
 	case ContentTypeJson:
 		my.GetResponseJsonBody(target)
 	case ContentTypeXml:
@@ -376,7 +372,6 @@ func (my *Client) SaveResponseSteamFile(filename string) *Client {
 		my.Err = err
 		return my
 	}
-	defer func() { file.Close() }()
 
 	// 将二进制数据写入文件
 	_, err = file.Write(my.responseBody)
@@ -384,6 +379,8 @@ func (my *Client) SaveResponseSteamFile(filename string) *Client {
 		my.Err = err
 		return my
 	}
+
+	my.Err = file.Close()
 
 	return my
 }
