@@ -4,35 +4,33 @@ import (
 	"sync"
 )
 
-type HttpClientMultiple struct {
-	clients []*HttpClient
+type Multiple struct {
+	clients []*Client
 }
 
-// New New 实例化：批量请求对象
-func (HttpClientMultiple) New() *HttpClientMultiple {
-	return &HttpClientMultiple{}
-}
+// NewHttpClientMultiple 实例化：批量请求对象
+func NewHttpClientMultiple() *Multiple { return &Multiple{} }
 
 // Add 添加httpClient对象
-func (my *HttpClientMultiple) Add(hc *HttpClient) *HttpClientMultiple {
+func (my *Multiple) Add(hc *Client) *Multiple {
 	my.clients = append(my.clients, hc)
 	return my
 }
 
 // SetClients 设置httpClient对象
-func (my *HttpClientMultiple) SetClients(clients []*HttpClient) *HttpClientMultiple {
+func (my *Multiple) SetClients(clients []*Client) *Multiple {
 	my.clients = clients
 	return my
 }
 
 // Send 批量发送
-func (my *HttpClientMultiple) Send() *HttpClientMultiple {
+func (my *Multiple) Send() *Multiple {
 	if len(my.clients) > 0 {
 		var wg sync.WaitGroup
 		wg.Add(len(my.clients))
 
 		for _, client := range my.clients {
-			go func(client *HttpClient) {
+			go func(client *Client) {
 				defer wg.Done()
 
 				client.Send()
@@ -46,6 +44,6 @@ func (my *HttpClientMultiple) Send() *HttpClientMultiple {
 }
 
 // GetClients 获取链接池
-func (my *HttpClientMultiple) GetClients() []*HttpClient {
+func (my *Multiple) GetClients() []*Client {
 	return my.clients
 }

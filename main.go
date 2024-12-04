@@ -1,13 +1,9 @@
 package main
 
-import (
-	"github.com/jericho-yu/aid/log"
-)
+import "log"
 
 func main() {
 
-	log.NewZapProvider("logs", false).Info("info")
-	log.NewZapProvider("logs", true).Debug("debug")
-	log.NewZapProvider("logs", true).Error("error")
+	log.Printf("info")
 
 }
