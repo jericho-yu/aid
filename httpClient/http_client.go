@@ -236,18 +236,32 @@ func (my *HttpClient) SetSteamBody(filename string) *HttpClient {
 		my.Err = err
 		return my
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		my.Err = file.Close()
+	}(file)
+	if my.Err != nil {
+		return my
+	}
 
 	// 获取文件大小
 	stat, _ := file.Stat()
 	size := stat.Size()
 
 	// 创建RequestBodyReader用于读取文件内容
-	my.requestBody, err = io.ReadAll(file)
-	if err != nil {
-		my.Err = err
-		return my
+	if size > 1*1024*1024 {
+		_, my.Err = io.Copy(my.responseBodyBuffer, file)
+		if my.Err != nil {
+			return my
+		}
+		my.requestBody = my.responseBodyBuffer.Bytes()
+	} else {
+		my.requestBody, err = io.ReadAll(file)
+		if err != nil {
+			my.Err = err
+			return my
+		}
 	}
+
 	my.request.Header.Set("Content-Length", fmt.Sprintf("%d", size))
 
 	return my

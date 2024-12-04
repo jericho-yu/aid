@@ -32,15 +32,15 @@ const (
 	FileManagerConfigDriverOss   FileManagerConfigDriver = "OSS"
 )
 
-// New 初始化：文件管理
-func (FileManager) New(config *FileManagerConfig) *FileManager {
+// NewFileManager 初始化：文件管理
+func NewFileManager(config *FileManagerConfig) *FileManager {
 	return &FileManager{
 		config: config,
 	}
 }
 
-// NewByLocalFile 初始化：文件管理器（通过本地文件）
-func (FileManager) NewByLocalFile(srcDir, dstDir string, config *FileManagerConfig) (*FileManager, error) {
+// NewFileManagerByLocalFile 初始化：文件管理器（通过本地文件）
+func NewFileManagerByLocalFile(srcDir, dstDir string, config *FileManagerConfig) (*FileManager, error) {
 	fs := FileSystemApp.NewByAbs(srcDir)
 	if !fs.IsExist {
 		return nil, errors.New("目标文件不存在")
@@ -60,8 +60,8 @@ func (FileManager) NewByLocalFile(srcDir, dstDir string, config *FileManagerConf
 	}, nil
 }
 
-// NewByBytes 实例化：文件管理器（通过字节）
-func (FileManager) NewByBytes(srcFileBytes []byte, dstDir string, config *FileManagerConfig) *FileManager {
+// NewFileManagerByBytes 实例化：文件管理器（通过字节）
+func NewFileManagerByBytes(srcFileBytes []byte, dstDir string, config *FileManagerConfig) *FileManager {
 	return &FileManager{
 		dstDir:    dstDir,
 		fileBytes: srcFileBytes,
