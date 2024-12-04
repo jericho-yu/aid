@@ -15,13 +15,7 @@ import (
 	"github.com/jericho-yu/aid/str"
 )
 
-type Secret struct{}
-
-var SecretHelper Secret
-
-func (Secret) New() *Secret { return &Secret{} }
-
-func (Secret) EncryptAuthorization(key, secretKey string, iv []byte, randStr ...string) (string, string, error) {
+func EncryptAuthorization(key, secretKey string, iv []byte, randStr ...string) (string, string, error) {
 	var (
 		err   error
 		uuid  = ""
@@ -35,13 +29,13 @@ func (Secret) EncryptAuthorization(key, secretKey string, iv []byte, randStr ...
 	if len(randStr) > 0 {
 		uuid = randStr[0]
 	} else {
-		uuid, err = SecretHelper.MustEncrypt(str.NewRand().GetLetters(10))
+		uuid, err = MustEncrypt(str.NewRand().GetLetters(10))
 		if err != nil {
 			return "", "", err
 		}
 	}
 
-	token, err = symmetric.CbcHelper.New().Encrypt([]byte(key+uuid), []byte(secretKey), iv)
+	token, err = symmetric.Cbc{}.Encrypt([]byte(key+uuid), []byte(secretKey), iv)
 	if err != nil {
 		return "", "", err
 	}
@@ -49,7 +43,7 @@ func (Secret) EncryptAuthorization(key, secretKey string, iv []byte, randStr ...
 	return base64.StdEncoding.EncodeToString(token), uuid, nil
 }
 
-func (Secret) DecryptAuthorization(token, secretKey string, iv []byte) (string, string, error) {
+func DecryptAuthorization(token, secretKey string, iv []byte) (string, string, error) {
 	var (
 		err                   error
 		token64, decryptToken []byte
@@ -63,7 +57,7 @@ func (Secret) DecryptAuthorization(token, secretKey string, iv []byte) (string, 
 	if err != nil {
 		return "", "", fmt.Errorf("base64解码token失败：%s", err.Error())
 	}
-	decryptToken, err = symmetric.CbcHelper.New().Decrypt(token64, []byte(secretKey), iv)
+	decryptToken, err = symmetric.Cbc{}.Decrypt(token64, []byte(secretKey), iv)
 	if err != nil {
 		return "", "", fmt.Errorf("解密失败：%s", err.Error())
 	}
@@ -71,7 +65,7 @@ func (Secret) DecryptAuthorization(token, secretKey string, iv []byte) (string, 
 	return string(decryptToken[:len(decryptToken)-32]), string(decryptToken[len(decryptToken)-32:]), nil
 }
 
-func (Secret) MustEncrypt(data any) (string, error) {
+func MustEncrypt(data any) (string, error) {
 	var (
 		err       error
 		dataBytes []byte
@@ -86,7 +80,7 @@ func (Secret) MustEncrypt(data any) (string, error) {
 	return fmt.Sprintf("%x", h.Sum(nil)), nil
 }
 
-func (Secret) Ecb16Encrypt(data any, needEncrypt, needZip bool, aes *symmetric.Aes) (string, error) {
+func Ecb16Encrypt(data any, needEncrypt, needZip bool, aes *symmetric.Aes) (string, error) {
 	var (
 		jsonByte, b                        []byte
 		jsonMarshalErr, zipErr, encryptErr error
@@ -108,7 +102,7 @@ func (Secret) Ecb16Encrypt(data any, needEncrypt, needZip bool, aes *symmetric.A
 
 	// 加密
 	if needEncrypt {
-		b, encryptErr = symmetric.EcbHelper.New().Encrypt(b, aes.Encrypt.GetAesKey())
+		b, encryptErr = symmetric.Ecb{}.Encrypt(b, aes.Encrypt.GetAesKey())
 		if encryptErr != nil {
 			return "", encryptErr
 		}
@@ -121,7 +115,7 @@ func (Secret) Ecb16Encrypt(data any, needEncrypt, needZip bool, aes *symmetric.A
 	}
 }
 
-func (Secret) Ecb16Decrypt(data string, needEncrypt, needZip bool, aes *symmetric.Aes) (any, error) {
+func Ecb16Decrypt(data string, needEncrypt, needZip bool, aes *symmetric.Aes) (any, error) {
 	var (
 		r                                                     any
 		cipherText, decryptedByte, decompressedByte           []byte
@@ -136,7 +130,7 @@ func (Secret) Ecb16Decrypt(data string, needEncrypt, needZip bool, aes *symmetri
 		}
 
 		// aes解密：ecb
-		decryptedByte, decryptErr = symmetric.EcbHelper.New().Decrypt(cipherText, aes.Encrypt.GetAesKey())
+		decryptedByte, decryptErr = symmetric.Ecb{}.Decrypt(cipherText, aes.Encrypt.GetAesKey())
 		if decryptErr != nil {
 			return nil, decryptErr
 		}

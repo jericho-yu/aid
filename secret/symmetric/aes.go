@@ -36,24 +36,18 @@ type (
 	}
 )
 
-var (
-	AesHelper        Aes
-	AesEncryptHelper AesEncrypt
-	AesDecryptHelper AesDecrypt
-)
-
-// New 实例化：Aes密钥
-func (Aes) New(sail string) *Aes { return &Aes{sailStr: sail} }
+// NewAes 实例化：Aes密钥
+func NewAes(sail string) *Aes { return &Aes{sailStr: sail} }
 
 // NewEncrypt 实例化：Aes加密密钥对象
 func (my *Aes) NewEncrypt() *Aes {
-	my.Encrypt = AesEncryptHelper.New(my.sailStr)
+	my.Encrypt = NewAesEncrypt(my.sailStr)
 	return my
 }
 
 // NewDecrypt 实例化：Aes解密密钥对象
 func (my *Aes) NewDecrypt(openKey string) *Aes {
-	my.Decrypt = AesDecryptHelper.New(my.sailStr, openKey)
+	my.Decrypt = NewAesDecrypt(my.sailStr, openKey)
 	return my
 }
 
@@ -63,10 +57,10 @@ func (my *Aes) GetEncrypt() *AesEncrypt { return my.Encrypt }
 // GetDecrypt 获取解密密钥
 func (my *Aes) GetDecrypt() *AesDecrypt { return my.Decrypt }
 
-// New 实例化：Aes加密密钥对象
-func (AesEncrypt) New(sailStr string) *AesEncrypt {
+// NewAesEncrypt 实例化：Aes加密密钥对象
+func NewAesEncrypt(sail string) *AesEncrypt {
 	aesHelper := &AesEncrypt{
-		sailStr:  sailStr,
+		sailStr:  sail,
 		sailByte: make([]byte, 16),
 		randKey:  make([]byte, 16),
 		aesKey:   make([]byte, 16),
@@ -75,7 +69,7 @@ func (AesEncrypt) New(sailStr string) *AesEncrypt {
 
 	aesHelper.randKey = make([]byte, 16)
 	_, aesHelper.Err = io.ReadFull(rand.Reader, aesHelper.randKey)
-	aesHelper.sailByte, aesHelper.Err = base64.StdEncoding.DecodeString(sailStr)
+	aesHelper.sailByte, aesHelper.Err = base64.StdEncoding.DecodeString(sail)
 
 	return aesHelper.sailByByte()
 }
@@ -110,8 +104,8 @@ func (r *AesEncrypt) GetOpenKey() string {
 	return r.openKey
 }
 
-// New 实例化：Aes解密密钥对象
-func (AesDecrypt) New(sailStr, openKey string) *AesDecrypt {
+// NewAesDecrypt 实例化：Aes解密密钥对象
+func NewAesDecrypt(sailStr, openKey string) *AesDecrypt {
 	aesDecrypt := &AesDecrypt{
 		sailStr:  sailStr,
 		sailByte: make([]byte, 16),

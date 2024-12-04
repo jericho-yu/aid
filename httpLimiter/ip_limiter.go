@@ -1,4 +1,4 @@
-package ipLimiter
+package httpLimiter
 
 import (
 	"time"
@@ -19,10 +19,8 @@ type (
 	}
 )
 
-var App IpLimiter
-
-// New 实例化：Ip 限流
-func (IpLimiter) New() *IpLimiter {
+// NewIpLimiter 实例化：Ip 限流
+func NewIpLimiter() *IpLimiter {
 	return &IpLimiter{visitMap: make(map[string]*Visit)}
 }
 

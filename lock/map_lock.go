@@ -27,16 +27,15 @@ type (
 var (
 	onceMapLock sync.Once
 	mapLockIns  *MapLock
-	MapLockApp  MapLock
 )
 
-// New 实例化：字典锁
-func (MapLock) New() *MapLock {
+// NewMapLock 实例化：字典锁
+func NewMapLock() *MapLock {
 	return &MapLock{locks: dict.MakeAnyDict[string, *itemLock]()}
 }
 
-// Once 单例化：字典锁
-func (MapLock) Once() *MapLock {
+// OnceMapLock 单例化：字典锁
+func OnceMapLock() *MapLock {
 	onceMapLock.Do(func() { mapLockIns = &MapLock{locks: dict.MakeAnyDict[string, *itemLock]()} })
 	return mapLockIns
 }
@@ -129,7 +128,7 @@ func (my *MapLock) Try(key string) error {
 	}
 }
 
-func (MapLock) Demo() {
+func DemoMapLock() {
 	k8sLinks := map[string]any{
 		"k8s-a": &struct{}{},
 		"k8s-b": &struct{}{},
@@ -137,7 +136,7 @@ func (MapLock) Demo() {
 	}
 
 	// 获取字典锁对象
-	ml := MapLockApp.Once()
+	ml := OnceMapLock()
 
 	// 批量创建锁
 	storeErr := ml.SetMany(k8sLinks)

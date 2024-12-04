@@ -17,10 +17,8 @@ import (
 
 type Rsa struct{}
 
-var RsaHelper Rsa
-
-// New 实例化：Rsa加密
-func (Rsa) New() *Rsa { return &RsaHelper }
+// NewRsa 实例化：Rsa加密
+func NewRsa() *Rsa { return &Rsa{} }
 
 // EncryptByBase64 通过base64公钥加密
 func (my Rsa) EncryptByBase64(base64PublicKey string, plainText []byte) ([]byte, error) {
@@ -29,8 +27,7 @@ func (my Rsa) EncryptByBase64(base64PublicKey string, plainText []byte) ([]byte,
 		err       error
 	)
 
-	pemBase64, err = PemBase64Helper.
-		New().
+	pemBase64, err = NewPemBase64().
 		SetBase64PublicKey(base64PublicKey).
 		GeneratePemPublicKey()
 	if err != nil {
@@ -115,7 +112,7 @@ func (my Rsa) DecryptByBase64(base64PrivateKey string, cipherText []byte) ([]byt
 		err       error
 	)
 
-	pemBase64, err = PemBase64Helper.SetBase64PrivateKye(base64PrivateKey).GeneratePemPrivateKey()
+	pemBase64, err = NewPemBase64().SetBase64PrivateKye(base64PrivateKey).GeneratePemPrivateKey()
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +155,10 @@ func (my Rsa) DecryptByPem(pemPrivateKey []byte, cipherText []byte) ([]byte, err
 
 	if len(plainText) > privateKey.PublicKey.N.BitLen() {
 		// 分段解密
-		my.decryptWithTooLong(privateKey, cipherText)
+		_, err2 := my.decryptWithTooLong(privateKey, cipherText)
+		if err2 != nil {
+			return nil, fmt.Errorf("分段解密错误：%v", err2)
+		}
 	} else {
 		// 解密数据
 		plainText, err = rsa.DecryptPKCS1v15(rand.Reader, privateKey, cipherText)
@@ -219,8 +219,7 @@ func (Rsa) DemoEncryptRsa(unEncrypt []byte) string {
 		generatePemPublicKeyErr, encryptErr error
 	)
 
-	pemBase64, generatePemPublicKeyErr = PemBase64Helper.
-		New().
+	pemBase64, generatePemPublicKeyErr = NewPemBase64().
 		SetBase64PublicKey(base64PublicKey).
 		GeneratePemPublicKey()
 	if generatePemPublicKeyErr != nil {
@@ -230,7 +229,7 @@ func (Rsa) DemoEncryptRsa(unEncrypt []byte) string {
 	pemPublicKey = pemBase64.GetPemPublicKey()
 	str.NewTerminalLog("[RSA] generate public key: \n%s").Info(pemPublicKey)
 
-	encrypted, encryptErr = RsaHelper.New().EncryptByPem(pemPublicKey, unEncrypt)
+	encrypted, encryptErr = NewRsa().EncryptByPem(pemPublicKey, unEncrypt)
 	if encryptErr != nil {
 		str.NewTerminalLog("[RSA] encrypt: %v").Error(encryptErr)
 	}
@@ -248,7 +247,7 @@ func (Rsa) DemoDecryptRsa(base64Encrypted string) string {
 		decrypted                                            []byte
 	)
 
-	pemBase64, generatePemPublicKeyErr = PemBase64Helper.
+	pemBase64, generatePemPublicKeyErr = NewPemBase64().
 		SetBase64PrivateKye(base64PrivateKey).
 		GeneratePemPrivateKey()
 	if generatePemPublicKeyErr != nil {
@@ -263,7 +262,7 @@ func (Rsa) DemoDecryptRsa(base64Encrypted string) string {
 		str.NewTerminalLog("[RSA] base64 decode: %v").Error(base64DecodeErr)
 	}
 
-	decrypted, decryptErr = RsaHelper.New().DecryptByPem(pemPrivateKey, encrypted)
+	decrypted, decryptErr = NewRsa().DecryptByPem(pemPrivateKey, encrypted)
 	if decryptErr != nil {
 		str.NewTerminalLog("[RSA] decrypt: %v").Error(decryptErr)
 	}

@@ -40,12 +40,13 @@ func (*Zlib) Decompress(data []byte) ([]byte, error) {
 	var (
 		err    error
 		buffer bytes.Buffer
+		reader io.ReadCloser
 	)
-	reader, err := zlib.NewReader(bytes.NewReader(data))
+	reader, err = zlib.NewReader(bytes.NewReader(data))
 	if err != nil {
 		return nil, err
 	}
-	defer reader.Close()
+	defer reader.Close().Error()
 
 	// 读取解压缩后的数据到缓冲区
 	if _, err = io.Copy(&buffer, reader); err != nil {

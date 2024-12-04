@@ -20,10 +20,6 @@ type (
 	}
 )
 
-var EcbHelper Ecb
-
-func (Ecb) New() *Ecb { return &Ecb{} }
-
 // padPKCS7 pads the plaintext to be a multiple of the block size
 func (Ecb) padPKCS7(plaintext []byte, blockSize int) []byte {
 	padding := blockSize - len(plaintext)%blockSize
@@ -75,7 +71,7 @@ func (Ecb) Encrypt(key, plaintext []byte) ([]byte, error) {
 	}
 
 	blockSize := block.BlockSize()
-	plaintext = EcbHelper.padPKCS7(plaintext, blockSize)
+	plaintext = Ecb{}.padPKCS7(plaintext, blockSize)
 	cipherText := make([]byte, len(plaintext))
 
 	for start := 0; start < len(plaintext); start += blockSize {
@@ -103,7 +99,7 @@ func (Ecb) Decrypt(key, cipherText []byte) ([]byte, error) {
 		block.Decrypt(plaintext[start:start+blockSize], cipherText[start:start+blockSize])
 	}
 
-	return EcbHelper.unPadPKCS72(plaintext, blockSize)
+	return Ecb{}.unPadPKCS72(plaintext, blockSize)
 }
 
 // encrypt
@@ -116,7 +112,7 @@ func encrypt(plaintext, key []byte) string {
 	str.NewTerminalLog("[ECB] zipped").Info()
 
 	// step2: aes-ecb-encrypt
-	encrypted, encryptErr := EcbHelper.Encrypt(zipped, key)
+	encrypted, encryptErr := Ecb{}.Encrypt(zipped, key)
 	if encryptErr != nil {
 		str.NewTerminalLog("[ECB] encrypting data:%v").Error(encryptErr)
 	}
@@ -139,7 +135,7 @@ func decrypt(cipherText, key []byte) []byte {
 	str.NewTerminalLog("[ECB] decode base64").Info()
 
 	// step2: aes-ecb-decrypt
-	decrypted, decryptErr := EcbHelper.Decrypt(decodeBase64, key)
+	decrypted, decryptErr := Ecb{}.Decrypt(decodeBase64, key)
 	if decryptErr != nil {
 		str.NewTerminalLog("[ECB] decrypting data: %v").Error(decryptErr)
 	}
