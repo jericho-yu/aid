@@ -125,8 +125,8 @@ type iSet interface {
 }
 
 // FloatFormat 浮点精度控制
-func FloatFormat(f float64) (float64, error) {
-	return strconv.ParseFloat(strconv.FormatFloat(f, 'f', 10, 64), 64)
+func FloatFormat(f float64, length int) (float64, error) {
+	return strconv.ParseFloat(strconv.FormatFloat(f, 'f', length, 64), 64)
 }
 
 func ToBytes(original any) []byte {
