@@ -46,7 +46,7 @@ func (*Zlib) Decompress(data []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer reader.Close().Error()
+	defer reader.Close()
 
 	// 读取解压缩后的数据到缓冲区
 	if _, err = io.Copy(&buffer, reader); err != nil {
