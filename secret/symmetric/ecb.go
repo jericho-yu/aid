@@ -172,8 +172,8 @@ func (Ecb) Demo() {
 		str.NewTerminalLog("[ECB] encrypted: %s").Info(encrypted)
 
 		// decrypt
-		// decrypted := decrypt([]byte(encrypted), key)
-		decrypted := decrypt([]byte("Yw0Fh8699WC0hvKCRcFinq9nDqLdoECXZ5ZFK3onuXtzR61QKEvAH4+7NI4xYsn1eLwFOhzf0eBHnXv1ZaeWdueOy+t/OpgMXxl64s2PqLDRE8z+z2mHUVpvb7/V/2cS"), key2)
+		decrypted := decrypt([]byte(encrypted), key2)
+		// decrypted := decrypt([]byte("Yw0Fh8699WC0hvKCRcFinq9nDqLdoECXZ5ZFK3onuXtzR61QKEvAH4+7NI4xYsn1eLwFOhzf0eBHnXv1ZaeWdueOy+t/OpgMXxl64s2PqLDRE8z+z2mHUVpvb7/V/2cS"), key2)
 		str.NewTerminalLog("[ECB] decrypted: %s").Info(string(decrypted))
 	}
 }

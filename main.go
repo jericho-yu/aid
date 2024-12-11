@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/jericho-yu/aid/common"
 	"log"
+
+	"github.com/jericho-yu/aid/common"
 )
 
 func main() {
