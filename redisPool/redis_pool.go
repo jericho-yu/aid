@@ -25,11 +25,10 @@ type (
 var (
 	redisPoolIns  *RedisPool
 	redisPoolOnce sync.Once
-	RedisPoolApp  RedisPool
 )
 
-// Once 单例化：redis 链接
-func (*RedisPool) Once(redisSetting *RedisSetting) *RedisPool {
+// OnceRedisPool 单例化：redis 链接
+func OnceRedisPool(redisSetting *RedisSetting) *RedisPool {
 	redisPoolOnce.Do(func() {
 		redisPoolIns = &RedisPool{}
 		redisPoolIns.connections = dict.MakeAnyDict[string, *redisConn]()
@@ -109,7 +108,7 @@ func (my *RedisPool) Close(key string) error {
 // Clean 清理链接
 func (*RedisPool) Clean() {
 	for key, val := range redisPoolIns.connections.All() {
-		val.conn.Close()
+		_ = val.conn.Close()
 		redisPoolIns.connections.RemoveByKey(key)
 	}
 }
