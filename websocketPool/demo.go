@@ -20,8 +20,7 @@ func ClientDemo() {
 		wg  sync.WaitGroup
 	)
 
-	wcp = ClientPoolApp.
-		Once().
+	wcp = OnceClientPool().
 		SetOnConnect(func(instanceName, clientName string) {
 			str.NewTerminalLog("[client] 链接成功：%s").Info(clientName)
 		}).
@@ -46,7 +45,7 @@ func ClientDemo() {
 	_, err = wci.SetClient("timeout", "127.0.0.1:44444", "", func(instanceName, clientName string, propertyMessage []byte) ([]byte, error) {
 		str.NewTerminalLog("[client timeout] 收到消息：%s；文本消息：%s；原始消息：%v").Info(clientName, string(propertyMessage), propertyMessage)
 		return propertyMessage, nil
-	}, HeartOpt.Default(), MessageTimeoutOpt.Default())
+	}, DefaultHeart(), DefaultMessageTimeout())
 	if err != nil {
 		str.NewTerminalLog("[client] 创建链接失败：%v").Wrong(err)
 	}
@@ -64,8 +63,8 @@ func ClientDemo() {
 			str.NewTerminalLog("[client] 收到消息：%s；文本消息：%s；原始消息：%v").Info(clientName, string(prototypeMsg), prototypeMsg)
 			return prototypeMsg, nil
 		},
-		HeartOpt.Default(),
-		MessageTimeoutOpt.Default(),
+		DefaultHeart(),
+		DefaultMessageTimeout(),
 	)
 	if err != nil {
 		str.NewTerminalLog("[client] 创建链接失败：%v").Error(err)
@@ -80,8 +79,8 @@ func ClientDemo() {
 			str.NewTerminalLog("[client] 收到消息：%s；文本消息：%s；原始消息：%v").Info(clientName, string(prototypeMsg), prototypeMsg)
 			return prototypeMsg, nil
 		},
-		HeartOpt.Default(),
-		MessageTimeoutOpt.Default(),
+		DefaultHeart(),
+		DefaultMessageTimeout(),
 	)
 	if err != nil {
 		str.NewTerminalLog("[client] 创建链接失败：%v").Error(err)
@@ -96,8 +95,8 @@ func ClientDemo() {
 			str.NewTerminalLog("[client] 收到消息：%s；文本消息：%s；原始消息：%v").Info(clientName, string(prototypeMsg), prototypeMsg)
 			return prototypeMsg, nil
 		},
-		HeartOpt.Default(),
-		MessageTimeoutOpt.Default(),
+		DefaultHeart(),
+		DefaultMessageTimeout(),
 	)
 	if err != nil {
 		str.NewTerminalLog("[client] 创建链接失败：%v").Error(err)

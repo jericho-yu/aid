@@ -31,9 +31,6 @@ func (msgType) Pong() int {
 }
 
 var (
-	ClientPoolApp     ClientPool
-	ClientInstanceApp ClientInstance
-	clientApp         Client
 	clientPoolIns     *ClientPool
 	clientPoolOnce    sync.Once
 	HeartOpt          Heart

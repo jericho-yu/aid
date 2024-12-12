@@ -12,8 +12,8 @@ type ClientInstance struct {
 	Clients *dict.AnyDict[string, *Client]
 }
 
-// New 实例化：websocket 客户端实例
-func (ClientInstance) New(instanceName string) *ClientInstance {
+// NewClientInstance 实例化：websocket 客户端实例
+func NewClientInstance(instanceName string) *ClientInstance {
 	return &ClientInstance{Name: instanceName, Clients: dict.MakeAnyDict[string, *Client]()}
 }
 

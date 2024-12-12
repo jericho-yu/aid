@@ -20,8 +20,8 @@ type (
 	}
 )
 
-// Once 单例化：websocket 客户端连接池
-func (ClientPool) Once() *ClientPool {
+// OnceClientPool 单例化：websocket 客户端连接池
+func OnceClientPool() *ClientPool {
 	clientPoolOnce.Do(func() {
 		clientPoolIns = &ClientPool{}
 		clientPoolIns.clientInstances = dict.MakeAnyDict[string, *ClientInstance]()
@@ -76,7 +76,7 @@ func (ClientPool) SetClientInstance(instanceName string) (*ClientInstance, error
 		return nil, fmt.Errorf("创建实例失败：%s已经存在", instanceName)
 	}
 
-	clientInstance = ClientInstanceApp.New(instanceName)
+	clientInstance = NewClientInstance(instanceName)
 	clientPoolIns.clientInstances.Set(instanceName, clientInstance)
 
 	return clientInstance, nil
@@ -122,7 +122,7 @@ func (ClientPool) SetClient(
 
 	clientInstance, exist = clientPoolIns.clientInstances.Get(instanceName)
 	if !exist {
-		clientInstance = ClientInstanceApp.New(instanceName)
+		clientInstance = NewClientInstance(instanceName)
 		clientPoolIns.clientInstances.Set(instanceName, clientInstance)
 	}
 
