@@ -14,8 +14,6 @@ type RedisSetting struct {
 	}
 }
 
-var RedisSet RedisSetting
-
 // New 初始化：数据库配置
 func (RedisSetting) New(path string) *RedisSetting {
 	var redisSetting *RedisSetting = &RedisSetting{}
