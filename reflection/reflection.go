@@ -123,7 +123,7 @@ func (my *Reflection) GetType() reflect.Type { return my.refType }
 
 // GetReflectionType 获取Reflection类型
 func (my *Reflection) GetReflectionType() ReflectionType {
-	var ref reflect.Value = reflect.ValueOf(my.original)
+	var ref = reflect.ValueOf(my.original)
 
 	if ref.Kind() != reflect.Ptr {
 		var is64 bool = unsafe.Sizeof(uintptr(0)) == 8
@@ -266,8 +266,8 @@ func findFieldAndFill(
 	process func(val reflect.Value),
 ) {
 	var (
-		refValue reflect.Value = reflect.ValueOf(model)
-		refType  reflect.Type  = reflect.TypeOf(model)
+		refValue = reflect.ValueOf(model)
+		refType  = reflect.TypeOf(model)
 	)
 
 	if refValue.Kind() == reflect.Ptr {

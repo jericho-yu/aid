@@ -2,6 +2,7 @@ package websocketPool
 
 import (
 	"errors"
+	"time"
 
 	"github.com/jericho-yu/aid/dict"
 )
@@ -40,10 +41,6 @@ func (my *ClientInstance) SetClient(
 		prototypeMsg []byte
 	)
 
-	if heart == nil {
-		return nil, errors.New("心跳设置不能为空")
-	}
-
 	client, exist = my.Clients.Get(clientName)
 	if exist {
 		if err = client.Conn.Close(); err != nil {
@@ -75,7 +72,12 @@ func (my *ClientInstance) SetClient(
 				client.heart.ticker.Stop()
 				my.Clients.RemoveByKey(clientName)
 				return
-			case <-client.heart.ticker.C:
+			case <-func() <-chan time.Time {
+				if client.heart != nil {
+					return client.heart.ticker.C
+				}
+				return nil
+			}():
 				// 执行心跳
 				if client.heart.fn != nil {
 					client.heart.fn(client)
@@ -86,6 +88,7 @@ func (my *ClientInstance) SetClient(
 					if clientPoolIns.onReceiveMsgErr != nil {
 						clientPoolIns.onReceiveMsgErr(my.Name, clientName, prototypeMsg, err)
 					}
+					client.syncChan <- []byte{}
 					return
 				}
 
