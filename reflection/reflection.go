@@ -231,7 +231,15 @@ func (my *Reflection) CallMethodByName(
 	methodName string,
 	values ...reflect.Value,
 ) []reflect.Value {
-	method := my.GetValue().MethodByName(methodName)
+
+	refVal := reflect.ValueOf(my.original)
+	if refVal.Kind() != reflect.Ptr {
+		ptr := reflect.New(refVal.Type())
+		ptr.Elem().Set(refVal)
+		refVal = ptr
+	}
+
+	method := refVal.MethodByName(methodName)
 	if method.IsValid() {
 		return method.Call(values)
 	}
