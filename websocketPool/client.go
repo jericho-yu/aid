@@ -34,7 +34,10 @@ type (
 )
 
 // NewClient 实例化：websocket 客户端链接
-func NewClient(instanceName, name, host, path string, receiveMessageFunc func(instanceName, clientName string, prototypeMsg []byte) ([]byte, error)) (*Client, error) {
+func NewClient(
+	instanceName, name, host, path string,
+	receiveMessageFunc func(instanceName, clientName string, prototypeMsg []byte) ([]byte, error),
+) (*Client, error) {
 	u := url.URL{
 		Scheme: "ws",
 		Host:   host,
