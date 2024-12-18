@@ -231,17 +231,14 @@ func (my *Reflection) CallMethodByName(
 	methodName string,
 	values ...reflect.Value,
 ) []reflect.Value {
-	str.NewTerminalLog("OK1 -> %#v").Info(my.original)
 	refVal := reflect.ValueOf(my.original)
 	if refVal.Kind() != reflect.Ptr {
-		str.NewTerminalLog("OK2 -> %#v").Info(refVal.Type())
 		ptr := reflect.New(refVal.Type())
 		ptr.Elem().Set(refVal)
 		refVal = ptr
 	}
 
 	method := refVal.MethodByName(methodName)
-	str.NewTerminalLog("OK3 -> %#v").Info(method)
 	if method.IsValid() {
 		return method.Call(values)
 	}
