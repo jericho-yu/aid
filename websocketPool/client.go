@@ -47,13 +47,19 @@ func NewClient(
 	if err != nil {
 		return nil, err
 	}
-	return &Client{
+
+	c := &Client{
 		InstanceName: instanceName,
 		Name:         name,
 		url:          u,
 		Conn:         client,
 		onReceiveMsg: receiveMessageFunc,
-	}, nil
+	}
+
+	c.syncChan = make(chan []byte, 1)
+	c.closeChan = make(chan struct{}, 1)
+
+	return c, nil
 }
 
 // SendMsg 发送消息：通过链接
@@ -62,7 +68,6 @@ func (my *Client) SendMsg(msgType int, msg []byte) ([]byte, error) {
 		err error
 		res = make([]byte, 0)
 	)
-	my.syncChan = make(chan []byte)
 
 	if my.timeout == nil || my.timeout.interval == 0 {
 		clientPoolIns.Error = errors.New("同步消息，需要设置超时时间")
