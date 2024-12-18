@@ -2,8 +2,6 @@ package websocketPool
 
 import (
 	"errors"
-	"time"
-
 	"github.com/jericho-yu/aid/dict"
 )
 
@@ -58,6 +56,9 @@ func (my *ClientInstance) SetClient(
 		clientPoolIns.onConnect(my.Name, clientName)
 	}
 
+	if heart == nil {
+		heart = DefaultHeart()
+	}
 	client.heart = heart
 	if timeout != nil {
 		client.timeout = timeout
@@ -72,12 +73,7 @@ func (my *ClientInstance) SetClient(
 				client.heart.ticker.Stop()
 				my.Clients.RemoveByKey(clientName)
 				return
-			case <-func() <-chan time.Time {
-				if client.heart != nil {
-					return client.heart.ticker.C
-				}
-				return nil
-			}():
+			case <-client.heart.ticker.C:
 				// 执行心跳
 				if client.heart.fn != nil {
 					client.heart.fn(client)

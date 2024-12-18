@@ -42,9 +42,10 @@ func (my *Heart) Stop() *Heart {
 
 // DefaultHeart 默认心跳：10秒
 func DefaultHeart() *Heart {
-	return NewHeart().SetInterval(time.Second * 10).SetFn(func(client *Client) {
-		_, _ = client.SendMsg(MsgType.Ping(), []byte("ping"))
-	})
+	// return NewHeart().SetInterval(time.Second * 10).SetFn(func(client *Client) {
+	// _, _ = client.SendMsg(MsgType.Ping(), []byte("ping"))
+	// })
+	return NewHeart().SetInterval(60 * time.Second).SetFn(nil)
 }
 
 // NewMessageTimeout 实例化：链接超时
