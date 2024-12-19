@@ -25,7 +25,7 @@ func (my *ClientInstance) GetClient(clientName string) (*Client, bool) {
 	return websocketClient, true
 }
 
-// SetClient 创建新链接
+// SetClient 创建新链接#
 func (my *ClientInstance) SetClient(
 	clientName, host, path string,
 	receiveMessageFn func(instanceName, clientName string, propertyMessage []byte) ([]byte, error),
