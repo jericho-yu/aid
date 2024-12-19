@@ -29,13 +29,14 @@ func (my *ClientInstance) GetClient(clientName string) (*Client, bool) {
 func (my *ClientInstance) SetClient(
 	clientName, host, path string,
 	receiveMessageFn func(instanceName, clientName string, propertyMessage []byte) ([]byte, error),
-	options ...any,
+	heart *Heart, timeout *MessageTimeout,
 ) (*Client, error) {
 	var (
-		err          error
-		exist        bool
-		client       *Client
-		prototypeMsg []byte
+		err                 error
+		exist               bool
+		client              *Client
+		prototypeMsg        []byte
+		defaultReceiveMsgFn = func(instanceName, clientName string, propertyMessage []byte) ([]byte, error) { return []byte{}, nil }
 	)
 
 	client, exist = my.Clients.Get(clientName)
@@ -46,7 +47,11 @@ func (my *ClientInstance) SetClient(
 		my.Clients.RemoveByKey(clientName)
 	}
 
-	if client, err = NewClient(my.Name, clientName, host, path, receiveMessageFn); err != nil {
+	if receiveMessageFn != nil {
+		defaultReceiveMsgFn = receiveMessageFn
+	}
+
+	if client, err = NewClient(my.Name, clientName, host, path, defaultReceiveMsgFn); err != nil {
 		return nil, err
 	}
 	client.heart = DefaultHeart()
@@ -57,16 +62,12 @@ func (my *ClientInstance) SetClient(
 		clientPoolIns.onConnect(my.Name, clientName)
 	}
 
-	if len(options) > 0 {
-		if v, ok := options[0].(*Heart); ok {
-			client.heart = v
-		}
+	if heart != nil {
+		client.heart = heart
 	}
 
-	if len(options) > 1 {
-		if v, ok := options[1].(*MessageTimeout); ok {
-			client.timeout = v
-		}
+	if timeout != nil {
+		client.timeout = timeout
 	}
 
 	// 开启协程：接收消息
