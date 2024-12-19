@@ -51,22 +51,21 @@ func (my *ClientInstance) SetClient(
 	}
 	client.heart = DefaultHeart()
 	client.timeout = DefaultMessageTimeout()
-	my.Clients.Set(clientName, client)
-
-	if clientPoolIns.onConnect != nil {
-		clientPoolIns.onConnect(my.Name, clientName)
-	}
 
 	if len(options) > 0 {
-		if v, ok := options[0].(*Heart); ok {
-			client.heart = v
+		for i := 0; i < len(options); i++ {
+			if v, ok := options[i].(*Heart); ok {
+				client.heart = v
+			}
+			if v, ok := options[i].(*MessageTimeout); ok {
+				client.timeout = v
+			}
 		}
 	}
 
-	if len(options) > 1 {
-		if v, ok := options[1].(*MessageTimeout); ok {
-			client.timeout = v
-		}
+	my.Clients.Set(clientName, client)
+	if clientPoolIns.onConnect != nil {
+		clientPoolIns.onConnect(my.Name, clientName)
 	}
 
 	// 开启协程：接收消息
