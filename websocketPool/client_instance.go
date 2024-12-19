@@ -83,7 +83,6 @@ func (my *ClientInstance) SetClient(
 					if clientPoolIns.onReceiveMsgErr != nil {
 						clientPoolIns.onReceiveMsgErr(my.Name, clientName, prototypeMsg, err)
 					}
-					client.syncChan <- nil
 				} else {
 					client.syncChan <- prototypeMsg
 				}
