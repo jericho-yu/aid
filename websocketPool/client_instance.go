@@ -29,8 +29,7 @@ func (my *ClientInstance) GetClient(clientName string) (*Client, bool) {
 func (my *ClientInstance) SetClient(
 	clientName, host, path string,
 	receiveMessageFn func(instanceName, clientName string, propertyMessage []byte) ([]byte, error),
-	heart *Heart,
-	timeout *MessageTimeout,
+	options ...any,
 ) (*Client, error) {
 	var (
 		err          error
@@ -50,18 +49,24 @@ func (my *ClientInstance) SetClient(
 	if client, err = NewClient(my.Name, clientName, host, path, receiveMessageFn); err != nil {
 		return nil, err
 	}
+	client.heart = DefaultHeart()
+	client.timeout = DefaultMessageTimeout()
 	my.Clients.Set(clientName, client)
 
 	if clientPoolIns.onConnect != nil {
 		clientPoolIns.onConnect(my.Name, clientName)
 	}
 
-	if heart == nil {
-		heart = DefaultHeart()
+	if len(options) > 0 {
+		if v, ok := options[0].(*Heart); ok {
+			client.heart = v
+		}
 	}
-	client.heart = heart
-	if timeout != nil {
-		client.timeout = timeout
+
+	if len(options) > 1 {
+		if v, ok := options[1].(*MessageTimeout); ok {
+			client.timeout = v
+		}
 	}
 
 	// 开启协程：接收消息
