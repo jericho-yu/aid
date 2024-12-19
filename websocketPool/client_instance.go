@@ -28,7 +28,6 @@ func (my *ClientInstance) GetClient(clientName string) (*Client, bool) {
 // SetClient 创建新链接
 func (my *ClientInstance) SetClient(
 	clientName, host, path string,
-// receiveMessageFn func(instanceName, clientName string, propertyMessage []byte) ([]byte, error),
 	options ...any,
 ) (*Client, error) {
 	var (
