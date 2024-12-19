@@ -25,18 +25,18 @@ func (my *ClientInstance) GetClient(clientName string) (*Client, bool) {
 	return websocketClient, true
 }
 
-// SetClient 创建新链接#
+// SetClient 创建新链接
 func (my *ClientInstance) SetClient(
 	clientName, host, path string,
 	receiveMessageFn func(instanceName, clientName string, propertyMessage []byte) ([]byte, error),
-	heart *Heart, timeout *MessageTimeout,
+	heart *Heart,
+	timeout *MessageTimeout,
 ) (*Client, error) {
 	var (
-		err                 error
-		exist               bool
-		client              *Client
-		prototypeMsg        []byte
-		defaultReceiveMsgFn = func(instanceName, clientName string, propertyMessage []byte) ([]byte, error) { return []byte{}, nil }
+		err          error
+		exist        bool
+		client       *Client
+		prototypeMsg []byte
 	)
 
 	client, exist = my.Clients.Get(clientName)
@@ -47,20 +47,19 @@ func (my *ClientInstance) SetClient(
 		my.Clients.RemoveByKey(clientName)
 	}
 
-	if receiveMessageFn != nil {
-		defaultReceiveMsgFn = receiveMessageFn
-	}
-
-	if client, err = NewClient(my.Name, clientName, host, path, defaultReceiveMsgFn); err != nil {
+	if client, err = NewClient(my.Name, clientName, host, path, receiveMessageFn); err != nil {
 		return nil, err
 	}
-	client.heart = DefaultHeart()
-	client.timeout = DefaultMessageTimeout()
+	my.Clients.Set(clientName, client)
 
-	if heart != nil {
-		client.heart = heart
+	if clientPoolIns.onConnect != nil {
+		clientPoolIns.onConnect(my.Name, clientName)
 	}
 
+	if heart == nil {
+		heart = DefaultHeart()
+	}
+	client.heart = heart
 	if timeout != nil {
 		client.timeout = timeout
 	}
