@@ -56,11 +56,6 @@ func (my *ClientInstance) SetClient(
 	}
 	client.heart = DefaultHeart()
 	client.timeout = DefaultMessageTimeout()
-	my.Clients.Set(clientName, client)
-
-	if clientPoolIns.onConnect != nil {
-		clientPoolIns.onConnect(my.Name, clientName)
-	}
 
 	if heart != nil {
 		client.heart = heart
