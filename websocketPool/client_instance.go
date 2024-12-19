@@ -57,9 +57,10 @@ func (my *ClientInstance) SetClient(
 	}
 
 	if heart == nil {
-		heart = DefaultHeart()
+		client.heart = DefaultHeart()
+	} else {
+		client.heart = heart
 	}
-	client.heart = heart
 	if timeout != nil {
 		client.timeout = timeout
 	}
