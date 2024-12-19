@@ -28,14 +28,15 @@ func (my *ClientInstance) GetClient(clientName string) (*Client, bool) {
 // SetClient 创建新链接
 func (my *ClientInstance) SetClient(
 	clientName, host, path string,
-	receiveMessageFn func(instanceName, clientName string, propertyMessage []byte) ([]byte, error),
+// receiveMessageFn func(instanceName, clientName string, propertyMessage []byte) ([]byte, error),
 	options ...any,
 ) (*Client, error) {
 	var (
-		err          error
-		exist        bool
-		client       *Client
-		prototypeMsg []byte
+		err                      error
+		exist                    bool
+		client                   *Client
+		prototypeMsg             []byte
+		defaultReceiverMessageFn = func(instanceName, clientName string, propMsg []byte) ([]byte, error) { return propMsg, nil }
 	)
 
 	client, exist = my.Clients.Get(clientName)
@@ -46,7 +47,15 @@ func (my *ClientInstance) SetClient(
 		my.Clients.RemoveByKey(clientName)
 	}
 
-	if client, err = NewClient(my.Name, clientName, host, path, receiveMessageFn); err != nil {
+	if len(options) > 0 {
+		for i := 0; i < len(options); i++ {
+			if v, ok := options[i].(func(instanceName, clientName string, propMsg []byte) ([]byte, error)); ok {
+				defaultReceiverMessageFn = v
+			}
+		}
+	}
+
+	if client, err = NewClient(my.Name, clientName, host, path, defaultReceiverMessageFn); err != nil {
 		return nil, err
 	}
 	client.heart = DefaultHeart()
