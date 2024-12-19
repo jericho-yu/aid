@@ -79,16 +79,14 @@ func (my *ClientInstance) SetClient(
 					client.heart.fn(client)
 				}
 			default:
-				_, prototypeMsg, err = client.Conn.ReadMessage()
-				if err != nil {
+				if _, prototypeMsg, err = client.Conn.ReadMessage(); err != nil {
 					if clientPoolIns.onReceiveMsgErr != nil {
 						clientPoolIns.onReceiveMsgErr(my.Name, clientName, prototypeMsg, err)
 					}
-					client.syncChan <- []byte{}
-					return
+					client.syncChan <- nil
+				} else {
+					client.syncChan <- prototypeMsg
 				}
-
-				client.syncChan <- prototypeMsg
 			}
 		}
 	}()
