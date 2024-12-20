@@ -106,10 +106,7 @@ func ClientDemo() {
 		wg.Add(3)
 		for o := 0; o < 3; o++ {
 			go func(i, o int) {
-				var (
-					err error
-					res []byte
-				)
+				var res []byte
 
 				res, err = wcp.SendMsgByName(
 					"test",

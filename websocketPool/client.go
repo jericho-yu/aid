@@ -104,6 +104,12 @@ func (my *Client) SendMsg(msgType int, msg []byte) ([]byte, error) {
 func (my *Client) Close() error {
 	var err error
 
+	// 发送关闭消息
+	err = my.Conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+	if err != nil {
+		return err
+	}
+
 	if err = my.Conn.Close(); err != nil {
 		if clientPoolIns.onCloseErr != nil {
 			clientPoolIns.onCloseErr(my.InstanceName, my.Name, err)
