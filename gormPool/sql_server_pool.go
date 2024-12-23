@@ -33,8 +33,8 @@ var (
 	SqlServerPoolApp   SqlServerPool
 )
 
-// Once 单例化：sql server连接池
-func (SqlServerPool) Once(dbSetting *DbSetting) GormPool {
+// OnceSqlServerPool 单例化：sql server连接池
+func OnceSqlServerPool(dbSetting *DbSetting) GormPool {
 	sqlServerPoolOnce.Do(func() {
 		sqlServerPoolIns = &SqlServerPool{
 			username:     dbSetting.SqlServer.Main.Username,

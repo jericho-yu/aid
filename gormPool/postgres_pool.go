@@ -33,8 +33,8 @@ var (
 	PostgresPoolApp   PostgresPool
 )
 
-// Once 单例化：postgres链接池
-func (PostgresPool) Once(dbSetting *DbSetting) GormPool {
+// OncePostgresPool 单例化：postgres链接池
+func OncePostgresPool(dbSetting *DbSetting) GormPool {
 	postgresPoolOnce.Do(func() {
 		postgresPoolIns = &PostgresPool{
 			username:     dbSetting.Postgres.Main.Username,

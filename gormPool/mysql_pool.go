@@ -31,8 +31,8 @@ var (
 	MySqlPoolApp   MySqlPool
 )
 
-// Once 单例化：mysql链接池
-func (MySqlPool) Once(dbSetting *DbSetting) GormPool {
+// OnceMySqlPool 单例化：mysql链接池
+func OnceMySqlPool(dbSetting *DbSetting) GormPool {
 	mysqlPoolOnce.Do(func() {
 		mysqlPoolIns = &MySqlPool{
 			username: dbSetting.MySql.Main.Username,

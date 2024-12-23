@@ -32,10 +32,10 @@ type (
 // NewClient 实例化：链接
 func NewClient(groupName, name string, uri url.URL, options ...any) (client *Client, err error) {
 	if reflection.New(uri).IsZero {
-		return nil, NewWebsocketConnOptionErr("链接地址为空")
+		return nil, WebsocketConnOptionErr
 	}
 	if name == "" {
-		return nil, NewWebsocketConnOptionErr("链接名称为空")
+		return nil, WebsocketConnOptionErr
 	}
 
 	client = &Client{
@@ -103,7 +103,10 @@ func (my *Client) SetOnReceiveMessageFail(fn standardFailFn) *Client {
 
 // Conn 启动链接，并打开监听
 func (my *Client) Conn(fn ...standardSuccessFn) *Client {
-	var receiveMessage []byte
+	var (
+		receiveMessage []byte
+		messageType    int
+	)
 
 	my.conn, _, my.err = websocket.DefaultDialer.Dial(my.uri.String(), my.requestHeader)
 	if my.err != nil {
@@ -118,7 +121,7 @@ func (my *Client) Conn(fn ...standardSuccessFn) *Client {
 	// 开启监听
 	go func(client *Client) {
 		for {
-			_, receiveMessage, client.err = client.conn.ReadMessage()
+			messageType, receiveMessage, client.err = client.conn.ReadMessage()
 			if client.err != nil {
 				if client.onReceiveMessageFail != nil {
 					client.onReceiveMessageFail(client.groupName, client.name, client.conn, client.err)
@@ -126,15 +129,24 @@ func (my *Client) Conn(fn ...standardSuccessFn) *Client {
 				return
 			}
 
-			// 解析消息
-			message := ParseMessage(receiveMessage)
-			client.receiveMessageCallback(client.groupName, client.name, message.GetMessage())
-			if message.GetAsync() { // 异步消息
-				if callback, ok := client.asyncReceiveCallbackDict.Get(message.GetMessageId()); ok {
-					callback(client.groupName, client.name, message.GetMessage())
+			switch messageType {
+			case websocket.TextMessage, websocket.BinaryMessage:
+				// 解析消息
+				message := ParseMessage(receiveMessage)
+				client.receiveMessageCallback(client.groupName, client.name, message.GetMessage())
+				if message.GetAsync() { // 异步消息
+					if callback, ok := client.asyncReceiveCallbackDict.Get(message.GetMessageId()); ok {
+						callback(client.groupName, client.name, message.GetMessage())       // 执行异步回调
+						client.asyncReceiveCallbackDict.RemoveByKey(message.GetMessageId()) // 删除异步回调
+					}
+				} else { // 同步消息
+					client.receiveMessageChan <- message.GetMessage()
 				}
-			} else { // 同步消息
-				client.receiveMessageChan <- message.GetMessage()
+			case websocket.CloseMessage:
+				client.Close()
+			case websocket.PingMessage:
+				_ = my.conn.WriteMessage(websocket.PongMessage, []byte{})
+			case websocket.PongMessage:
 			}
 		}
 	}(my)
@@ -148,7 +160,10 @@ func (my *Client) Conn(fn ...standardSuccessFn) *Client {
 func (my *Client) AsyncMessage(message []byte, fn callbackFn) *Client {
 	msg := NewMessage(true, message)
 
-	my.asyncReceiveCallbackDict.Set(msg.GetMessageId(), fn) // 配置异步回调
+	// 配置异步回调
+	if fn != nil {
+		my.asyncReceiveCallbackDict.Set(msg.GetMessageId(), fn)
+	}
 
 	my.err = my.conn.WriteMessage(websocket.TextMessage, msg.GetMessage()) // 发送消息
 
@@ -163,7 +178,7 @@ func (my *Client) SyncMessage(message []byte, options ...any) ([]byte, error) {
 	)
 
 	if my.conn == nil || my.status == Offline {
-		return nil, NewWebsocketOfflineErr("链接断开不在线")
+		return nil, WebsocketOfflineErr
 	}
 
 	my.err = my.conn.WriteMessage(websocket.TextMessage, msg.GetMessage()) // 发送消息
@@ -183,7 +198,7 @@ func (my *Client) SyncMessage(message []byte, options ...any) ([]byte, error) {
 	case receiveMessage := <-my.receiveMessageChan:
 		return receiveMessage, nil
 	case <-timeoutTimer:
-		return nil, NewSyncMessageTimeoutErr("消息超时")
+		return nil, SyncMessageTimeoutErr
 	}
 }
 
@@ -220,3 +235,9 @@ func (my *Client) Close() *Client {
 
 // Error 获取错误
 func (my *Client) Error() error { return my.err }
+
+// Ping 发送
+func (my *Client) Ping() *Client {
+	_ = my.conn.WriteMessage(websocket.PingMessage, []byte{})
+	return my
+}
