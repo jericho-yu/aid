@@ -1,10 +1,10 @@
 package websocketPool
 
 import (
-	"context"
 	"errors"
 	"net/url"
 	"sync"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
@@ -86,10 +86,9 @@ func (my *Client) SendMsg(msgType int, msg []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), my.timeout.interval)
-	defer cancel()
+	timer := time.After(my.timeout.interval)
 	select {
-	case <-ctx.Done():
+	case <-timer:
 		clientPoolIns.Error = errors.New("请求超时")
 		return nil, errors.New("请求超时")
 	case res = <-my.syncChan:
