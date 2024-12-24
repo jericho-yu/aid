@@ -324,8 +324,6 @@ func (my *Client) Heart(interval time.Duration, fn heartFn) *Client {
 				select {
 				case <-my.closeChan: // 接收链接关闭信号，停止心跳
 					my.heart.Stop()
-					my.heart = nil
-					my.heartCallback = nil
 					return
 				case <-client.heart.C:
 					my.heartCallback(client.groupName, client.name, client)
@@ -335,4 +333,23 @@ func (my *Client) Heart(interval time.Duration, fn heartFn) *Client {
 	}
 
 	return my
+}
+
+// ReConn 重连
+func (my *Client) ReConn() error {
+	{
+		my.Close()
+		if my.err != nil {
+			return my.Error()
+		}
+	}
+
+	{
+		my.Conn()
+		if my.err != nil {
+			return my.Error()
+		}
+	}
+
+	return nil
 }
