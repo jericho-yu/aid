@@ -65,6 +65,22 @@ func (*ClientInstance) Close(name string) error {
 	if client, err := clientInstance.Get(name); err != nil {
 		return err
 	} else {
-		return client.Close().Error()
+		err = client.Close().Error()
+		clientInstance.pool.RemoveByKey(client.name)
+		return err
 	}
+}
+
+// Clean 清空客户端
+func (*ClientInstance) Clean() []error {
+	var errorList []error
+	for _, client := range clientInstance.pool.All() {
+		if err := client.Close().Error(); err != nil {
+			errorList = append(errorList, err)
+		} else {
+			clientInstance.pool.RemoveByKey(client.name)
+		}
+	}
+
+	return errorList
 }
