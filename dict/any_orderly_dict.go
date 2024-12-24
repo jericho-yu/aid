@@ -102,6 +102,12 @@ func (my *AnyOrderlyDict[K, V]) Get(key K) (V, bool) {
 	return emptyValue, false
 }
 
+// Has 检查是否具备谋个key
+func (my *AnyOrderlyDict[K, V]) Has(key K) bool {
+	_, exist := my.Get(key)
+	return exist
+}
+
 // First 获取第一个键值对
 func (my *AnyOrderlyDict[K, V]) First() *OrderlyDict[K, V] {
 	return my.data.First()

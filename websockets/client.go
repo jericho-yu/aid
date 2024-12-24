@@ -34,16 +34,6 @@ type (
 		onReceiveMessageFailCallback    standardFailFn
 		onSendMessageFailCallback       standardFailFn
 	}
-
-	ClientCallbackConfig struct {
-		OnConnSuccessCallback           standardSuccessFn
-		OnConnFailCallback              standardFailFn
-		OnCloseSuccessCallback          standardSuccessFn
-		OnCloseFailCallback             standardFailFn
-		OnReceiveMessageSuccessCallback receiveMessageSuccessFn
-		OnReceiveMessageFailCallback    standardFailFn
-		OnSendMessageFailCallback       standardFailFn
-	}
 )
 
 // NewClient 实例化：链接
@@ -194,11 +184,9 @@ func (my *Client) AsyncMessage(message []byte, fn callbackFn, timeout time.Durat
 	timer := time.After(timeout)                            // 设置超时
 
 	go func(messageId string) {
-		select {
-		case <-timer: // 超时删除异步回调方法
-			my.asyncReceiveCallbackDict.RemoveByKey(messageId)
-			my.onSendMessageFailCallback(my.groupName, my.name, my.conn, AsyncMessageTimeoutErr) // 执行发送消息回调
-		}
+		<-timer // 超时删除异步回调方法
+		my.asyncReceiveCallbackDict.RemoveByKey(messageId)
+		my.onSendMessageFailCallback(my.groupName, my.name, my.conn, AsyncMessageTimeoutErr) // 执行发送消息回调
 	}(msg.GetMessageId())
 
 	return my

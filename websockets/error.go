@@ -8,4 +8,7 @@ var (
 	WebsocketOfflineErr          = errors.New("链接不在线")
 	AsyncMessageCallbackEmptyErr = errors.New("异步消息回调不能为空")
 	AsyncMessageTimeoutErr       = errors.New("异步消息回调超时必须大于0")
+
+	WebsocketClientExistErr    = errors.New("websocket客户端已存在")
+	WebsocketClientNotExistErr = errors.New("websocket客户端不存在")
 )

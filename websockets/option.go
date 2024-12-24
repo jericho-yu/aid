@@ -1,18 +1,11 @@
 package websockets
 
-import "time"
-
-type (
-	Heart struct {
-		timer *time.Ticker
-	}
-
-	Timeout struct {
-		interval time.Duration
-		timer    string
-	}
-)
-
-func NewHeart(interval time.Duration) {
-	time.NewTicker(interval)
+type ClientCallbackConfig struct {
+	OnConnSuccessCallback           standardSuccessFn
+	OnConnFailCallback              standardFailFn
+	OnCloseSuccessCallback          standardSuccessFn
+	OnCloseFailCallback             standardFailFn
+	OnReceiveMessageSuccessCallback receiveMessageSuccessFn
+	OnReceiveMessageFailCallback    standardFailFn
+	OnSendMessageFailCallback       standardFailFn
 }

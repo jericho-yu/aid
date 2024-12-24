@@ -46,6 +46,12 @@ func (my *AnyDict[K, V]) Get(key K) (V, bool) {
 	return val, exist
 }
 
+// Has 检查是否具备谋元素
+func (my *AnyDict[K, V]) Has(key K) bool {
+	_, exist := my.Get(key)
+	return exist
+}
+
 // All 获取全部元素
 func (my *AnyDict[K, V]) All() map[K]V {
 	my.mu.RLock()
