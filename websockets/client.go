@@ -22,17 +22,17 @@ type (
 		status                          WebsocketConnStatus
 		closeChan                       chan struct{}
 		receiveMessageChan              chan []byte
-		asyncReceiveCallbackDict        *dict.AnyDict[string, callbackFn]
+		asyncReceiveCallbackDict        *dict.AnyDict[string, clientCallbackFn]
 		syncMessageTimeout              time.Duration
 		heart                           *time.Ticker
 		heartCallback                   heartFn
-		onConnSuccessCallback           standardSuccessFn
-		onConnFailCallback              standardFailFn
-		onCloseSuccessCallback          standardSuccessFn
-		onCloseFailCallback             standardFailFn
-		onReceiveMessageSuccessCallback receiveMessageSuccessFn
-		onReceiveMessageFailCallback    standardFailFn
-		onSendMessageFailCallback       standardFailFn
+		onConnSuccessCallback           clientStandardSuccessFn
+		onConnFailCallback              clientStandardFailFn
+		onCloseSuccessCallback          clientStandardSuccessFn
+		onCloseFailCallback             clientStandardFailFn
+		onReceiveMessageSuccessCallback clientReceiveMessageSuccessFn
+		onReceiveMessageFailCallback    clientStandardFailFn
+		onSendMessageFailCallback       clientStandardFailFn
 	}
 )
 
@@ -58,7 +58,7 @@ func NewClient(
 		status:                          Offline,
 		closeChan:                       make(chan struct{}, 1),
 		receiveMessageChan:              make(chan []byte, 1),
-		asyncReceiveCallbackDict:        dict.MakeAnyDict[string, callbackFn](),
+		asyncReceiveCallbackDict:        dict.MakeAnyDict[string, clientCallbackFn](),
 		syncMessageTimeout:              5 * time.Second,
 		onConnSuccessCallback:           clientCallbackConfig.OnConnSuccessCallback,
 		onConnFailCallback:              clientCallbackConfig.OnConnFailCallback,
@@ -159,7 +159,7 @@ func (my *Client) Conn() *Client {
 }
 
 // AsyncMessage 发送消息：异步
-func (my *Client) AsyncMessage(message []byte, fn callbackFn, timeout time.Duration) *Client {
+func (my *Client) AsyncMessage(message []byte, fn clientCallbackFn, timeout time.Duration) *Client {
 	msg := NewMessage(true, message)
 
 	if fn == nil {

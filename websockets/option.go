@@ -1,11 +1,19 @@
 package websockets
 
-type ClientCallbackConfig struct {
-	OnConnSuccessCallback           standardSuccessFn
-	OnConnFailCallback              standardFailFn
-	OnCloseSuccessCallback          standardSuccessFn
-	OnCloseFailCallback             standardFailFn
-	OnReceiveMessageSuccessCallback receiveMessageSuccessFn
-	OnReceiveMessageFailCallback    standardFailFn
-	OnSendMessageFailCallback       standardFailFn
-}
+type (
+	// ClientCallbackConfig 客户端回调
+	ClientCallbackConfig struct {
+		OnConnSuccessCallback           clientStandardSuccessFn
+		OnConnFailCallback              clientStandardFailFn
+		OnCloseSuccessCallback          clientStandardSuccessFn
+		OnCloseFailCallback             clientStandardFailFn
+		OnReceiveMessageSuccessCallback clientReceiveMessageSuccessFn
+		OnReceiveMessageFailCallback    clientStandardFailFn
+		OnSendMessageFailCallback       clientStandardFailFn
+	}
+
+	ServerCallbackConfig struct {
+		OnReceiveMessageFailCallback serverReceiveMessageFailFn
+		OnReceivePingCallback        serverReceivePingFn
+	}
+)
