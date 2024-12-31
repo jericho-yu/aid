@@ -226,6 +226,20 @@ func FromAnyArray[T any](anyArray *AnyArray[any]) []T {
 	return l.All()
 }
 
+// ToAny converts any slice to []any
+func ToAny(slice interface{}) []any {
+	v := reflect.ValueOf(slice)
+	if v.Kind() != reflect.Slice {
+		return nil
+	}
+
+	result := make([]any, v.Len())
+	for i := 0; i < v.Len(); i++ {
+		result[i] = v.Index(i).Interface()
+	}
+	return result
+}
+
 // CopyFromAnyArray 从AnyArray复制并处理转换内容
 func CopyFromAnyArray[S any, D any](src *AnyArray[S], processFn func(idx int, item S) D) *AnyArray[D] {
 	var dst *AnyArray[D] = MakeAnyArray[D](src.Len())
