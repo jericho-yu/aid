@@ -46,6 +46,19 @@ func (my *AnyDict[K, V]) Get(key K) (V, bool) {
 	return val, exist
 }
 
+// GetByKeys 通过多个键获取值
+func (my *AnyDict[K, V]) GetByKeys(keys ...K) []V {
+	var ret = make([]V, 0)
+
+	for _, key := range keys {
+		if item, exist := my.Get(key); exist {
+			ret = append(ret, item)
+		}
+	}
+
+	return ret
+}
+
 // Has 检查是否具备谋元素
 func (my *AnyDict[K, V]) Has(key K) bool {
 	_, exist := my.Get(key)
