@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/jericho-yu/aid/reflection"
 	"log"
+
+	"github.com/jericho-yu/aid/reflection"
 )
 
 type Os struct{}

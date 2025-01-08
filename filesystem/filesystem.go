@@ -153,6 +153,36 @@ func (my *FileSystem) Exist() (bool, error) {
 	return false, err
 }
 
+// IAmDir 检查当前路径是否是目录
+func (my *FileSystem) IAmDir() (bool, error) {
+	_, err := my.Exist()
+	if err != nil {
+		return false, err
+	}
+
+	info, e := os.Stat(my.dir)
+	if e != nil {
+		return false, e
+	}
+
+	return info.IsDir(), nil
+}
+
+// IAmFile 检查当前路径是否是文件
+func (my *FileSystem) IAmFile() (bool, error) {
+	_, err := my.Exist()
+	if err != nil {
+		return false, err
+	}
+
+	info, e := os.Stat(my.dir)
+	if e != nil {
+		return false, e
+	}
+
+	return !info.IsDir(), nil
+}
+
 // MkDir 创建文件夹
 func (my *FileSystem) MkDir() error {
 	if !my.IsExist {
