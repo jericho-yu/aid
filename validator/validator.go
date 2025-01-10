@@ -269,7 +269,7 @@ func (my *Validator[T]) checkString(rule, fieldName string, value any) error {
 		between := strings.TrimPrefix(rule, "range=")
 		betweens := strings.Split(between, "~")
 		if len(betweens) != 2 {
-			return fmt.Errorf("[%s]规则定义错误，规则定义错误，规则格式：num~num", fieldName)
+			return fmt.Errorf("[%s]规则定义错误，规则定义错误，规则格式：d~d", fieldName)
 		}
 		min := common.ToInt(betweens[0])
 		max := common.ToInt(betweens[1])
@@ -315,7 +315,7 @@ func (my *Validator[T]) checkInt(rule, fieldName string, value any) error {
 		between := strings.TrimPrefix(rule, "range=")
 		betweens := strings.Split(between, "~")
 		if len(betweens) != 2 {
-			return fmt.Errorf("[%s]规则定义错误，规则定义错误，规则格式：num~num", fieldName)
+			return fmt.Errorf("[%s]规则定义错误，规则定义错误，规则格式：d~d", fieldName)
 		}
 		min := common.ToInt(betweens[0])
 		max := common.ToInt(betweens[1])
@@ -361,7 +361,7 @@ func (my *Validator[T]) checkInt8(rule, fieldName string, value any) error {
 		between := strings.TrimPrefix(rule, "range=")
 		betweens := strings.Split(between, "~")
 		if len(betweens) != 2 {
-			return fmt.Errorf("[%s]规则定义错误，规则定义错误，规则格式：num~num", fieldName)
+			return fmt.Errorf("[%s]规则定义错误，规则定义错误，规则格式：d~d", fieldName)
 		}
 		min := common.ToInt8(betweens[0])
 		max := common.ToInt8(betweens[1])
@@ -407,7 +407,7 @@ func (my *Validator[T]) checkInt16(rule, fieldName string, value any) error {
 		between := strings.TrimPrefix(rule, "range=")
 		betweens := strings.Split(between, "~")
 		if len(betweens) != 2 {
-			return fmt.Errorf("[%s]规则定义错误，规则定义错误，规则格式：num~num", fieldName)
+			return fmt.Errorf("[%s]规则定义错误，规则定义错误，规则格式：d~d", fieldName)
 		}
 		min := common.ToInt16(betweens[0])
 		max := common.ToInt16(betweens[1])
@@ -453,7 +453,7 @@ func (my *Validator[T]) checkInt32(rule, fieldName string, value any) error {
 		between := strings.TrimPrefix(rule, "range=")
 		betweens := strings.Split(between, "~")
 		if len(betweens) != 2 {
-			return fmt.Errorf("[%s]规则定义错误，规则定义错误，规则格式：num~num", fieldName)
+			return fmt.Errorf("[%s]规则定义错误，规则定义错误，规则格式：d~d", fieldName)
 		}
 		min := common.ToInt32(betweens[0])
 		max := common.ToInt32(betweens[1])
@@ -499,7 +499,7 @@ func (my *Validator[T]) checkInt64(rule, fieldName string, value any) error {
 		between := strings.TrimPrefix(rule, "range=")
 		betweens := strings.Split(between, "~")
 		if len(betweens) != 2 {
-			return fmt.Errorf("[%s]规则定义错误，规则定义错误，规则格式：num~num", fieldName)
+			return fmt.Errorf("[%s]规则定义错误，规则定义错误，规则格式：d~d", fieldName)
 		}
 		min := common.ToInt64(betweens[0])
 		max := common.ToInt64(betweens[1])
@@ -545,7 +545,7 @@ func (my *Validator[T]) checkUint(rule, fieldName string, value any) error {
 		between := strings.TrimPrefix(rule, "range=")
 		betweens := strings.Split(between, "~")
 		if len(betweens) != 2 {
-			return fmt.Errorf("[%s]规则定义错误，规则定义错误，规则格式：num~num", fieldName)
+			return fmt.Errorf("[%s]规则定义错误，规则定义错误，规则格式：d~d", fieldName)
 		}
 		min := common.ToUint(betweens[0])
 		max := common.ToUint(betweens[1])
@@ -591,7 +591,7 @@ func (my *Validator[T]) checkUint8(rule, fieldName string, value any) error {
 		between := strings.TrimPrefix(rule, "range=")
 		betweens := strings.Split(between, "~")
 		if len(betweens) != 2 {
-			return fmt.Errorf("[%s]规则定义错误，规则定义错误，规则格式：num~num", fieldName)
+			return fmt.Errorf("[%s]规则定义错误，规则定义错误，规则格式：d~d", fieldName)
 		}
 		min := common.ToUint8(betweens[0])
 		max := common.ToUint8(betweens[1])
@@ -637,7 +637,7 @@ func (my *Validator[T]) checkUint16(rule, fieldName string, value any) error {
 		between := strings.TrimPrefix(rule, "range=")
 		betweens := strings.Split(between, "~")
 		if len(betweens) != 2 {
-			return fmt.Errorf("[%s]规则定义错误，规则定义错误，规则格式：num~num", fieldName)
+			return fmt.Errorf("[%s]规则定义错误，规则定义错误，规则格式：d~d", fieldName)
 		}
 		min := common.ToUint16(betweens[0])
 		max := common.ToUint16(betweens[1])
@@ -683,7 +683,7 @@ func (my *Validator[T]) checkUint32(rule, fieldName string, value any) error {
 		between := strings.TrimPrefix(rule, "range=")
 		betweens := strings.Split(between, "~")
 		if len(betweens) != 2 {
-			return fmt.Errorf("[%s]规则定义错误，规则定义错误，规则格式：num~num", fieldName)
+			return fmt.Errorf("[%s]规则定义错误，规则定义错误，规则格式：d~d", fieldName)
 		}
 		min := common.ToUint32(betweens[0])
 		max := common.ToUint32(betweens[1])
@@ -729,7 +729,7 @@ func (my *Validator[T]) checkUint64(rule, fieldName string, value any) error {
 		between := strings.TrimPrefix(rule, "range=")
 		betweens := strings.Split(between, "~")
 		if len(betweens) != 2 {
-			return fmt.Errorf("[%s]规则定义错误，规则定义错误，规则格式：num~num", fieldName)
+			return fmt.Errorf("[%s]规则定义错误，规则定义错误，规则格式：d~d", fieldName)
 		}
 		min := common.ToUint64(betweens[0])
 		max := common.ToUint64(betweens[1])
@@ -775,7 +775,7 @@ func (my *Validator[T]) checkFloat32(rule, fieldName string, value any) error {
 		between := strings.TrimPrefix(rule, "range=")
 		betweens := strings.Split(between, "~")
 		if len(betweens) != 2 {
-			return fmt.Errorf("[%s]规则定义错误，规则定义错误，规则格式：num~num", fieldName)
+			return fmt.Errorf("[%s]规则定义错误，规则定义错误，规则格式：f~f", fieldName)
 		}
 		min := common.ToFloat32(betweens[0])
 		max := common.ToFloat32(betweens[1])
@@ -821,7 +821,7 @@ func (my *Validator[T]) checkFloat64(rule, fieldName string, value any) error {
 		between := strings.TrimPrefix(rule, "range=")
 		betweens := strings.Split(between, "~")
 		if len(betweens) != 2 {
-			return fmt.Errorf("[%s]规则定义错误，规则定义错误，规则格式：num~num", fieldName)
+			return fmt.Errorf("[%s]规则定义错误，规则定义错误，规则格式：f~f", fieldName)
 		}
 		min := common.ToFloat64(betweens[0])
 		max := common.ToFloat64(betweens[1])
