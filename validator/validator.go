@@ -12,6 +12,7 @@ import (
 	"github.com/jericho-yu/aid/operation"
 )
 
+// Validator 验证器 验证规则 -> [required] [email|datetime|date|time] [min<|min<=] [max>|max=] [range=]
 type Validator[T any] struct {
 	data           T
 	prefixNames    []string
