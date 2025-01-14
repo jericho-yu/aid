@@ -11,12 +11,16 @@ type (
 	clientStandardSuccessFn       func(groupName, name string, conn *websocket.Conn)
 	clientStandardFailFn          func(groupName, name string, conn *websocket.Conn, err error)
 	clientReceiveMessageSuccessFn func(groupName, name string, prototypeMessage []byte)
-	heartFn                       func(groupName, name string, client *Client)
+	clientHeartFn                 func(groupName, name string, client *Client)
 	pingFn                        func(conn *websocket.Conn) error
-	serverConnConditionFn         func() (string, error)
-	serverReceiveMessageSuccessFn func(prototypeMessage []byte, ws *websocket.Conn)
+	serverConnectionFailFn        func(error)
+	serverConnectionSuccessFn     func(conn *websocket.Conn) error
+	serverConnectionCheckFn       func(header http.Header) error
+	serverReceiveMessageSuccessFn func(server *Server, message Message)
 	serverReceiveMessageFailFn    func(conn *websocket.Conn, err error)
-	serverReceivePingFn           func(ws *websocket.Conn)
+	serverReceivePingFn           func(conn *websocket.Conn)
+	serverSendMessageFailFn       func(err error)
+	serverSendMessageSuccessFn    func(conn *websocket.Conn, message, prototypeMessage []byte)
 )
 
 var upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}

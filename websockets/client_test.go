@@ -72,7 +72,7 @@ func Test1Conn(t *testing.T) {
 			t.Error(err)
 		}
 
-		client.Conn()
+		client.Boot()
 
 		if err = offLine(client); err != nil {
 			t.Error(err)
@@ -87,7 +87,7 @@ func Test2Sync(t *testing.T) {
 		t.Error(err)
 	}
 
-	_, err = client.Conn().SyncMessage([]byte("hello"), time.Second) // 1秒超时
+	_, err = client.Boot().SyncMessage([]byte("hello"), time.Second) // 1秒超时
 	if err != nil {
 		if !errors.Is(err, SyncMessageTimeoutErr) {
 			t.Errorf("发送消息失败：%v", err)
@@ -107,7 +107,7 @@ func Test3Heart(t *testing.T) {
 			t.Errorf("获取链接失败：%v", err)
 		}
 
-		client.Conn().Heart(time.Second, func(groupName, name string, client *Client) {
+		client.Boot().Heart(time.Second, func(groupName, name string, client *Client) {
 			err = client.Ping(func(conn *websocket.Conn) error {
 				return conn.WriteMessage(websocket.TextMessage, []byte(time.Now().GoString()))
 			}).Error()
@@ -137,7 +137,7 @@ func Test3Async(t *testing.T) {
 
 		closeSign := make(chan struct{}, 1)
 
-		if err = client.Conn().AsyncMessage([]byte("123"), func(groupName, name string, message []byte) {
+		if err = client.Boot().AsyncMessage([]byte("123"), func(groupName, name string, message []byte) {
 			log.Printf("[%s:%s] 回调成功 -> %s", groupName, name, message)
 			closeSign <- struct{}{}
 		}, 60*time.Second).Error(); err != nil {

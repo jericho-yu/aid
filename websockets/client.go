@@ -15,7 +15,7 @@ type (
 	Client struct {
 		err                             error
 		requestHeader                   http.Header
-		uri                             url.URL
+		addr                            url.URL
 		groupName                       string
 		name                            string
 		conn                            *websocket.Conn
@@ -25,7 +25,7 @@ type (
 		asyncReceiveCallbackDict        *dict.AnyDict[string, clientCallbackFn]
 		syncMessageTimeout              time.Duration
 		heart                           *time.Ticker
-		heartCallback                   heartFn
+		heartCallback                   clientHeartFn
 		onConnSuccessCallback           clientStandardSuccessFn
 		onConnFailCallback              clientStandardFailFn
 		onCloseSuccessCallback          clientStandardSuccessFn
@@ -39,11 +39,11 @@ type (
 // NewClient 实例化：链接
 func NewClient(
 	groupName, name string,
-	uri url.URL,
+	addr url.URL,
 	clientCallbackConfig ClientCallbackConfig,
 	options ...any,
 ) (client *Client, err error) {
-	if reflection.New(uri).IsZero {
+	if reflection.New(addr).IsZero {
 		return nil, WebsocketConnOptionErr
 	}
 	if name == "" {
@@ -51,7 +51,7 @@ func NewClient(
 	}
 
 	client = &Client{
-		uri:                             uri,
+		addr:                            addr,
 		groupName:                       groupName,
 		name:                            name,
 		conn:                            &websocket.Conn{},
@@ -87,7 +87,7 @@ func (my *Client) GetStatus() WebsocketConnStatus { return my.status }
 func (my *Client) GetName() string { return my.name }
 
 // GetUri 获取链接地址
-func (my *Client) GetUri() url.URL { return my.uri }
+func (my *Client) GetUri() url.URL { return my.addr }
 
 // GetConn 获取链接本体
 func (my *Client) GetConn() *websocket.Conn { return my.conn }
@@ -101,14 +101,14 @@ func (my *Client) SetRequestHeader(header http.Header) *Client {
 	return my
 }
 
-// Conn 启动链接，并打开监听
-func (my *Client) Conn() *Client {
+// Boot 启动链接，并打开监听
+func (my *Client) Boot() *Client {
 	var (
 		receiveMessage []byte
 		messageType    int
 	)
 
-	my.conn, _, my.err = websocket.DefaultDialer.Dial(my.uri.String(), my.requestHeader)
+	my.conn, _, my.err = websocket.DefaultDialer.Dial(my.addr.String(), my.requestHeader)
 	if my.err != nil {
 		if my.onConnFailCallback != nil {
 			my.onConnFailCallback(my.groupName, my.name, my.conn, my.err)
@@ -293,7 +293,7 @@ func (my *Client) Ping(fn pingFn) *Client {
 }
 
 // Heart 设置或重置心跳
-func (my *Client) Heart(interval time.Duration, fn heartFn) *Client {
+func (my *Client) Heart(interval time.Duration, fn clientHeartFn) *Client {
 	if interval > 0 {
 		if my.heart != nil {
 			my.heart.Reset(interval)
@@ -323,8 +323,8 @@ func (my *Client) Heart(interval time.Duration, fn heartFn) *Client {
 	return my
 }
 
-// ReConn 重连
-func (my *Client) ReConn() error {
+// ReBoot 重连
+func (my *Client) ReBoot() error {
 	{
 		my.Close()
 		if my.err != nil {
@@ -333,7 +333,7 @@ func (my *Client) ReConn() error {
 	}
 
 	{
-		my.Conn()
+		my.Boot()
 		if my.err != nil {
 			return my.Error()
 		}

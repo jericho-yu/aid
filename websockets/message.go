@@ -2,9 +2,10 @@ package websockets
 
 import (
 	"bytes"
+	"strings"
+
 	"github.com/google/uuid"
 	"github.com/jericho-yu/aid/operation"
-	"strings"
 )
 
 type Message struct {

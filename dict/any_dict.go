@@ -181,13 +181,13 @@ func (my *AnyDict[K, V]) AnyEmpty() bool {
 }
 
 // GetKeysByValue 通过值找到所有对应的key
-func (my *AnyDict[K, V]) GetKeysByValue(value *array.AnyArray[V]) *array.AnyArray[K] {
+func (my *AnyDict[K, V]) GetKeysByValue(value ...V) *array.AnyArray[K] {
 	my.mu.RLock()
 	defer my.mu.RUnlock()
 
 	l := array.MakeAnyArray[K](0)
 	for key, val := range my.data {
-		if value.In(val) {
+		if array.NewAnyArray[V](value).In(val) {
 			l.Append(key)
 		}
 	}
@@ -233,7 +233,7 @@ func (my *AnyDict[K, V]) RemoveByValues(values ...V) *AnyDict[K, V] {
 	my.mu.Lock()
 	defer my.mu.Unlock()
 
-	my.RemoveByKeys(my.GetKeysByValue(array.NewAnyArray[V](values)).All()...)
+	my.RemoveByKeys(my.GetKeysByValue(values...).All()...)
 	return my
 }
 

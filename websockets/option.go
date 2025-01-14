@@ -13,7 +13,11 @@ type (
 	}
 
 	ServerCallbackConfig struct {
-		OnReceiveMessageFailCallback serverReceiveMessageFailFn
-		OnReceivePingCallback        serverReceivePingFn
+		OnConnectionFail        serverConnectionFailFn
+		OnConnectionSuccess     serverConnectionSuccessFn
+		OnSendMessageSuccess    serverSendMessageSuccessFn
+		OnSendMessageFail       serverSendMessageFailFn
+		OnReceiveMessageFail    serverReceiveMessageFailFn
+		OnReceiveMessageSuccess serverReceiveMessageSuccessFn
 	}
 )
