@@ -82,6 +82,13 @@ func (my *Server) AsyncMessage(prototypeMessage []byte, onSuccess serverSendMess
 	}
 }
 
+// Close 关闭
+func (my *Server) Close() *Server {
+	my.closeChan <- struct{}{}
+	return my
+}
+
+// Boot 启动
 func (my *Server) Boot(
 	onReceiveMessageSuccess serverReceiveMessageSuccessFn,
 	onReceiveMessageFail serverReceiveMessageFailFn,

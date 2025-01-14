@@ -48,11 +48,20 @@ func OnceServer(serverCallbackConfig ServerCallbackConfig) *ServerPool {
 }
 
 // appendConn 增加连接
-func (*ServerPool) appendConn(authId *string, conn *websocket.Conn) {
-	server := NewServer(conn)
+func (*ServerPool) appendConn(authId *string, conn *websocket.Conn) (server *Server) {
+	server = NewServer(conn)
 	serverPool.authIdToAddr.Set(*authId, conn.RemoteAddr().String())
 	serverPool.addrToAuth.Set(conn.RemoteAddr().String(), *authId)
 	serverPool.connections.Set(conn.RemoteAddr().String(), server)
+
+	return
+}
+
+// removeConn 移除连接
+func (*ServerPool) removeConn(addr *string) {
+	serverPool.addrToAuth.RemoveByKey(*addr)
+	serverPool.authIdToAddr.RemoveByKeys(serverPool.authIdToAddr.GetKeysByValue(*addr).All()...)
+	serverPool.connections.RemoveByKey(*addr)
 }
 
 // SendMessageByAddr 发送消息：通过地址
@@ -116,7 +125,7 @@ func (*ServerPool) SetOnReceiveMessageFail(onReceiveMessageFail serverReceiveMes
 }
 
 // Handle 消息处理
-func (my *ServerPool) Handle(
+func (*ServerPool) Handle(
 	writer http.ResponseWriter,
 	req *http.Request,
 	header http.Header,
@@ -145,8 +154,20 @@ func (my *ServerPool) Handle(
 
 	// 加入连接池
 	authId := header.Get("Auth-Id")
-	my.appendConn(&authId, conn)
+	server := serverPool.appendConn(&authId, conn)
 
 	// 开启接收消息
+	if err = server.Boot(
+		serverPool.onReceiveMessageSuccess,
+		serverPool.onReceiveMessageFail,
+		serverPool.onSendMessageFail,
+	); err != nil {
+		if serverPool.onConnectionFail != nil {
+			serverPool.onConnectionFail(err)
+		}
 
+		server.Close()
+		serverPool.removeConn(&server.addr)
+		server = nil
+	}
 }
