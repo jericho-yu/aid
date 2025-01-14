@@ -23,7 +23,7 @@ func OnceClientInstancePool() *ClientInstancePool {
 
 // Append 增加客户端
 func (*ClientInstancePool) Append(clientInstance *ClientInstance) error {
-	if clientInstance.pool.Has(clientInstance.name) {
+	if clientInstance.connections.Has(clientInstance.name) {
 		return WebsocketClientExistErr
 	}
 
@@ -34,18 +34,18 @@ func (*ClientInstancePool) Append(clientInstance *ClientInstance) error {
 
 // Remove 删除客户端
 func (*ClientInstancePool) Remove(name string) error {
-	if !clientInstance.pool.Has(name) {
+	if !clientInstance.connections.Has(name) {
 		return WebsocketClientNotExistErr
 	}
 
-	clientInstance.pool.RemoveByKey(name)
+	clientInstance.connections.RemoveByKey(name)
 
 	return nil
 }
 
 // Get 获取客户端
 func (*ClientInstancePool) Get(name string) (*ClientInstance, error) {
-	if !clientInstance.pool.Has(name) {
+	if !clientInstance.connections.Has(name) {
 		return nil, WebsocketClientNotExistErr
 	}
 
@@ -78,7 +78,7 @@ func (*ClientInstancePool) Clean() []error {
 		if len(errTmp) > 0 {
 			errorList = append(errorList, errTmp...)
 		} else {
-			clientInstance.pool.RemoveByKey(clientInstance.name)
+			clientInstance.connections.RemoveByKey(clientInstance.name)
 		}
 	}
 

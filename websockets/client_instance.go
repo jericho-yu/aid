@@ -7,8 +7,8 @@ import (
 )
 
 type ClientInstance struct {
-	name string
-	pool *dict.AnyDict[string, *Client]
+	name        string
+	connections *dict.AnyDict[string, *Client]
 }
 
 var (
@@ -17,47 +17,47 @@ var (
 )
 
 func OnceClientInstance(name string) *ClientInstance {
-	clientInstanceOnce.Do(func() { clientInstance = &ClientInstance{name: name, pool: dict.MakeAnyDict[string, *Client]()} })
+	clientInstanceOnce.Do(func() { clientInstance = &ClientInstance{name: name, connections: dict.MakeAnyDict[string, *Client]()} })
 
 	return clientInstance
 }
 
 // Append 增加客户端
 func (*ClientInstance) Append(client *Client) error {
-	if clientInstance.pool.Has(client.name) {
+	if clientInstance.connections.Has(client.name) {
 		return WebsocketClientExistErr
 	}
 
-	clientInstance.pool.Set(client.name, client)
+	clientInstance.connections.Set(client.name, client)
 
 	return nil
 }
 
 // Remove 删除客户端
 func (*ClientInstance) Remove(name string) error {
-	if !clientInstance.pool.Has(name) {
+	if !clientInstance.connections.Has(name) {
 		return WebsocketClientNotExistErr
 	}
 
-	clientInstance.pool.RemoveByKey(name)
+	clientInstance.connections.RemoveByKey(name)
 
 	return nil
 }
 
 // Get 获取客户端
 func (*ClientInstance) Get(name string) (*Client, error) {
-	if !clientInstance.pool.Has(name) {
+	if !clientInstance.connections.Has(name) {
 		return nil, WebsocketClientNotExistErr
 	}
 
-	client, _ := clientInstance.pool.Get(name)
+	client, _ := clientInstance.connections.Get(name)
 
 	return client, nil
 }
 
 // Has 检查客户端是否存在
 func (*ClientInstance) Has(name string) bool {
-	return clientInstance.pool.Has(name)
+	return clientInstance.connections.Has(name)
 }
 
 // Close 关闭客户端
@@ -66,7 +66,7 @@ func (*ClientInstance) Close(name string) error {
 		return err
 	} else {
 		err = client.Close().Error()
-		clientInstance.pool.RemoveByKey(client.name)
+		clientInstance.connections.RemoveByKey(client.name)
 		return err
 	}
 }
@@ -74,11 +74,11 @@ func (*ClientInstance) Close(name string) error {
 // Clean 清空客户端
 func (*ClientInstance) Clean() []error {
 	var errorList []error
-	for _, client := range clientInstance.pool.All() {
+	for _, client := range clientInstance.connections.All() {
 		if err := client.Close().Error(); err != nil {
 			errorList = append(errorList, err)
 		} else {
-			clientInstance.pool.RemoveByKey(client.name)
+			clientInstance.connections.RemoveByKey(client.name)
 		}
 	}
 
