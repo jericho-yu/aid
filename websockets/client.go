@@ -1,13 +1,10 @@
 package websockets
 
 import (
-	"log"
 	"net/http"
-	"net/url"
 	"time"
 
 	"github.com/jericho-yu/aid/dict"
-	"github.com/jericho-yu/aid/reflection"
 
 	"github.com/gorilla/websocket"
 )
@@ -16,9 +13,7 @@ type (
 	Client struct {
 		err                             error
 		requestHeader                   http.Header
-		addr                            url.URL
-		groupName                       string
-		name                            string
+		groupName, name, addr           string
 		conn                            *websocket.Conn
 		status                          WebsocketConnStatus
 		closeChan                       chan struct{}
@@ -39,15 +34,11 @@ type (
 
 // NewClient 实例化：链接
 func NewClient(
-	groupName, name string,
-	addr url.URL,
+	groupName, name, addr string,
 	clientCallbackConfig ClientCallbackConfig,
 	options ...any,
 ) (client *Client, err error) {
-	if reflection.New(addr).IsZero {
-		return nil, WebsocketConnOptionErr
-	}
-	if name == "" {
+	if name == "" || addr == "" {
 		return nil, WebsocketConnOptionErr
 	}
 
@@ -87,8 +78,8 @@ func (my *Client) GetStatus() WebsocketConnStatus { return my.status }
 // GetName 获取链接名称
 func (my *Client) GetName() string { return my.name }
 
-// GetUri 获取链接地址
-func (my *Client) GetUri() url.URL { return my.addr }
+// GetAddr 获取链接地址
+func (my *Client) GetAddr() string { return my.addr }
 
 // GetConn 获取链接本体
 func (my *Client) GetConn() *websocket.Conn { return my.conn }
@@ -109,9 +100,7 @@ func (my *Client) Boot() *Client {
 		messageType    int
 	)
 
-	log.Printf("ok: %s", my.addr.String())
-
-	my.conn, _, my.err = websocket.DefaultDialer.Dial(my.addr.String(), my.requestHeader)
+	my.conn, _, my.err = websocket.DefaultDialer.Dial(my.addr, my.requestHeader)
 	if my.err != nil {
 		if my.onConnFailCallback != nil {
 			my.onConnFailCallback(my.groupName, my.name, my.conn, my.err)

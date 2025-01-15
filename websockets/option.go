@@ -19,5 +19,6 @@ type (
 		OnSendMessageFail       serverSendMessageFailFn
 		OnReceiveMessageFail    serverReceiveMessageFailFn
 		OnReceiveMessageSuccess serverReceiveMessageSuccessFn
+		OnCloseCallback         serverCloseCallbackFn
 	}
 )

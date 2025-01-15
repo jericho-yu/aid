@@ -20,6 +20,7 @@ type (
 		onSendMessageFail       serverSendMessageFailFn
 		onReceiveMessageFail    serverReceiveMessageFailFn
 		onReceiveMessageSuccess serverReceiveMessageSuccessFn
+		onCloseCallback         serverCloseCallbackFn
 	}
 )
 
@@ -40,6 +41,7 @@ func OnceServer(serverCallbackConfig ServerCallbackConfig) *ServerPool {
 			onSendMessageFail:       serverCallbackConfig.OnSendMessageFail,
 			onReceiveMessageFail:    serverCallbackConfig.OnReceiveMessageFail,
 			onReceiveMessageSuccess: serverCallbackConfig.OnReceiveMessageSuccess,
+			onCloseCallback:         serverCallbackConfig.OnCloseCallback,
 		}
 	})
 
@@ -115,6 +117,12 @@ func (*ServerPool) SetOnReceiveMessageFail(onReceiveMessageFail serverReceiveMes
 	return serverPool
 }
 
+// SetOnCloseCallback 设置回调：关闭时回调
+func (*ServerPool) SetOnCloseCallback(onCloseCallback serverCloseCallbackFn) *ServerPool {
+	serverPool.onCloseCallback = onCloseCallback
+	return serverPool
+}
+
 // Handle 消息处理
 func (*ServerPool) Handle(
 	writer http.ResponseWriter,
@@ -155,6 +163,7 @@ func (*ServerPool) Handle(
 		serverPool.onReceiveMessageSuccess,
 		serverPool.onReceiveMessageFail,
 		serverPool.onSendMessageFail,
+		serverPool.onCloseCallback,
 	); err != nil {
 		if serverPool.onConnectionFail != nil {
 			serverPool.onConnectionFail(err)

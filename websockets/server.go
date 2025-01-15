@@ -93,6 +93,7 @@ func (my *Server) Boot(
 	onReceiveMessageSuccess serverReceiveMessageSuccessFn,
 	onReceiveMessageFail serverReceiveMessageFailFn,
 	onSendMessageFail serverSendMessageFailFn,
+	onCloseCallback serverCloseCallbackFn,
 ) error {
 	if onReceiveMessageSuccess == nil {
 		return errors.New("解析消息函数不能为空：onReceiveMessageSuccess")
@@ -102,33 +103,47 @@ func (my *Server) Boot(
 		onReceiveMessageSuccess serverReceiveMessageSuccessFn,
 		onReceiveMessageFail serverReceiveMessageFailFn,
 		onSendMessageFail serverSendMessageFailFn,
+		onCloseCallback serverCloseCallbackFn,
 	) {
+		defer my.conn.Close() // 确保 goroutine 结束时关闭连接
 		my.status = Online
-		for {
-			messageType, prototypeMessage, err := my.conn.ReadMessage()
-			if err != nil {
-				if onReceiveMessageFail != nil {
-					onReceiveMessageFail(my.conn, err)
-				}
-				break
-			}
 
+		for {
 			select {
 			case <-my.closeChan:
-				// my.conn.WriteMessage(websocket.CloseMessage, []byte{})
-				my.conn.Close()
+				close(my.closeChan)
+				my.status = Offline
+				if onCloseCallback != nil {
+					onCloseCallback(my.conn)
+				}
 				return
 			default:
+				messageType, prototypeMessage, err := my.conn.ReadMessage()
+				if err != nil {
+					if err.Error() == "websocket: close 1006 (abnormal closure): unexpected EOF" {
+						close(my.closeChan)
+						my.status = Offline
+						if onCloseCallback != nil {
+							onCloseCallback(my.conn)
+						}
+						return
+					}
+					if onReceiveMessageFail != nil {
+						onReceiveMessageFail(my.conn, err)
+					}
+					break
+				}
+
 				switch messageType {
 				case websocket.TextMessage:
 					message := ParseMessage(prototypeMessage)
 					go onReceiveMessageSuccess(my, message)
 				case websocket.BinaryMessage:
 				case websocket.CloseMessage:
-					my.conn.Close()
+					return
 				case websocket.PingMessage:
 					if err = my.conn.WriteMessage(websocket.TextMessage, []byte{}); err != nil {
-						if onReceiveMessageFail != nil {
+						if onSendMessageFail != nil {
 							onSendMessageFail(fmt.Errorf("发送消息失败(pong)：%s", my.conn.RemoteAddr().String()))
 						}
 					}
@@ -144,6 +159,7 @@ func (my *Server) Boot(
 		onReceiveMessageSuccess,
 		onReceiveMessageFail,
 		onSendMessageFail,
+		onCloseCallback,
 	)
 
 	return nil
