@@ -84,12 +84,21 @@ func (my *Client) GetAddr() string { return my.addr }
 // GetConn 获取链接本体
 func (my *Client) GetConn() *websocket.Conn { return my.conn }
 
-// GetRequestHeader 获取请求头
-func (my *Client) GetRequestHeader() http.Header { return my.requestHeader }
+// GetRequestHeaders 获取请求头
+func (my *Client) GetRequestHeaders() http.Header { return my.requestHeader }
 
-// SetRequestHeader 设置请求头
-func (my *Client) SetRequestHeader(header http.Header) *Client {
+// SetRequestHeaders 设置请求头
+func (my *Client) SetRequestHeaders(header http.Header) *Client {
 	my.requestHeader = header
+	return my
+}
+
+// AppendRequestHeader 新增请求头
+func (my *Client) AppendRequestHeader(header http.Header) *Client {
+	for k, v := range header {
+		my.requestHeader[k] = v
+	}
+
 	return my
 }
 
