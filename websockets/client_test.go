@@ -96,7 +96,7 @@ func Test(t *testing.T) {
 		t.Fatalf("创建websocket客户端失败：%v", err)
 	}
 
-	client.AppendRequestHeader(http.Header{"Auth-Id": []string{"abc"}}).Boot()
+	client.AppendRequestHeader(http.Header{"Identity": []string{"abc"}}).Boot()
 
 	ci := NewClientInstance("groupA")
 	cip := OnceClientInstancePool()
@@ -121,7 +121,7 @@ func Test1Conn(t *testing.T) {
 			t.Error(err)
 		}
 
-		client.AppendRequestHeader(http.Header{"Auth-Id": []string{"abc"}}).Boot()
+		client.AppendRequestHeader(http.Header{"Identity": []string{"abc"}}).Boot()
 
 		if err = offLine(client); err != nil {
 			t.Error(err)

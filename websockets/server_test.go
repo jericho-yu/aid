@@ -39,7 +39,7 @@ func TestServer(t *testing.T) {
 	r.GET("/ws", func(c *gin.Context) {
 		serverPool.Handle(c.Writer, c.Request, c.Request.Header, func(header http.Header) (string, error) {
 			t.Logf("header: %#v\n", header)
-			authId := header.Get("Auth-Id")
+			authId := header.Get("Identity")
 			return authId, nil
 		})
 	})

@@ -149,14 +149,14 @@ func (*ServerPool) Handle(
 	}
 
 	// 验证连接
-	authId, err := condition(header)
+	identity, err := condition(header)
 	if err != nil && serverPool.onConnectionFail != nil {
 		serverPool.onConnectionFail(err)
 		return
 	}
 
 	// 加入连接池
-	server := serverPool.appendConn(&authId, conn)
+	server := serverPool.appendConn(&identity, conn)
 
 	// 开启接收消息
 	if err = server.Boot(
