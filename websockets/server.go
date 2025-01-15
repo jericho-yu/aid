@@ -110,6 +110,7 @@ func (my *Server) Boot(
 				if onReceiveMessageFail != nil {
 					onReceiveMessageFail(my.conn, err)
 				}
+				break
 			}
 
 			select {
