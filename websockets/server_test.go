@@ -18,7 +18,7 @@ func TestServer(t *testing.T) {
 		OnConnectionFail: func(err error) {
 			t.Logf("连接失败：%v\n", err)
 		},
-		OnReceiveMessageSuccess: func(server *websockets.Server, message websockets.Message) {
+		OnReceiveMessageSuccess: func(server *Server, message Message) {
 			t.Logf("接收消息成功：%s\n", message.GetMessage())
 		},
 		OnReceiveMessageFail: func(conn *websocket.Conn, err error) {
