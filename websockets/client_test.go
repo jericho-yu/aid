@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"testing"
 	"time"
 
@@ -63,6 +64,55 @@ func offLine(client *Client) error {
 	return nil
 }
 
+func Test(t *testing.T) {
+	client, err := NewClient(
+		"groupA",
+		"aa",
+		"ws://127.0.0.1:8080/ws",
+		ClientCallbackConfig{
+			OnReceiveMessageSuccessCallback: func(groupName, name string, prototypeMessage []byte) {
+				t.Logf("发送消息成功：[%s:%s] %s", groupName, name, prototypeMessage)
+			},
+			OnReceiveMessageFailCallback: func(groupName, name string, conn *websocket.Conn, err error) {
+				t.Logf("接收消息失败：[%s:%s] %s -> %v", groupName, name, conn.RemoteAddr().String(), err)
+			},
+			OnConnSuccessCallback: func(groupName, name string, conn *websocket.Conn) {
+				t.Logf("连接成功：[%s:%s] %s", groupName, name, conn.RemoteAddr().String())
+			},
+			OnConnFailCallback: func(groupName, name string, conn *websocket.Conn, err error) {
+				t.Logf("连接失败：[%s:%s] %s -> %v", groupName, name, conn.RemoteAddr().String(), err)
+			},
+			OnSendMessageFailCallback: func(groupName, name string, conn *websocket.Conn, err error) {
+				t.Logf("发送消息失败：[%s:%s] %s -> %v", groupName, name, conn.RemoteAddr().String(), err)
+			},
+			OnCloseSuccessCallback: func(groupName, name string, conn *websocket.Conn) {
+				t.Logf("关闭成功：[%s:%s] %s", groupName, name, conn.RemoteAddr().String())
+			},
+			OnCloseFailCallback: func(groupName, name string, conn *websocket.Conn, err error) {
+				t.Logf("关闭失败：[%s:%s] %s -> %v", groupName, name, conn.RemoteAddr().String(), err)
+			},
+		})
+	if err != nil {
+		t.Fatalf("创建websocket客户端失败：%v", err)
+	}
+
+	client.AppendRequestHeader(http.Header{"Auth-Id": []string{"abc"}}).Boot()
+
+	ci := NewClientInstance("groupA")
+	cip := OnceClientInstancePool()
+	if err = ci.Append(client); err != nil {
+		t.Fatalf("添加客户端到实例失败：%v", err)
+	}
+
+	if err = cip.Append(ci); err != nil {
+		t.Fatalf("添加客户端实例到客户端实例池失败：%v", err)
+	}
+
+	client.AsyncMessage([]byte("这里是异步消息"), func(groupName, name string, message []byte) {
+		t.Logf("异步消息回调：%s", message)
+	}, time.Second)
+}
+
 // Test1Conn 测试：创建和关闭链接
 func Test1Conn(t *testing.T) {
 	t.Run("websocket客户端测试", func(t *testing.T) {
@@ -71,7 +121,7 @@ func Test1Conn(t *testing.T) {
 			t.Error(err)
 		}
 
-		client.Boot()
+		client.AppendRequestHeader(http.Header{"Auth-Id": []string{"abc"}}).Boot()
 
 		if err = offLine(client); err != nil {
 			t.Error(err)
