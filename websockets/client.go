@@ -1,6 +1,7 @@
 package websockets
 
 import (
+	"log"
 	"net/http"
 	"net/url"
 	"time"
@@ -108,6 +109,8 @@ func (my *Client) Boot() *Client {
 		messageType    int
 	)
 
+	log.Printf("ok: %s", my.addr.String())
+
 	my.conn, _, my.err = websocket.DefaultDialer.Dial(my.addr.String(), my.requestHeader)
 	if my.err != nil {
 		if my.onConnFailCallback != nil {
@@ -147,7 +150,7 @@ func (my *Client) Boot() *Client {
 			case websocket.CloseMessage:
 				client.Close()
 			case websocket.PingMessage:
-				_ = my.conn.WriteMessage(websocket.PongMessage, []byte{})
+				_ = my.conn.WriteMessage(websocket.TextMessage, []byte{})
 			case websocket.PongMessage:
 			}
 		}
@@ -238,26 +241,25 @@ func (my *Client) SyncMessage(message []byte, options ...any) ([]byte, error) {
 // Close 关闭链接
 func (my *Client) Close() *Client {
 	if my.conn != nil && my.status == Online {
-		my.err = my.conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
-
+		// my.err = my.conn.WriteMessage(websocket.CloseMessage, []byte{})
+		// if my.err != nil {
+		// 	if my.onCloseFailCallback != nil {
+		// 		my.onCloseFailCallback(my.groupName, my.name, my.conn, my.err)
+		// 	}
+		// 	my.status = Online
+		// } else {
+		my.err = my.conn.Close()
 		if my.err != nil {
 			if my.onCloseFailCallback != nil {
 				my.onCloseFailCallback(my.groupName, my.name, my.conn, my.err)
 			}
 			my.status = Online
 		} else {
-			my.err = my.conn.Close()
-			if my.err != nil {
-				if my.onCloseFailCallback != nil {
-					my.onCloseFailCallback(my.groupName, my.name, my.conn, my.err)
-				}
-				my.status = Online
-			} else {
-				my.conn = nil
-				my.status = Offline
-				close(my.receiveMessageChan) // 关闭同步消息通道
-			}
+			my.conn = nil
+			my.status = Offline
+			close(my.receiveMessageChan) // 关闭同步消息通道
 		}
+		// }
 	} else {
 		my.conn = nil
 		my.status = Offline
@@ -286,7 +288,7 @@ func (my *Client) Ping(fn pingFn) *Client {
 	if fn != nil {
 		my.err = fn(my.conn)
 	} else {
-		my.err = my.conn.WriteMessage(websocket.PingMessage, []byte(time.Now().String()))
+		my.err = my.conn.WriteMessage(websocket.TextMessage, []byte(time.Now().String()))
 	}
 
 	return my

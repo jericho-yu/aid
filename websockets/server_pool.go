@@ -1,6 +1,7 @@
 package websockets
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"sync"
@@ -12,7 +13,6 @@ import (
 type (
 	ServerPool struct {
 		connections             *dict.AnyDict[string, *Server]
-		authIdToAddr            *dict.AnyDict[string, string]
 		addrToAuth              *dict.AnyDict[string, string]
 		onConnectionFail        serverConnectionFailFn
 		onConnectionSuccess     serverConnectionSuccessFn
@@ -33,7 +33,6 @@ func OnceServer(serverCallbackConfig ServerCallbackConfig) *ServerPool {
 	serverPoolOnce.Do(func() {
 		serverPool = &ServerPool{
 			connections:             dict.MakeAnyDict[string, *Server](),
-			authIdToAddr:            dict.MakeAnyDict[string, string](),
 			addrToAuth:              dict.MakeAnyDict[string, string](),
 			onConnectionFail:        serverCallbackConfig.OnConnectionFail,
 			onConnectionSuccess:     serverCallbackConfig.OnConnectionSuccess,
@@ -50,7 +49,6 @@ func OnceServer(serverCallbackConfig ServerCallbackConfig) *ServerPool {
 // appendConn 增加连接
 func (*ServerPool) appendConn(authId *string, conn *websocket.Conn) (server *Server) {
 	server = NewServer(conn)
-	serverPool.authIdToAddr.Set(*authId, conn.RemoteAddr().String())
 	serverPool.addrToAuth.Set(conn.RemoteAddr().String(), *authId)
 	serverPool.connections.Set(conn.RemoteAddr().String(), server)
 
@@ -60,7 +58,6 @@ func (*ServerPool) appendConn(authId *string, conn *websocket.Conn) (server *Ser
 // removeConn 移除连接
 func (*ServerPool) removeConn(addr *string) {
 	serverPool.addrToAuth.RemoveByKey(*addr)
-	serverPool.authIdToAddr.RemoveByKeys(serverPool.authIdToAddr.GetKeysByValue(*addr).All()...)
 	serverPool.connections.RemoveByKey(*addr)
 }
 
@@ -77,15 +74,9 @@ func (*ServerPool) SendMessageByAddr(addr *string, prototypeMessage []byte) {
 
 // SendMessageByAuthId 发送消息：通过认证ID
 func (*ServerPool) SendMessageByAuthId(authId *string, prototypeMessage []byte) {
-	serverPool.authIdToAddr.GetKeysByValue(*authId).Each(func(idx int, item string) {
-		if server, ok := serverPool.connections.Get(item); ok {
-			server.AsyncMessage(prototypeMessage, serverPool.onSendMessageSuccess, serverPool.onSendMessageFail)
-		} else {
-			if serverPool.onSendMessageFail != nil {
-				serverPool.onSendMessageFail(fmt.Errorf("没有找到连接：%s -> %s", *authId, item))
-			}
-		}
-	})
+	for _, server := range serverPool.connections.GetByKeys(serverPool.addrToAuth.GetKeysByValue(*authId).All()...) {
+		server.AsyncMessage(prototypeMessage, serverPool.onSendMessageSuccess, serverPool.onSendMessageFail)
+	}
 }
 
 // SetOnConnectionSuccess 设置回调：当连接成功
@@ -136,6 +127,11 @@ func (*ServerPool) Handle(
 		conn *websocket.Conn
 	)
 
+	if condition == nil {
+		serverPool.onConnectionFail(errors.New("验证方法不能为空"))
+		return
+	}
+
 	// 升级协议
 	conn, err = upgrader.Upgrade(writer, req, header)
 	if err != nil {
@@ -145,15 +141,13 @@ func (*ServerPool) Handle(
 	}
 
 	// 验证连接
-	if condition != nil {
-		if err = condition(header); err != nil && serverPool.onConnectionFail != nil {
-			serverPool.onConnectionFail(err)
-			return
-		}
+	authId, err := condition(header)
+	if err != nil && serverPool.onConnectionFail != nil {
+		serverPool.onConnectionFail(err)
+		return
 	}
 
 	// 加入连接池
-	authId := header.Get("Auth-Id")
 	server := serverPool.appendConn(&authId, conn)
 
 	// 开启接收消息

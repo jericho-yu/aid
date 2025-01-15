@@ -114,7 +114,7 @@ func (my *Server) Boot(
 
 			select {
 			case <-my.closeChan:
-				my.conn.WriteMessage(websocket.CloseMessage, nil)
+				// my.conn.WriteMessage(websocket.CloseMessage, []byte{})
 				my.conn.Close()
 				return
 			default:
@@ -124,8 +124,9 @@ func (my *Server) Boot(
 					go onReceiveMessageSuccess(my, message)
 				case websocket.BinaryMessage:
 				case websocket.CloseMessage:
+					my.conn.Close()
 				case websocket.PingMessage:
-					if err = my.conn.WriteMessage(websocket.PongMessage, nil); err != nil {
+					if err = my.conn.WriteMessage(websocket.TextMessage, []byte{}); err != nil {
 						if onReceiveMessageFail != nil {
 							onSendMessageFail(fmt.Errorf("发送消息失败(pong)：%s", my.conn.RemoteAddr().String()))
 						}

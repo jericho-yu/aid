@@ -15,7 +15,19 @@ func onLine() (*Client, error) {
 	client, err := NewClient(
 		"",
 		"client-test1",
-		url.URL{Scheme: "ws", Host: "127.0.0.1:12345"},
+		url.URL{
+			Scheme:      "",
+			Opaque:      "",
+			User:        &url.Userinfo{},
+			Host:        "",
+			Path:        "",
+			RawPath:     "ws://127.0.0.1:8080",
+			OmitHost:    false,
+			ForceQuery:  false,
+			RawQuery:    "",
+			Fragment:    "",
+			RawFragment: "",
+		},
 		ClientCallbackConfig{
 			OnConnSuccessCallback: func(groupName, name string, conn *websocket.Conn) {
 				log.Printf("[%s:%s] 链接：成功\n", groupName, name)

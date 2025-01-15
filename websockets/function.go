@@ -15,7 +15,7 @@ type (
 	pingFn                        func(conn *websocket.Conn) error
 	serverConnectionFailFn        func(error)
 	serverConnectionSuccessFn     func(conn *websocket.Conn) error
-	serverConnectionCheckFn       func(header http.Header) error
+	serverConnectionCheckFn       func(header http.Header) (string, error)
 	serverReceiveMessageSuccessFn func(server *Server, message Message)
 	serverReceiveMessageFailFn    func(conn *websocket.Conn, err error)
 	serverReceivePingFn           func(conn *websocket.Conn)
