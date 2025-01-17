@@ -93,8 +93,12 @@ func (my *Str) PadLeft(length int, s string) string {
 }
 
 // NewTerminalLog 实例化：控制台日志
-func NewTerminalLog(format string) *TerminalLog {
-	return &TerminalLog{format: format, enable: common.ToBool(os.Getenv("AID__STR__TERMINAL_LOG__ENABLE"))}
+func NewTerminalLog(format ...string) *TerminalLog {
+	if len(format) > 1 {
+		return &TerminalLog{format: fmt.Sprintf(format[0], format[1:]), enable: common.ToBool(os.Getenv("AID__STR__TERMINAL_LOG__ENABLE"))}
+	} else {
+		return &TerminalLog{format: format[0], enable: common.ToBool(os.Getenv("AID__STR__TERMINAL_LOG__ENABLE"))}
+	}
 }
 
 // Default 打印日志行
