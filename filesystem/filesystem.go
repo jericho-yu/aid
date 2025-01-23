@@ -36,8 +36,8 @@ func (FileSystem) NewByRelative(dir string) *FileSystem {
 	return ins.init()
 }
 
-// NewByAbs 实例化：文件系统（绝对路径）
-func (FileSystem) NewByAbs(dir string) *FileSystem {
+// NewByAbsolute 实例化：文件系统（绝对路径）
+func (FileSystem) NewByAbsolute(dir string) *FileSystem {
 	ins := &FileSystem{dir: dir}
 	return ins.init()
 }
@@ -256,7 +256,7 @@ func (my *FileSystem) Read() ([]byte, error) {
 // RenameFile 修改文件名并获取新的文件对象
 func (my *FileSystem) RenameFile(newFilename string, deleteRepetition bool) (*FileSystem, error) {
 	dir, _ := filepath.Split(my.GetDir())
-	dst := FileSystemApp.NewByAbs(path.Join(dir, newFilename))
+	dst := FileSystemApp.NewByAbsolute(path.Join(dir, newFilename))
 
 	if deleteRepetition {
 		if dst.IsExist {
@@ -284,7 +284,7 @@ func (my *FileSystem) CopyFile(dstDir, dstFilename string, abs bool) (string, er
 	if !abs {
 		dst = FileSystemApp.NewByRelative(dstDir)
 	} else {
-		dst = FileSystemApp.NewByAbs(dstDir)
+		dst = FileSystemApp.NewByAbsolute(dstDir)
 	}
 	// 创建目标文件夹
 	if !dst.IsDir {
@@ -340,7 +340,7 @@ func (FileSystem) CopyFiles(srcFiles []*FileSystemCopyFilesTarget, dstDir string
 	)
 
 	if abs {
-		dst = FileSystemApp.NewByAbs(dstDir)
+		dst = FileSystemApp.NewByAbsolute(dstDir)
 	} else {
 		dst = FileSystemApp.NewByRelative(dstDir)
 	}
@@ -383,7 +383,7 @@ func (my *FileSystem) CopyDir(dstDir string, abs bool) error {
 		)
 
 		if abs {
-			dst = FileSystemApp.NewByAbs(dstDir)
+			dst = FileSystemApp.NewByAbsolute(dstDir)
 		} else {
 			dst = FileSystemApp.NewByRelative(dstDir)
 		}
@@ -397,7 +397,7 @@ func (my *FileSystem) CopyDir(dstDir string, abs bool) error {
 		}
 
 		srcFilename = filepath.Base(srcPath)
-		src = FileSystemApp.NewByAbs(srcPath)
+		src = FileSystemApp.NewByAbsolute(srcPath)
 
 		if src.IsFile {
 			if _, err = src.CopyFile(dst.GetDir(), srcFilename, true); err != nil {

@@ -41,7 +41,7 @@ func NewFileManager(config *FileManagerConfig) *FileManager {
 
 // NewFileManagerByLocalFile 初始化：文件管理器（通过本地文件）
 func NewFileManagerByLocalFile(srcDir, dstDir string, config *FileManagerConfig) (*FileManager, error) {
-	fs := FileSystemApp.NewByAbs(srcDir)
+	fs := FileSystemApp.NewByAbsolute(srcDir)
 	if !fs.IsExist {
 		return nil, errors.New("目标文件不存在")
 	}
@@ -72,7 +72,7 @@ func NewFileManagerByBytes(srcFileBytes []byte, dstDir string, config *FileManag
 
 // SetSrcDir 设置源文件
 func (my *FileManager) SetSrcDir(srcDir string) (*FileManager, error) {
-	fs := FileSystemApp.NewByAbs(srcDir)
+	fs := FileSystemApp.NewByAbsolute(srcDir)
 	if !fs.IsExist {
 		return nil, errors.New("目标文件不存在")
 	}
@@ -124,7 +124,7 @@ func (my *FileManager) Delete() error {
 
 // 上传到本地
 func (my *FileManager) uploadToLocal() (int64, error) {
-	dst := FileSystemApp.NewByAbs(my.dstDir)
+	dst := FileSystemApp.NewByAbsolute(my.dstDir)
 	return dst.WriteBytes(my.fileBytes)
 }
 
@@ -152,7 +152,7 @@ func (my *FileManager) uploadToOss() (int64, error) {
 
 // 从本地删除文件
 func (my *FileManager) deleteFromLocal() error {
-	return FileSystemApp.NewByAbs(my.dstDir).DelFile()
+	return FileSystemApp.NewByAbsolute(my.dstDir).DelFile()
 }
 
 // 从nexus删除文件
