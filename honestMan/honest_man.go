@@ -54,3 +54,25 @@ func (my *HonestMan) LoadJson(target any) (err error) {
 
 	return json.Unmarshal(my.readFile(), target)
 }
+
+// SaveYaml 写入Yaml文件
+func (my *HonestMan) SaveYaml(target any) (err error) {
+	my.isPtr(target)
+	out, err := yaml.Marshal(target)
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(my.dir, out, os.ModePerm)
+}
+
+// SaveJson 写入Json文件
+func (my *HonestMan) SaveJson(target any) (err error) {
+	my.isPtr(target)
+	out, err := json.Marshal(target)
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(my.dir, out, os.ModePerm)
+}
