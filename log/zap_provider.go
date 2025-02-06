@@ -178,7 +178,7 @@ func NewZapProvider(path string, inConsole bool, encoderType EncoderType, level 
 		level = int(zapcore.FatalLevel)
 	}
 
-	for _, logLevel := range []zapcore.Level{
+	for idx, logLevel := range []zapcore.Level{
 		zapcore.DebugLevel,
 		zapcore.InfoLevel,
 		zapcore.WarnLevel,
@@ -189,7 +189,8 @@ func NewZapProvider(path string, inConsole bool, encoderType EncoderType, level 
 	} {
 		if level >= int(logLevel) {
 			writer := FileRotateLogs.GetWriteSync(path, logLevel.String(), inConsole)
-			zapCores = append(zapCores, zapcore.NewCore(encoderTypes[encoderType](zapLoggerConfig), writer, logLevel))
+			zapCores[idx] = zapcore.NewCore(encoderTypes[encoderType](zapLoggerConfig), writer, logLevel)
+			// zapCores = append(zapCores, zapcore.NewCore(encoderTypes[encoderType](zapLoggerConfig), writer, logLevel))
 		}
 	}
 
