@@ -182,8 +182,7 @@ func NewZapProvider(
 		if inConsole {
 			return
 		}
-		e = zapLogger.Sync()
-		if e != nil {
+		if e = zapLogger.Sync(); e != nil {
 			panic(e)
 		}
 	}()
