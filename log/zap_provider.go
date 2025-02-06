@@ -214,6 +214,6 @@ func NewZapProvider(
 	return zapLogger
 }
 
-func CustomTimeEncoder(t time.Time, encoder zapcore.PrimitiveArrayEncoder) {
-	encoder.AppendString(t.Format(time.DateTime + ".000"))
-}
+// func CustomTimeEncoder(t time.Time, encoder zapcore.PrimitiveArrayEncoder) {
+// 	encoder.AppendString(t.Format(time.DateTime + ".000"))
+// }
