@@ -131,7 +131,12 @@ func (r *fileRotateLogs) GetWriteSync(path, level string, inConsole bool) zapcor
 }
 
 // NewZapProvider 实例化：Zap日志服务提供者
-func NewZapProvider(path string, inConsole bool, encoderType EncoderType, level int) *zap.Logger {
+func NewZapProvider(
+	path string,
+	inConsole bool,
+	encoderType EncoderType,
+	level int,
+) *zap.Logger {
 	var (
 		e               error
 		fs              *filesystem.FileSystem
