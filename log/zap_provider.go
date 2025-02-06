@@ -16,19 +16,13 @@ import (
 
 // ZapProvider Zap日志服务提供者
 type (
-	ZapProvider struct {
-		path      string
-		inConsole bool
-	}
-	fileRotateLogs struct{}
-	Cutter         struct {
+	Cutter struct {
 		level    string        // 日志级别(debug, info, warn, error, dpanic, panic, fatal)
 		format   string        // 时间格式(2006-01-02)
 		Director string        // 日志文件夹
 		file     *os.File      // 文件句柄
 		mutex    *sync.RWMutex // 读写锁
 	}
-	CutterOption func(*Cutter)
 
 	EncoderType string
 )
@@ -38,14 +32,7 @@ const (
 	EncoderTypeJson    EncoderType = "JSON"
 )
 
-// WithCutterFormat 设置时间格式
-func WithCutterFormat(format string) CutterOption {
-	return func(c *Cutter) {
-		c.format = format
-	}
-}
-
-func NewCutter(director string, level string, options ...CutterOption) *Cutter {
+func NewCutter(director string, level string, options ...func(*Cutter)) *Cutter {
 	rotate := &Cutter{
 		level:    level,
 		Director: director,
@@ -115,15 +102,9 @@ func (c *Cutter) Write(bytes []byte) (n int, err error) {
 	return c.file.Write(bytes)
 }
 
-var (
-	zapProvider    *ZapProvider
-	FileRotateLogs = new(fileRotateLogs)
-)
-
 // GetWriteSync 获取 zapcore.WriteSync
-// Author [SliverHorn](https://github.com/SliverHorn)
-func (r *fileRotateLogs) GetWriteSync(path, level string, inConsole bool) zapcore.WriteSyncer {
-	fileWriter := NewCutter(path, level, WithCutterFormat(time.DateOnly))
+func GetWriteSync(path string, level zapcore.Level, inConsole bool) zapcore.WriteSyncer {
+	fileWriter := NewCutter(path, level.String(), func(c *Cutter) { c.format = time.DateOnly })
 	if inConsole {
 		return zapcore.NewMultiWriteSyncer(zapcore.AddSync(fileWriter), zapcore.AddSync(os.Stdout))
 	}
@@ -163,10 +144,6 @@ func NewZapProvider(
 		}
 	)
 
-	if zapProvider == nil {
-		zapProvider = &ZapProvider{path: path, inConsole: inConsole}
-	}
-
 	fs = filesystem.FileSystemApp.NewByRelative(path)
 	if !fs.IsExist {
 		e = fs.MkDir()
@@ -193,7 +170,7 @@ func NewZapProvider(
 		zapcore.FatalLevel,
 	} {
 		if level >= logLevel {
-			writer := FileRotateLogs.GetWriteSync(path, logLevel.String(), inConsole)
+			writer := GetWriteSync(path, logLevel, inConsole)
 			zapCores[idx] = zapcore.NewCore(encoderTypes[encoderType](zapLoggerConfig), writer, logLevel)
 			// zapCores = append(zapCores, zapcore.NewCore(encoderTypes[encoderType](zapLoggerConfig), writer, logLevel))
 		}
