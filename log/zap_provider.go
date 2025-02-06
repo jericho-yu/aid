@@ -2,15 +2,16 @@ package log
 
 import (
 	"fmt"
-	"github.com/jericho-yu/aid/filesystem"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/jericho-yu/aid/filesystem"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 // ZapProvider Zap日志服务提供者
@@ -130,7 +131,7 @@ func (r *fileRotateLogs) GetWriteSync(path, level string, inConsole bool) zapcor
 }
 
 // NewZapProvider 实例化：Zap日志服务提供者
-func NewZapProvider(path string, inConsole bool, encoderType EncoderType) *zap.Logger {
+func NewZapProvider(path string, inConsole bool, encoderType EncoderType, level int) *zap.Logger {
 	var (
 		e               error
 		fs              *filesystem.FileSystem
@@ -169,7 +170,15 @@ func NewZapProvider(path string, inConsole bool, encoderType EncoderType) *zap.L
 		}
 	}
 
-	for _, level := range []zapcore.Level{
+	if level < int(zapcore.DebugLevel) {
+		level = int(zapcore.DebugLevel)
+	}
+
+	if level > int(zapcore.FatalLevel) {
+		level = int(zapcore.FatalLevel)
+	}
+
+	for _, logLevel := range []zapcore.Level{
 		zapcore.DebugLevel,
 		zapcore.InfoLevel,
 		zapcore.WarnLevel,
@@ -178,8 +187,10 @@ func NewZapProvider(path string, inConsole bool, encoderType EncoderType) *zap.L
 		zapcore.PanicLevel,
 		zapcore.FatalLevel,
 	} {
-		writer := FileRotateLogs.GetWriteSync(path, level.String(), inConsole)
-		zapCores = append(zapCores, zapcore.NewCore(encoderTypes[encoderType](zapLoggerConfig), writer, level))
+		if level >= int(logLevel) {
+			writer := FileRotateLogs.GetWriteSync(path, logLevel.String(), inConsole)
+			zapCores = append(zapCores, zapcore.NewCore(encoderTypes[encoderType](zapLoggerConfig), writer, logLevel))
+		}
 	}
 
 	zapLogger = zap.New(zapcore.NewTee(zapCores...))
