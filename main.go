@@ -86,19 +86,19 @@ func main() {
 		fmt.Println(result)
 	}
 
-	// 删除单条记录
-	deleteResult, err := collection.DeleteOne(context.TODO(), bson.M{"name": "Alice"})
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("删除了 %v 条记录\n", deleteResult.DeletedCount)
+	// // 删除单条记录
+	// deleteResult, err := collection.DeleteOne(context.TODO(), bson.M{"name": "Alice"})
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Printf("删除了 %v 条记录\n", deleteResult.DeletedCount)
 
-	// 删除多条记录
-	deleteManyResult, err := collection.DeleteMany(context.TODO(), bson.M{"age": bson.M{"$gt": 20}})
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("删除了 %v 条记录\n", deleteManyResult.DeletedCount)
+	// // 删除多条记录
+	// deleteManyResult, err := collection.DeleteMany(context.TODO(), bson.M{"age": bson.M{"$gt": 20}})
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Printf("删除了 %v 条记录\n", deleteManyResult.DeletedCount)
 
 	// 断开与 MongoDB 的连接
 	err = client.Disconnect(context.TODO())
