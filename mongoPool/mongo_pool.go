@@ -83,13 +83,14 @@ func (*MongoClientPool) Remove(key string) (*MongoClientPool, error) {
 		return mongoClientPool, errors.New("客户端不存在")
 	}
 
-	mongoClient, exist := mongoClientPool.clients.Get(key)
-	if !exist {
+	if mongoClient, exist := mongoClientPool.clients.Get(key); exist {
 		return mongoClientPool, errors.New("客户端不存在")
-	}
+	} else {
+		if err := mongoClient.Close(); err != nil {
+			return mongoClientPool, err
+		}
 
-	if err := mongoClient.Close(); err != nil {
-		return mongoClientPool, err
+		mongoClientPool.clients.RemoveByKey(key)
 	}
 
 	return mongoClientPool, nil
