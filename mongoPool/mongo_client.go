@@ -15,18 +15,19 @@ type (
 		client            *mongo.Client
 		currentDatabase   *mongo.Database
 		currentCollection *mongo.Collection
-		condition         M
+		condition         Map
 	}
 
-	D primitive.D
-	E primitive.E
-	M primitive.M
+	Data  = []any
+	Datum = primitive.D
+	E     = primitive.E
+	Map   = primitive.M
 )
 
 // NewMongoClient 实例化：mongo客户端
 func NewMongoClient(url string) (*MongoClient, error) {
 	var err error
-	mc := &MongoClient{url: url, condition: M{}}
+	mc := &MongoClient{url: url, condition: Map{}}
 	// 设置客户端选项
 	clientOptions := options.Client().ApplyURI(mc.url)
 
@@ -79,7 +80,7 @@ func (my *MongoClient) SetCollection(collection string, opts ...*options.Collect
 }
 
 // InsertOne 插入一条数据
-func (my *MongoClient) InsertOne(data D) (*mongo.InsertOneResult, error) {
+func (my *MongoClient) InsertOne(data Datum) (*mongo.InsertOneResult, error) {
 	return my.currentCollection.InsertOne(context.TODO(), data)
 }
 
@@ -89,14 +90,14 @@ func (my *MongoClient) InsertMany(data []any) (*mongo.InsertManyResult, error) {
 }
 
 // Where 设置查询条件
-func (my *MongoClient) Where(condition M) *MongoClient {
+func (my *MongoClient) Where(condition Map) *MongoClient {
 	my.condition = condition
 	return my
 }
 
 // FindOne 查询一条数据
-func (my *MongoClient) FindOne(result M, findOneOptionFn func(opt *options.FindOneOptions) *options.FindOneOptions) error {
-	defer func() { my.condition = M{} }()
+func (my *MongoClient) FindOne(result *Map, findOneOptionFn func(opt *options.FindOneOptions) *options.FindOneOptions) error {
+	defer func() { my.condition = Map{} }()
 	var findOneOption *options.FindOneOptions
 	if findOneOptionFn != nil {
 		findOneOption = findOneOptionFn(options.FindOne())
@@ -105,31 +106,31 @@ func (my *MongoClient) FindOne(result M, findOneOptionFn func(opt *options.FindO
 }
 
 // FindMany 查询多条数据
-func (my *MongoClient) FindMany(results []M, findOptionFn func(opt *options.FindOptions) *options.FindOptions) error {
+func (my *MongoClient) FindMany(results *[]Map, findOptionFn func(opt *options.FindOptions) *options.FindOptions) error {
 	var (
 		err        error
 		findOption *options.FindOptions
 		cursor     *mongo.Cursor
 	)
-	defer func() { my.condition = M{} }()
+	defer func() { my.condition = Map{} }()
 	if findOptionFn != nil {
 		findOption = findOptionFn(options.Find())
 	}
 	if cursor, err = my.currentCollection.Find(context.TODO(), my.condition, findOption); err != nil {
 		return err
 	} else {
-		return cursor.All(context.TODO(), &results)
+		return cursor.All(context.TODO(), results)
 	}
 }
 
 // DeleteOne 删除单条数据
 func (my *MongoClient) DeleteOne() (*mongo.DeleteResult, error) {
-	defer func() { my.condition = M{} }()
+	defer func() { my.condition = Map{} }()
 	return my.currentCollection.DeleteOne(context.TODO(), my.condition)
 }
 
 // DeleteMany 删除多条数据
 func (my *MongoClient) DeleteMany() (*mongo.DeleteResult, error) {
-	defer func() { my.condition = M{} }()
-	return my.currentCollection.DeleteMany(context.TODO(), my.currentCollection)
+	defer func() { my.condition = Map{} }()
+	return my.currentCollection.DeleteMany(context.TODO(), my.condition)
 }

@@ -37,6 +37,20 @@ func (*MongoClientPool) Append(key string, mongoClient *MongoClient) (*MongoClie
 	return mongoClientPool, nil
 }
 
+// HasClient 检查客户端是否存在
+func (*MongoClientPool) HasClient(key string) bool {
+	return mongoClientPool.clients.Has(key)
+}
+
+// GetClient 获取客户端
+func (*MongoClientPool) GetClient(key string) *MongoClient {
+	if mongoClient, exist := mongoClientPool.clients.Get(key); exist {
+		return mongoClient
+	}
+
+	return nil
+}
+
 // 清除客户端
 func (*MongoClientPool) Remove(key string) (*MongoClientPool, error) {
 	if !mongoClientPool.clients.Has(key) {
