@@ -37,11 +37,16 @@ func TestServer(t *testing.T) {
 
 	r := gin.Default()
 	r.GET("/ws", func(c *gin.Context) {
-		serverPool.Handle(c.Writer, c.Request, c.Request.Header, func(header http.Header) (string, error) {
-			t.Logf("header: %#v\n", header)
-			authId := header.Get("Identity")
-			return authId, nil
-		})
+		serverPool.Handle(
+			c.Writer,
+			c.Request,
+			c.Request.Header,
+			func(header http.Header) (string, error) {
+				t.Logf("header: %#v\n", header)
+				authId := header.Get("Identity")
+				return authId, nil
+			},
+		)
 	})
 	if err := r.Run(); err != nil {
 		t.Fatalf("启动失败：%v\n", err)
