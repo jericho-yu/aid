@@ -20,7 +20,7 @@ type (
 
 	Data  = []any
 	Datum = primitive.D
-	E     = primitive.E
+	KV    = primitive.E
 	Map   = primitive.M
 )
 
@@ -133,4 +133,26 @@ func (my *MongoClient) DeleteOne() (*mongo.DeleteResult, error) {
 func (my *MongoClient) DeleteMany() (*mongo.DeleteResult, error) {
 	defer func() { my.condition = Map{} }()
 	return my.currentCollection.DeleteMany(context.TODO(), my.condition)
+}
+
+// NewMap 新建Map数据
+func NewMap(Key string, Value any) Map {
+	return Map{Key: Value}
+}
+
+// NewKV 新建KeyValue字段数据
+func NewKV(Key string, Value any) KV {
+	return KV{Key: Key, Value: Value}
+}
+
+// NewData 新建Datum单条数据
+func NewDatum(kv ...KV) Datum {
+	var d = make(Datum, len(kv))
+	copy(d, kv)
+	return d
+}
+
+// NewData 新建Data多条数据集
+func NewData(datum ...Datum) Data {
+	return Data{datum}
 }

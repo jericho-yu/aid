@@ -31,43 +31,43 @@ func main() {
 	}
 
 	// 插入单条数据
-	insertOneRes, err = mc.InsertOne(mongoPool.Datum{{Key: "name", Value: "张三"}, {Key: "age", Value: 18}})
+	insertOneRes, err = mc.InsertOne(mongoPool.NewDatum(mongoPool.NewKV("name", "张三"), mongoPool.NewKV("age", 18)))
 	if err != nil {
 		log.Fatalf("插入单条数据失败：%v", err)
 	}
 	log.Printf("插入单条数据成功：%v\n", insertOneRes.InsertedID)
 
 	// 插入多条数据
-	insertManyRes, err = mc.InsertMany(mongoPool.Data{
-		mongoPool.Datum{{Key: "name", Value: "李四"}, {Key: "age", Value: 19}},
-		mongoPool.Datum{{Key: "name", Value: "王五"}, {Key: "age", Value: 20}},
-		mongoPool.Datum{{Key: "name", Value: "赵六"}, {Key: "age", Value: 21}},
-	})
+	insertManyRes, err = mc.InsertMany(mongoPool.NewData(
+		mongoPool.NewDatum(mongoPool.NewKV("name", "李四"), mongoPool.NewKV("age", 19)),
+		mongoPool.NewDatum(mongoPool.NewKV("name", "王五"), mongoPool.NewKV("age", 20)),
+		mongoPool.NewDatum(mongoPool.NewKV("name", "赵六"), mongoPool.NewKV("age", 21)),
+	))
 	if err != nil {
 		log.Fatalf("插入多条数据失败：%v", err)
 	}
 	log.Printf("插入多条数据成功：%v\n", insertManyRes.InsertedIDs)
 
 	// 查询单条数据
-	if err = mc.Where(mongoPool.Map{"_id": insertOneRes.InsertedID}).FindOne(&findOneRes, nil); err != nil {
+	if err = mc.Where(mongoPool.NewMap("_id", insertOneRes.InsertedID)).FindOne(&findOneRes, nil); err != nil {
 		log.Fatalf("查询单条数据失败：%v", err)
 	}
 	log.Printf("查询单条数据成功：%v", findOneRes)
 
 	// 查询多条数据
-	if err = mc.Where(mongoPool.Map{"_id": mongoPool.Map{"$in": insertManyRes.InsertedIDs[1:]}}).FindMany(&findManyRes, nil); err != nil {
+	if err = mc.Where(mongoPool.NewMap("_id", mongoPool.NewMap("$in", insertManyRes.InsertedIDs[1:]))).FindMany(&findManyRes, nil); err != nil {
 		log.Fatalf("查询多条数据失败：%v", err)
 	}
 	log.Printf("查询多条数据成功：%v\n", findManyRes)
 
 	// 删除单条数据
-	if deleteOneRes, err = mc.Where(mongoPool.Map{"_id": insertOneRes.InsertedID}).DeleteOne(); err != nil {
+	if deleteOneRes, err = mc.Where(mongoPool.NewMap("_id", insertOneRes.InsertedID)).DeleteOne(); err != nil {
 		log.Fatalf("删除单条数据失败：%v", err)
 	}
 	log.Printf("删除单条数据成功：%d", deleteOneRes.DeletedCount)
 
 	// 删除多条数据
-	if deleteManyRes, err = mc.Where(mongoPool.Map{"_id": mongoPool.Map{"$in": insertManyRes.InsertedIDs[1:]}}).DeleteMany(); err != nil {
+	if deleteManyRes, err = mc.Where(mongoPool.NewMap("_id", mongoPool.NewMap("$in", insertManyRes.InsertedIDs[1:]))).DeleteMany(); err != nil {
 		log.Fatalf("删除多条数据失败：%v", err)
 	}
 	log.Printf("删除多条数据成功：%d", deleteManyRes.DeletedCount)
