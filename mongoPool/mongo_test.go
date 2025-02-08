@@ -14,7 +14,7 @@ func getDB(t *testing.T) (*MongoClientPool, *MongoClient) {
 	if err != nil {
 		t.Fatalf("创建mongo客户端失败：%v", err)
 	}
-	if _, err = mp.Append("default", mc); err != nil {
+	if _, err = mp.AppendClient("default", mc); err != nil {
 		t.Fatalf("添加mongo客户端失败：%v", err)
 	}
 	mc = mp.GetClient("default").SetDatabase("test_db").SetCollection("test_collection")

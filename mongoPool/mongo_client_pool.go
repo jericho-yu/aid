@@ -26,8 +26,8 @@ func OnceMongoPool() *MongoClientPool {
 	return mongoClientPool
 }
 
-// Append 增加客户端
-func (*MongoClientPool) Append(key string, mongoClient *MongoClient) (*MongoClientPool, error) {
+// AppendClient 增加客户端
+func (*MongoClientPool) AppendClient(key string, mongoClient *MongoClient) (*MongoClientPool, error) {
 	if mongoClientPool.clients.Has(key) {
 		return mongoClientPool, errors.New("客户端已存在")
 	}
@@ -73,7 +73,7 @@ func (*MongoClientPool) Remove(key string) (*MongoClientPool, error) {
 // Clean 清理客户端
 func (*MongoClientPool) Clean() *MongoClientPool {
 	for _, key := range mongoClientPool.clients.Keys() {
-		mongoClientPool.Remove(key)
+		_, _ = mongoClientPool.Remove(key)
 	}
 	return mongoClientPool
 }

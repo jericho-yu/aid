@@ -21,7 +21,7 @@ func Demo() {
 	if err != nil {
 		log.Fatalf("创建mongo客户端失败：%v", err)
 	}
-	mp.Append("default", mc)
+	mp.AppendClient("default", mc)
 	mc = mp.GetClient("default").SetDatabase("test_db").SetCollection("test_collection")
 
 	// 清空数据
