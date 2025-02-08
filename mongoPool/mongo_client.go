@@ -114,7 +114,6 @@ func (my *MongoClient) FindOne(result *Map, findOneOptionFn func(opt *options.Fi
 // FindMany 查询多条数据
 func (my *MongoClient) FindMany(results *[]Map, findOptionFn func(opt *options.FindOptions) *options.FindOptions) *MongoClient {
 	var (
-		err        error
 		findOption *options.FindOptions
 		cursor     *mongo.Cursor
 	)
@@ -122,7 +121,7 @@ func (my *MongoClient) FindMany(results *[]Map, findOptionFn func(opt *options.F
 	if findOptionFn != nil {
 		findOption = findOptionFn(options.Find())
 	}
-	if cursor, my.Err = my.currentCollection.Find(context.TODO(), my.condition, findOption); err != nil {
+	if cursor, my.Err = my.currentCollection.Find(context.TODO(), my.condition, findOption); my.Err != nil {
 		return my
 	} else {
 		my.Err = cursor.All(context.TODO(), results)
