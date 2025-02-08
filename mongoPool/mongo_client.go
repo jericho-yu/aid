@@ -40,7 +40,6 @@ func NewMongoClient(url string) (*MongoClient, error) {
 	// 检查连接
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-
 	if err = mc.client.Ping(ctx, nil); err != nil {
 		return nil, err
 	}
