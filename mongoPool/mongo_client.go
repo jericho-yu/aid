@@ -28,6 +28,7 @@ type (
 func NewMongoClient(url string) (*MongoClient, error) {
 	var err error
 	mc := &MongoClient{url: url, condition: Map{}}
+
 	// 设置客户端选项
 	clientOptions := options.Client().ApplyURI(mc.url)
 
@@ -39,27 +40,26 @@ func NewMongoClient(url string) (*MongoClient, error) {
 	// 检查连接
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
+
 	if err = mc.client.Ping(ctx, nil); err != nil {
 		return nil, err
 	}
+
 	return mc, nil
 }
 
 // Close 关闭客户端
-func (my *MongoClient) Close() error {
-	return my.client.Disconnect(context.Background())
-}
+func (my *MongoClient) Close() error { return my.client.Disconnect(context.Background()) }
 
 // GetClient 获取客户端链接
-func (my *MongoClient) GetClient() *mongo.Client {
-	return my.client
-}
+func (my *MongoClient) GetClient() *mongo.Client { return my.client }
 
 // Ping 测试链接
 func (my *MongoClient) Ping() {
 	// 检查连接
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
+
 	my.Err = my.client.Ping(ctx, nil)
 }
 
@@ -96,17 +96,18 @@ func (my *MongoClient) Where(condition Map) *MongoClient {
 }
 
 // CleanCondition 清理查询条件
-func (my *MongoClient) CleanCondition() {
-	my.condition = Map{}
-}
+func (my *MongoClient) CleanCondition() { my.condition = Map{} }
 
 // FindOne 查询一条数据
 func (my *MongoClient) FindOne(result *Map, findOneOptionFn func(opt *options.FindOneOptions) *options.FindOneOptions) *MongoClient {
-	defer my.CleanCondition()
 	var findOneOption *options.FindOneOptions
+
+	defer my.CleanCondition()
+
 	if findOneOptionFn != nil {
 		findOneOption = findOneOptionFn(options.FindOne())
 	}
+
 	my.Err = my.currentCollection.FindOne(context.TODO(), my.condition, findOneOption).Decode(&result)
 	return my
 }
@@ -117,47 +118,47 @@ func (my *MongoClient) FindMany(results *[]Map, findOptionFn func(opt *options.F
 		findOption *options.FindOptions
 		cursor     *mongo.Cursor
 	)
+
 	defer my.CleanCondition()
+
 	if findOptionFn != nil {
 		findOption = findOptionFn(options.Find())
 	}
-	if cursor, my.Err = my.currentCollection.Find(context.TODO(), my.condition, findOption); my.Err != nil {
-		return my
-	} else {
-		my.Err = cursor.All(context.TODO(), results)
+
+	cursor, my.Err = my.currentCollection.Find(context.TODO(), my.condition, findOption)
+	if my.Err != nil {
 		return my
 	}
+
+	my.Err = cursor.All(context.TODO(), results)
+	return my
 }
 
 // DeleteOne 删除单条数据
 func (my *MongoClient) DeleteOne() *mongo.DeleteResult {
 	var res *mongo.DeleteResult
+
 	defer my.CleanCondition()
-	if res, my.Err = my.currentCollection.DeleteOne(context.TODO(), my.condition); my.Err != nil {
-		return nil
-	}
+
+	res, my.Err = my.currentCollection.DeleteOne(context.TODO(), my.condition)
 	return res
 }
 
 // DeleteMany 删除多条数据
 func (my *MongoClient) DeleteMany() *mongo.DeleteResult {
 	var res *mongo.DeleteResult
+
 	defer my.CleanCondition()
-	if res, my.Err = my.currentCollection.DeleteMany(context.TODO(), my.condition); my.Err != nil {
-		return nil
-	}
+
+	res, my.Err = my.currentCollection.DeleteMany(context.TODO(), my.condition)
 	return res
 }
 
 // NewMap 新建Map数据
-func NewMap(Key string, Value any) Map {
-	return Map{Key: Value}
-}
+func NewMap(Key string, Value any) Map { return Map{Key: Value} }
 
 // NewEntity 新建实体数据
-func NewEntity(Key string, Value any) Entity {
-	return Entity{Key: Key, Value: Value}
-}
+func NewEntity(Key string, Value any) Entity { return Entity{Key: Key, Value: Value} }
 
 // NewData 新建单条数据
 func NewData(kv ...Entity) Data {
