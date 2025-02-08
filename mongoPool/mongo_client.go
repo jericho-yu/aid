@@ -16,12 +16,12 @@ type (
 		currentDatabase   *mongo.Database
 		currentCollection *mongo.Collection
 		condition         Map
+		Err               error
 	}
 
-	Data  = []any
-	Datum = primitive.D
-	KV    = primitive.E
-	Map   = primitive.M
+	Data   = primitive.D
+	Entity = primitive.E
+	Map    = primitive.M
 )
 
 // NewMongoClient 实例化：mongo客户端
@@ -56,15 +56,11 @@ func (my *MongoClient) GetClient() *mongo.Client {
 }
 
 // Ping 测试链接
-func (my *MongoClient) Ping() error {
-	var err error
+func (my *MongoClient) Ping() {
 	// 检查连接
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	if err = my.client.Ping(ctx, nil); err != nil {
-		return err
-	}
-	return nil
+	my.Err = my.client.Ping(ctx, nil)
 }
 
 // SetDatabase 设置数据库
@@ -80,13 +76,17 @@ func (my *MongoClient) SetCollection(collection string, opts ...*options.Collect
 }
 
 // InsertOne 插入一条数据
-func (my *MongoClient) InsertOne(data Datum) (*mongo.InsertOneResult, error) {
-	return my.currentCollection.InsertOne(context.TODO(), data)
+func (my *MongoClient) InsertOne(data Data) *mongo.InsertOneResult {
+	var insertOneRes *mongo.InsertOneResult
+	insertOneRes, my.Err = my.currentCollection.InsertOne(context.TODO(), data)
+	return insertOneRes
 }
 
 // InsertMany 插入多条数据
-func (my *MongoClient) InsertMany(data []any) (*mongo.InsertManyResult, error) {
-	return my.currentCollection.InsertMany(context.TODO(), data)
+func (my *MongoClient) InsertMany(data []any) *mongo.InsertManyResult {
+	var res *mongo.InsertManyResult
+	res, my.Err = my.currentCollection.InsertMany(context.TODO(), data)
+	return res
 }
 
 // Where 设置查询条件
@@ -95,44 +95,59 @@ func (my *MongoClient) Where(condition Map) *MongoClient {
 	return my
 }
 
+// CleanCondition 清理查询条件
+func (my *MongoClient) CleanCondition() {
+	my.condition = Map{}
+}
+
 // FindOne 查询一条数据
-func (my *MongoClient) FindOne(result *Map, findOneOptionFn func(opt *options.FindOneOptions) *options.FindOneOptions) error {
-	defer func() { my.condition = Map{} }()
+func (my *MongoClient) FindOne(result *Map, findOneOptionFn func(opt *options.FindOneOptions) *options.FindOneOptions) *MongoClient {
+	defer my.CleanCondition()
 	var findOneOption *options.FindOneOptions
 	if findOneOptionFn != nil {
 		findOneOption = findOneOptionFn(options.FindOne())
 	}
-	return my.currentCollection.FindOne(context.TODO(), my.condition, findOneOption).Decode(&result)
+	my.Err = my.currentCollection.FindOne(context.TODO(), my.condition, findOneOption).Decode(&result)
+	return my
 }
 
 // FindMany 查询多条数据
-func (my *MongoClient) FindMany(results *[]Map, findOptionFn func(opt *options.FindOptions) *options.FindOptions) error {
+func (my *MongoClient) FindMany(results *[]Map, findOptionFn func(opt *options.FindOptions) *options.FindOptions) *MongoClient {
 	var (
 		err        error
 		findOption *options.FindOptions
 		cursor     *mongo.Cursor
 	)
-	defer func() { my.condition = Map{} }()
+	defer my.CleanCondition()
 	if findOptionFn != nil {
 		findOption = findOptionFn(options.Find())
 	}
-	if cursor, err = my.currentCollection.Find(context.TODO(), my.condition, findOption); err != nil {
-		return err
+	if cursor, my.Err = my.currentCollection.Find(context.TODO(), my.condition, findOption); err != nil {
+		return my
 	} else {
-		return cursor.All(context.TODO(), results)
+		my.Err = cursor.All(context.TODO(), results)
+		return my
 	}
 }
 
 // DeleteOne 删除单条数据
-func (my *MongoClient) DeleteOne() (*mongo.DeleteResult, error) {
-	defer func() { my.condition = Map{} }()
-	return my.currentCollection.DeleteOne(context.TODO(), my.condition)
+func (my *MongoClient) DeleteOne() *mongo.DeleteResult {
+	var res *mongo.DeleteResult
+	defer my.CleanCondition()
+	if res, my.Err = my.currentCollection.DeleteOne(context.TODO(), my.condition); my.Err != nil {
+		return nil
+	}
+	return res
 }
 
 // DeleteMany 删除多条数据
-func (my *MongoClient) DeleteMany() (*mongo.DeleteResult, error) {
-	defer func() { my.condition = Map{} }()
-	return my.currentCollection.DeleteMany(context.TODO(), my.condition)
+func (my *MongoClient) DeleteMany() *mongo.DeleteResult {
+	var res *mongo.DeleteResult
+	defer my.CleanCondition()
+	if res, my.Err = my.currentCollection.DeleteMany(context.TODO(), my.condition); my.Err != nil {
+		return nil
+	}
+	return res
 }
 
 // NewMap 新建Map数据
@@ -140,19 +155,14 @@ func NewMap(Key string, Value any) Map {
 	return Map{Key: Value}
 }
 
-// NewKV 新建KeyValue字段数据
-func NewKV(Key string, Value any) KV {
-	return KV{Key: Key, Value: Value}
+// NewEntity 新建实体数据
+func NewEntity(Key string, Value any) Entity {
+	return Entity{Key: Key, Value: Value}
 }
 
-// NewData 新建Datum单条数据
-func NewDatum(kv ...KV) Datum {
-	var d = make(Datum, len(kv))
+// NewData 新建单条数据
+func NewData(kv ...Entity) Data {
+	var d = make(Data, len(kv))
 	copy(d, kv)
 	return d
-}
-
-// NewData 新建Data多条数据集
-func NewData(datum ...Datum) Data {
-	return Data{datum}
 }
