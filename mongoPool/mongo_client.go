@@ -26,11 +26,11 @@ type (
 
 // NewMongoClient 实例化：mongo客户端
 func NewMongoClient(url string) (*MongoClient, error) {
-	var err error
-	mc := &MongoClient{url: url, condition: Map{}}
-
-	// 设置客户端选项
-	clientOptions := options.Client().ApplyURI(mc.url)
+	var (
+		err           error
+		mc            = &MongoClient{url: url, condition: Map{}}
+		clientOptions = options.Client().ApplyURI(mc.url)
+	)
 
 	// 连接到 MongoDB
 	if mc.client, err = mongo.Connect(context.TODO(), clientOptions); err != nil {
@@ -54,12 +54,14 @@ func (my *MongoClient) Close() error { return my.client.Disconnect(context.Backg
 func (my *MongoClient) GetClient() *mongo.Client { return my.client }
 
 // Ping 测试链接
-func (my *MongoClient) Ping() {
+func (my *MongoClient) Ping() error {
 	// 检查连接
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	my.Err = my.client.Ping(ctx, nil)
+
+	return my.Err
 }
 
 // SetDatabase 设置数据库

@@ -38,9 +38,7 @@ func (*MongoClientPool) AppendClient(key string, mongoClient *MongoClient) (*Mon
 }
 
 // HasClient 检查客户端是否存在
-func (*MongoClientPool) HasClient(key string) bool {
-	return mongoClientPool.clients.Has(key)
-}
+func (*MongoClientPool) HasClient(key string) bool { return mongoClientPool.clients.Has(key) }
 
 // GetClient 获取客户端
 func (*MongoClientPool) GetClient(key string) *MongoClient {
