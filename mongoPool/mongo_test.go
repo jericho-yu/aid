@@ -4,7 +4,6 @@ import (
 	"log"
 	"testing"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -24,8 +23,8 @@ func getDB(t *testing.T) (*MongoClientPool, *MongoClient) {
 }
 
 var (
-	testInsertOneId   primitive.ObjectID
-	testInsertManyIds []primitive.ObjectID
+	testInsertOneId   OID
+	testInsertManyIds []OID
 )
 
 func Test1InsertOne(t *testing.T) {
@@ -45,8 +44,8 @@ func Test1InsertOne(t *testing.T) {
 		if mc.InsertOne(NewData(NewEntity("name", "张三"), NewEntity("age", 18)), &insertOneRes).Err != nil {
 			log.Fatalf("插入单条数据失败：%v", err)
 		}
-		testInsertOneId = insertOneRes.InsertedID.(primitive.ObjectID)
-		t.Logf("插入单条数据成功：%v\n", insertOneRes.InsertedID.(primitive.ObjectID))
+		testInsertOneId = insertOneRes.InsertedID.(OID)
+		t.Logf("插入单条数据成功：%v\n", insertOneRes.InsertedID.(OID))
 
 		mp.Clean()
 	})
@@ -70,9 +69,9 @@ func Test2InsertMany(t *testing.T) {
 		t.Logf("插入多条数据成功：%v\n", insertManyRes.InsertedIDs)
 
 		if len(insertManyRes.InsertedIDs) > 0 {
-			testInsertManyIds = make([]primitive.ObjectID, len(insertManyRes.InsertedIDs))
+			testInsertManyIds = make([]OID, len(insertManyRes.InsertedIDs))
 			for idx, v := range insertManyRes.InsertedIDs {
-				testInsertManyIds[idx] = v.(primitive.ObjectID)
+				testInsertManyIds[idx] = v.(OID)
 			}
 		}
 

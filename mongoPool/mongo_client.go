@@ -22,6 +22,7 @@ type (
 	Data   = primitive.D
 	Entity = primitive.E
 	Map    = primitive.M
+	OID    = primitive.ObjectID
 )
 
 // NewMongoClient 实例化：mongo客户端
