@@ -88,6 +88,18 @@ func (my *MongoClient) InsertMany(data []any, res **mongo.InsertManyResult) *Mon
 	return my
 }
 
+// UpdateOne 修改一条数据
+func (my *MongoClient) UpdateOne(data Map, res **mongo.UpdateResult, opts ...*options.UpdateOptions) *MongoClient {
+	*res, my.Err = my.currentCollection.UpdateOne(context.TODO(), my.condition, NewMap("$set", data), opts...)
+	return my
+}
+
+// UpdateMany 修改多条数据
+func (my *MongoClient) UpdateMany(data Map, res **mongo.UpdateResult, opts ...*options.UpdateOptions) *MongoClient {
+	*res, my.Err = my.currentCollection.UpdateMany(context.TODO(), my.condition, NewMap("$set", data), opts...)
+	return my
+}
+
 // Where 设置查询条件
 func (my *MongoClient) Where(condition Map) *MongoClient {
 	my.condition = condition
