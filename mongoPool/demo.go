@@ -25,25 +25,23 @@ func Demo() {
 	mc = mp.GetClient("default").SetDatabase("test_db").SetCollection("test_collection")
 
 	// 清空数据
-	_ = mc.DeleteMany()
+	_ = mc.DeleteMany(nil)
 	if mc.Err != nil {
 		log.Fatalf("清空数据失败：%v", err)
 	}
 
 	// 插入单条数据
-	insertOneRes = mc.InsertOne(NewData(NewEntity("name", "张三"), NewEntity("age", 18)))
-	if mc.Err != nil {
+	if mc.InsertOne(NewData(NewEntity("name", "张三"), NewEntity("age", 18)), &insertOneRes).Err != nil {
 		log.Fatalf("插入单条数据失败：%v", err)
 	}
 	log.Printf("插入单条数据成功：%v\n", insertOneRes.InsertedID)
 
 	// 插入多条数据
-	insertManyRes = mc.InsertMany([]any{
+	if mc.InsertMany([]any{
 		NewData(NewEntity("name", "李四"), NewEntity("age", 19)),
 		NewData(NewEntity("name", "王五"), NewEntity("age", 20)),
 		NewData(NewEntity("name", "赵六"), NewEntity("age", 21)),
-	})
-	if mc.Err != nil {
+	}, &insertManyRes).Err != nil {
 		log.Fatalf("插入多条数据失败：%v", err)
 	}
 	log.Printf("插入多条数据成功：%v\n", insertManyRes.InsertedIDs)
@@ -61,15 +59,13 @@ func Demo() {
 	log.Printf("查询多条数据成功：%v\n", findManyRes)
 
 	// 删除单条数据
-	deleteOneRes = mc.Where(NewMap("_id", insertOneRes.InsertedID)).DeleteOne()
-	if mc.Err != nil {
+	if mc.Where(NewMap("_id", insertOneRes.InsertedID)).DeleteOne(&deleteOneRes).Err != nil {
 		log.Fatalf("删除单条数据失败：%v", mc.Err)
 	}
 	log.Printf("删除单条数据成功：%d", deleteOneRes.DeletedCount)
 
 	// 删除多条数据
-	deleteManyRes = mc.Where(NewMap("_id", NewMap("$in", insertManyRes.InsertedIDs[1:]))).DeleteMany()
-	if mc.Err != nil {
+	if mc.Where(NewMap("_id", NewMap("$in", insertManyRes.InsertedIDs[1:]))).DeleteMany(&deleteManyRes).Err != nil {
 		log.Fatalf("删除多条数据失败：%v", mc.Err)
 	}
 	log.Printf("删除多条数据成功：%d", deleteManyRes.DeletedCount)

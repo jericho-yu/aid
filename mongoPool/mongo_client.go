@@ -77,17 +77,15 @@ func (my *MongoClient) SetCollection(collection string, opts ...*options.Collect
 }
 
 // InsertOne 插入一条数据
-func (my *MongoClient) InsertOne(data Data) *mongo.InsertOneResult {
-	var insertOneRes *mongo.InsertOneResult
-	insertOneRes, my.Err = my.currentCollection.InsertOne(context.TODO(), data)
-	return insertOneRes
+func (my *MongoClient) InsertOne(data Data, res **mongo.InsertOneResult) *MongoClient {
+	*res, my.Err = my.currentCollection.InsertOne(context.TODO(), data)
+	return my
 }
 
 // InsertMany 插入多条数据
-func (my *MongoClient) InsertMany(data []any) *mongo.InsertManyResult {
-	var res *mongo.InsertManyResult
-	res, my.Err = my.currentCollection.InsertMany(context.TODO(), data)
-	return res
+func (my *MongoClient) InsertMany(data []any, res **mongo.InsertManyResult) *MongoClient {
+	*res, my.Err = my.currentCollection.InsertMany(context.TODO(), data)
+	return my
 }
 
 // Where 设置查询条件
@@ -136,23 +134,29 @@ func (my *MongoClient) FindMany(results *[]Map, findOptionFn func(opt *options.F
 }
 
 // DeleteOne 删除单条数据
-func (my *MongoClient) DeleteOne() *mongo.DeleteResult {
-	var res *mongo.DeleteResult
-
+func (my *MongoClient) DeleteOne(res **mongo.DeleteResult) *MongoClient {
 	defer my.CleanCondition()
 
-	res, my.Err = my.currentCollection.DeleteOne(context.TODO(), my.condition)
-	return res
+	if res == nil {
+		_, my.Err = my.currentCollection.DeleteOne(context.TODO(), my.condition)
+	} else {
+		*res, my.Err = my.currentCollection.DeleteOne(context.TODO(), my.condition)
+	}
+
+	return my
 }
 
 // DeleteMany 删除多条数据
-func (my *MongoClient) DeleteMany() *mongo.DeleteResult {
-	var res *mongo.DeleteResult
-
+func (my *MongoClient) DeleteMany(res **mongo.DeleteResult) *MongoClient {
 	defer my.CleanCondition()
 
-	res, my.Err = my.currentCollection.DeleteMany(context.TODO(), my.condition)
-	return res
+	if res == nil {
+		_, my.Err = my.currentCollection.DeleteMany(context.TODO(), my.condition)
+	} else {
+		*res, my.Err = my.currentCollection.DeleteMany(context.TODO(), my.condition)
+	}
+
+	return my
 }
 
 // NewMap 新建Map数据

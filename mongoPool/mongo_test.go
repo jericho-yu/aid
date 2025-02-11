@@ -20,7 +20,7 @@ func getDB(t *testing.T) (*MongoClientPool, *MongoClient) {
 	mc = mp.GetClient("default").SetDatabase("test_db").SetCollection("test_collection")
 
 	// 清空数据
-	_ = mc.DeleteMany()
+	_ = mc.DeleteMany(nil)
 	if mc.Err != nil {
 		t.Fatalf("清空数据失败：%v", err)
 	}
@@ -38,8 +38,7 @@ func Test1One(t *testing.T) {
 			mp, mc       = getDB(t)
 		)
 		// 插入单条数据
-		insertOneRes = mc.InsertOne(NewData(NewEntity("name", "张三"), NewEntity("age", 18)))
-		if mc.Err != nil {
+		if mc.InsertOne(NewData(NewEntity("name", "张三"), NewEntity("age", 18)), &insertOneRes).Err != nil {
 			log.Fatalf("插入单条数据失败：%v", err)
 		}
 		t.Logf("插入单条数据成功：%v\n", insertOneRes.InsertedID)
@@ -51,8 +50,7 @@ func Test1One(t *testing.T) {
 		t.Logf("查询单条数据成功：%v\n", findOneRes)
 
 		// 删除单条数据
-		deleteOneRes = mc.Where(NewMap("_id", insertOneRes.InsertedID)).DeleteOne()
-		if mc.Err != nil {
+		if mc.Where(NewMap("_id", insertOneRes.InsertedID)).DeleteOne(&deleteOneRes).Err != nil {
 			t.Fatalf("删除单条数据失败：%v", mc.Err)
 		}
 		t.Logf("成功删除数据：%d\n", deleteOneRes.DeletedCount)
@@ -71,12 +69,11 @@ func Test2Many(t *testing.T) {
 			mp, mc        = getDB(t)
 		)
 		// 插入多条数据
-		insertManyRes = mc.InsertMany([]any{
+		if mc.InsertMany([]any{
 			NewData(NewEntity("name", "李四"), NewEntity("age", 19)),
 			NewData(NewEntity("name", "王五"), NewEntity("age", 20)),
 			NewData(NewEntity("name", "赵六"), NewEntity("age", 21)),
-		})
-		if mc.Err != nil {
+		}, &insertManyRes).Err != nil {
 			t.Fatalf("插入多条数据失败：%v", err)
 		}
 		t.Logf("插入多条数据成功：%v\n", insertManyRes.InsertedIDs)
@@ -88,8 +85,7 @@ func Test2Many(t *testing.T) {
 		t.Logf("查询多条数据成功：%v\n", findManyRes)
 
 		// 删除多条数据
-		deleteManyRes = mc.Where(NewMap("_id", NewMap("$in", insertManyRes.InsertedIDs))).DeleteMany()
-		if mc.Err != nil {
+		if mc.Where(NewMap("_id", NewMap("$in", insertManyRes.InsertedIDs))).DeleteMany(&deleteManyRes).Err != nil {
 			t.Fatalf("删除多条数据失败：%v", mc.Err)
 		}
 		t.Logf("删除数据成功：%d\n", deleteManyRes.DeletedCount)
