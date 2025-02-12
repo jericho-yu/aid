@@ -15,13 +15,13 @@ type (
 		Name    string `bson:"name"`
 		Age     uint64 `bson:"age"`
 		ClassId OID    `bson:"class_id"`
-		Class   Class  `bson:"-"`
+		Class   *Class `bson:"-"`
 	}
 
 	Class struct {
-		Id       OID       `bson:"_id"`
-		Name     string    `bson:"name"`
-		Students []Student `bson:"-"`
+		Id       OID        `bson:"_id"`
+		Name     string     `bson:"name"`
+		Students []*Student `bson:"-"`
 	}
 )
 
@@ -148,9 +148,9 @@ func Test5FindOne(t *testing.T) {
 func Test6FindMany(t *testing.T) {
 	var (
 		classes  []Map
-		classes2 []Class
-		classA   Class
-		students []Student
+		classes2 []*Class
+		classA   *Class
+		students []*Student
 		mp, mc   = getDB(t)
 	)
 
@@ -201,8 +201,8 @@ func Test6FindMany(t *testing.T) {
 		if mc.SetCollection("classes").
 			Where(Map{"_id": Map{
 				"$in": array.FromAnyArray[OID](
-					array.NewAnyArray[Student](students).
-						Pluck(func(item Student) any { return item.ClassId })),
+					array.NewAnyArray[*Student](students).
+						Pluck(func(item *Student) any { return item.ClassId })),
 			}}).
 			FindMany(&classes2, nil).Err != nil {
 			t.Fatalf("查询多条数据失败：%v", mc.Err)
