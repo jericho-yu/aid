@@ -1,7 +1,8 @@
-package mongoPool
+package mongoDriver
 
 import (
 	"errors"
+	"log"
 	"sync"
 
 	"github.com/jericho-yu/aid/dict"
@@ -51,11 +52,7 @@ func (*MongoClientPool) GetClient(key string) *MongoClient {
 
 // 清除客户端
 func (*MongoClientPool) Remove(key string) (*MongoClientPool, error) {
-	if !mongoClientPool.clients.Has(key) {
-		return mongoClientPool, errors.New("客户端不存在")
-	}
-
-	if mongoClient, exist := mongoClientPool.clients.Get(key); exist {
+	if mongoClient, exist := mongoClientPool.clients.Get(key); !exist {
 		return mongoClientPool, errors.New("客户端不存在")
 	} else {
 		if err := mongoClient.Close(); err != nil {
@@ -71,6 +68,7 @@ func (*MongoClientPool) Remove(key string) (*MongoClientPool, error) {
 // Clean 清理客户端
 func (*MongoClientPool) Clean() *MongoClientPool {
 	for _, key := range mongoClientPool.clients.Keys() {
+		log.Printf("key: %v\n", key)
 		_, _ = mongoClientPool.Remove(key)
 	}
 	return mongoClientPool

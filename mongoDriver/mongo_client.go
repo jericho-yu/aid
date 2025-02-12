@@ -1,4 +1,4 @@
-package mongoPool
+package mongoDriver
 
 import (
 	"context"
@@ -13,8 +13,8 @@ type (
 	MongoClient struct {
 		url               string
 		client            *mongo.Client
-		currentDatabase   *mongo.Database
-		currentCollection *mongo.Collection
+		CurrentDatabase   *mongo.Database
+		CurrentCollection *mongo.Collection
 		condition         Map
 		Err               error
 	}
@@ -67,37 +67,37 @@ func (my *MongoClient) Ping() error {
 
 // SetDatabase 设置数据库
 func (my *MongoClient) SetDatabase(database string, opts ...*options.DatabaseOptions) *MongoClient {
-	my.currentDatabase = my.client.Database(database, opts...)
+	my.CurrentDatabase = my.client.Database(database, opts...)
 	return my
 }
 
 // SetCollection 设置文档
 func (my *MongoClient) SetCollection(collection string, opts ...*options.CollectionOptions) *MongoClient {
-	my.currentCollection = my.currentDatabase.Collection(collection, opts...)
+	my.CurrentCollection = my.CurrentDatabase.Collection(collection, opts...)
 	return my
 }
 
 // InsertOne 插入一条数据
-func (my *MongoClient) InsertOne(data Data, res **mongo.InsertOneResult) *MongoClient {
-	*res, my.Err = my.currentCollection.InsertOne(context.TODO(), data)
+func (my *MongoClient) InsertOne(data any, res **mongo.InsertOneResult) *MongoClient {
+	*res, my.Err = my.CurrentCollection.InsertOne(context.TODO(), data)
 	return my
 }
 
 // InsertMany 插入多条数据
 func (my *MongoClient) InsertMany(data []any, res **mongo.InsertManyResult) *MongoClient {
-	*res, my.Err = my.currentCollection.InsertMany(context.TODO(), data)
+	*res, my.Err = my.CurrentCollection.InsertMany(context.TODO(), data)
 	return my
 }
 
 // UpdateOne 修改一条数据
-func (my *MongoClient) UpdateOne(data Map, res **mongo.UpdateResult, opts ...*options.UpdateOptions) *MongoClient {
-	*res, my.Err = my.currentCollection.UpdateOne(context.TODO(), my.condition, NewMap("$set", data), opts...)
+func (my *MongoClient) UpdateOne(data any, res **mongo.UpdateResult, opts ...*options.UpdateOptions) *MongoClient {
+	*res, my.Err = my.CurrentCollection.UpdateOne(context.TODO(), my.condition, Map{"$set": data}, opts...)
 	return my
 }
 
 // UpdateMany 修改多条数据
-func (my *MongoClient) UpdateMany(data Map, res **mongo.UpdateResult, opts ...*options.UpdateOptions) *MongoClient {
-	*res, my.Err = my.currentCollection.UpdateMany(context.TODO(), my.condition, NewMap("$set", data), opts...)
+func (my *MongoClient) UpdateMany(data any, res **mongo.UpdateResult, opts ...*options.UpdateOptions) *MongoClient {
+	*res, my.Err = my.CurrentCollection.UpdateMany(context.TODO(), my.condition, Map{"$set": data}, opts...)
 	return my
 }
 
@@ -120,7 +120,7 @@ func (my *MongoClient) FindOne(result *Map, findOneOptionFn func(opt *options.Fi
 		findOneOption = findOneOptionFn(options.FindOne())
 	}
 
-	my.Err = my.currentCollection.FindOne(context.TODO(), my.condition, findOneOption).Decode(&result)
+	my.Err = my.CurrentCollection.FindOne(context.TODO(), my.condition, findOneOption).Decode(&result)
 	return my
 }
 
@@ -137,7 +137,7 @@ func (my *MongoClient) FindMany(results *[]Map, findOptionFn func(opt *options.F
 		findOption = findOptionFn(options.Find())
 	}
 
-	cursor, my.Err = my.currentCollection.Find(context.TODO(), my.condition, findOption)
+	cursor, my.Err = my.CurrentCollection.Find(context.TODO(), my.condition, findOption)
 	if my.Err != nil {
 		return my
 	}
@@ -151,9 +151,9 @@ func (my *MongoClient) DeleteOne(res **mongo.DeleteResult) *MongoClient {
 	defer my.CleanCondition()
 
 	if res == nil {
-		_, my.Err = my.currentCollection.DeleteOne(context.TODO(), my.condition)
+		_, my.Err = my.CurrentCollection.DeleteOne(context.TODO(), my.condition)
 	} else {
-		*res, my.Err = my.currentCollection.DeleteOne(context.TODO(), my.condition)
+		*res, my.Err = my.CurrentCollection.DeleteOne(context.TODO(), my.condition)
 	}
 
 	return my
@@ -164,23 +164,10 @@ func (my *MongoClient) DeleteMany(res **mongo.DeleteResult) *MongoClient {
 	defer my.CleanCondition()
 
 	if res == nil {
-		_, my.Err = my.currentCollection.DeleteMany(context.TODO(), my.condition)
+		_, my.Err = my.CurrentCollection.DeleteMany(context.TODO(), my.condition)
 	} else {
-		*res, my.Err = my.currentCollection.DeleteMany(context.TODO(), my.condition)
+		*res, my.Err = my.CurrentCollection.DeleteMany(context.TODO(), my.condition)
 	}
 
 	return my
-}
-
-// NewMap 新建Map数据
-func NewMap(Key string, Value any) Map { return Map{Key: Value} }
-
-// NewEntity 新建实体数据
-func NewEntity(Key string, Value any) Entity { return Entity{Key: Key, Value: Value} }
-
-// NewData 新建单条数据
-func NewData(kv ...Entity) Data {
-	var d = make(Data, len(kv))
-	copy(d, kv)
-	return d
 }
