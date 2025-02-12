@@ -103,6 +103,7 @@ func (my *MongoClient) UpdateMany(data any, res **mongo.UpdateResult, opts ...*o
 
 // Where 设置查询条件
 func (my *MongoClient) Where(condition ...Map) *MongoClient {
+	my.CleanConditions()
 	my.conditions = append(my.conditions, condition...)
 	return my
 }
