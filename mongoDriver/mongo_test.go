@@ -193,15 +193,17 @@ func Test6FindMany(t *testing.T) {
 	})
 
 	t.Run("查询多条数据3", func(t *testing.T) {
-		var classIds []OID
 		if mc.SetCollection("students").
 			FindMany(&students, nil).Err != nil {
 			t.Fatalf("查询多条数据失败：%v", mc.Err)
 		}
 
-		classIds = array.FromAnyArray[OID](array.NewAnyArray[Student](students).Pluck(func(item Student) any { return item.ClassId }))
 		if mc.SetCollection("classes").
-			Where(Map{"_id": Map{"$in": classIds}}).
+			Where(Map{"_id": Map{
+				"$in": array.FromAnyArray[OID](
+					array.NewAnyArray[Student](students).
+						Pluck(func(item Student) any { return item.ClassId })),
+			}}).
 			FindMany(&classes2, nil).Err != nil {
 			t.Fatalf("查询多条数据失败：%v", mc.Err)
 		}
