@@ -156,16 +156,12 @@ func Test6FindMany(t *testing.T) {
 
 	t.Run("查询多条数据1", func(t *testing.T) {
 		if mc.SetCollection("classes").
-			Where(Map{
-				"$lookup": Map{
-					"from":         "students",
-					"localField":   "_id",
-					"foreignField": "class_id",
-					"as":           "students",
-				},
-			}, Map{
-				"$match": Map{"name": "一班"},
-			}).
+			Where(Map{"$lookup": Map{
+				"from":         "students",
+				"localField":   "_id",
+				"foreignField": "class_id",
+				"as":           "students",
+			}}, Map{"$match": Map{"name": "一班"}}).
 			Aggregate(&classes).Err != nil {
 			t.Fatalf("查询多条数据失败：%v", mc.Err)
 		}
