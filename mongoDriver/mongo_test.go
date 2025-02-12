@@ -7,6 +7,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+type User struct {
+	Name string `bson:"name"`
+	Age  uint64 `bson:"age"`
+}
+
 func getDB(t *testing.T) (*MongoClientPool, *MongoClient) {
 	var err error
 	mp := OnceMongoPool()
@@ -28,6 +33,7 @@ func Test1InsertOne(t *testing.T) {
 			err          error
 			insertOneRes *mongo.InsertOneResult
 			mp, mc       = getDB(t)
+			user         = User{Name: "张三", Age: 18}
 		)
 		// 清空数据
 		_ = mc.DeleteMany(nil)
@@ -36,7 +42,7 @@ func Test1InsertOne(t *testing.T) {
 		}
 
 		// 插入单条数据
-		if mc.InsertOne(Map{"name": "张三", "age": 18}, &insertOneRes).Err != nil {
+		if mc.InsertOne(user, &insertOneRes).Err != nil {
 			log.Fatalf("插入单条数据失败：%v", err)
 		}
 		t.Logf("插入单条数据成功：%s\n", insertOneRes.InsertedID.(OID).String())
@@ -54,9 +60,9 @@ func Test2InsertMany(t *testing.T) {
 		)
 		// 插入多条数据
 		if mc.InsertMany([]any{
-			Map{"name": "李四", "age": 19},
-			Map{"name": "王五", "age": 20},
-			Map{"name": "赵六", "age": 21},
+			&User{Name: "李四", Age: 19},
+			&User{Name: "王五", Age: 20},
+			&User{Name: "赵六", Age: 21},
 		}, &insertManyRes).Err != nil {
 			t.Fatalf("插入多条数据失败：%v", err)
 		}
@@ -72,7 +78,7 @@ func Test3UpdateOne(t *testing.T) {
 		mp, mc       = getDB(t)
 	)
 
-	if mc.Where(Map{"name": "张三"}).UpdateOne(Map{"age": 1}, &updateOneRes).Err != nil {
+	if mc.Where(Map{"name": "张三"}).UpdateOne(User{Name: "张三", Age: 1}, &updateOneRes).Err != nil {
 		t.Fatalf("更新单条数据失败：%v", mc.Err)
 	}
 	t.Logf("更新成功：%d\n", updateOneRes.ModifiedCount)
@@ -94,7 +100,39 @@ func Test4UpdateMany(t *testing.T) {
 	mp.Clean()
 }
 
-func Test5DeleteOne(t *testing.T) {
+func Test5FindOne(t *testing.T) {
+	var (
+		user   *User
+		mp, mc = getDB(t)
+	)
+
+	t.Run("查询单条数据", func(t *testing.T) {
+		if mc.Where(Map{"name": "张三"}).FindOne(&user, nil).Err != nil {
+			t.Fatalf("查询单条数据失败：%v", mc.Err)
+		}
+		t.Errorf("查询单条数据成功：%#v\n", user)
+
+		mp.Clean()
+	})
+}
+
+func Test6FindAny(t *testing.T) {
+	var (
+		users  []*User
+		mp, mc = getDB(t)
+	)
+
+	t.Run("查询多条数据", func(t *testing.T) {
+		if mc.Where(Map{"name": Map{"$ne": "张三"}}).FindMany(&users, nil).Err != nil {
+			t.Fatalf("查询多条数据失败：%v", mc.Err)
+		}
+		t.Errorf("查询多条数据成功：%#v\n", users)
+	})
+
+	mp.Clean()
+}
+
+func Test7DeleteOne(t *testing.T) {
 	var (
 		deleteOneRes *mongo.DeleteResult
 		mp, mc       = getDB(t)
@@ -110,7 +148,7 @@ func Test5DeleteOne(t *testing.T) {
 	})
 }
 
-func Test6DeleteMany(t *testing.T) {
+func Test8DeleteMany(t *testing.T) {
 	var (
 		deleteManyRes *mongo.DeleteResult
 		mp, mc        = getDB(t)

@@ -111,7 +111,7 @@ func (my *MongoClient) Where(condition Map) *MongoClient {
 func (my *MongoClient) CleanCondition() { my.condition = Map{} }
 
 // FindOne 查询一条数据
-func (my *MongoClient) FindOne(result *Map, findOneOptionFn func(opt *options.FindOneOptions) *options.FindOneOptions) *MongoClient {
+func (my *MongoClient) FindOne(result any, findOneOptionFn func(opt *options.FindOneOptions) *options.FindOneOptions) *MongoClient {
 	var findOneOption *options.FindOneOptions
 
 	defer my.CleanCondition()
@@ -120,12 +120,12 @@ func (my *MongoClient) FindOne(result *Map, findOneOptionFn func(opt *options.Fi
 		findOneOption = findOneOptionFn(options.FindOne())
 	}
 
-	my.Err = my.CurrentCollection.FindOne(context.TODO(), my.condition, findOneOption).Decode(&result)
+	my.Err = my.CurrentCollection.FindOne(context.TODO(), my.condition, findOneOption).Decode(result)
 	return my
 }
 
 // FindMany 查询多条数据
-func (my *MongoClient) FindMany(results *[]Map, findOptionFn func(opt *options.FindOptions) *options.FindOptions) *MongoClient {
+func (my *MongoClient) FindMany(results any, findOptionFn func(opt *options.FindOptions) *options.FindOptions) *MongoClient {
 	var (
 		findOption *options.FindOptions
 		cursor     *mongo.Cursor

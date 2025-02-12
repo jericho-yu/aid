@@ -2,17 +2,14 @@ package mongoDriver
 
 import (
 	"errors"
-	"log"
 	"sync"
 
 	"github.com/jericho-yu/aid/dict"
 )
 
-type (
-	MongoClientPool struct {
-		clients *dict.AnyDict[string, *MongoClient]
-	}
-)
+type MongoClientPool struct {
+	clients *dict.AnyDict[string, *MongoClient]
+}
 
 var (
 	mongoClientPool *MongoClientPool
@@ -68,7 +65,6 @@ func (*MongoClientPool) Remove(key string) (*MongoClientPool, error) {
 // Clean 清理客户端
 func (*MongoClientPool) Clean() *MongoClientPool {
 	for _, key := range mongoClientPool.clients.Keys() {
-		log.Printf("key: %v\n", key)
 		_, _ = mongoClientPool.Remove(key)
 	}
 	return mongoClientPool
