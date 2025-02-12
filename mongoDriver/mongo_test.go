@@ -166,8 +166,7 @@ func Test6FindMany(t *testing.T) {
 			}, Map{
 				"$match": Map{"name": "一班"},
 			}).
-			Aggregate(&classes).
-			Err != nil {
+			Aggregate(&classes).Err != nil {
 			t.Fatalf("查询多条数据失败：%v", mc.Err)
 		}
 		t.Logf("查询多条数据成功：%#v\n", classes)
@@ -176,15 +175,13 @@ func Test6FindMany(t *testing.T) {
 	t.Run("查询多条数据2", func(t *testing.T) {
 		if mc.SetCollection("classes").
 			Where(Map{"name": "一班"}).
-			FindOne(&classA, nil).
-			Err != nil {
+			FindOne(&classA, nil).Err != nil {
 			t.Fatalf("查询多条数据失败：%v", mc.Err)
 		}
 
 		if mc.SetCollection("students").
 			Where(Map{"class_id": classA.Id}).
-			FindMany(&students, nil).
-			Err != nil {
+			FindMany(&students, nil).Err != nil {
 			t.Fatalf("查询多条数据失败：%v", mc.Err)
 		}
 
