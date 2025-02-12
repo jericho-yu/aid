@@ -15,7 +15,7 @@ type (
 		client            *mongo.Client
 		CurrentDatabase   *mongo.Database
 		CurrentCollection *mongo.Collection
-		condition         Map
+		condition         []Map
 		Err               error
 	}
 
@@ -29,7 +29,7 @@ type (
 func NewMongoClient(url string) (*MongoClient, error) {
 	var (
 		err           error
-		mc            = &MongoClient{url: url, condition: Map{}}
+		mc            = &MongoClient{url: url, condition: []Map{}}
 		clientOptions = options.Client().ApplyURI(mc.url)
 	)
 
@@ -102,13 +102,13 @@ func (my *MongoClient) UpdateMany(data any, res **mongo.UpdateResult, opts ...*o
 }
 
 // Where 设置查询条件
-func (my *MongoClient) Where(condition Map) *MongoClient {
-	my.condition = condition
+func (my *MongoClient) Where(condition ...Map) *MongoClient {
+	my.condition = append(my.condition, condition...)
 	return my
 }
 
 // CleanCondition 清理查询条件
-func (my *MongoClient) CleanCondition() { my.condition = Map{} }
+func (my *MongoClient) CleanCondition() { my.condition = []Map{} }
 
 // FindOne 查询一条数据
 func (my *MongoClient) FindOne(result any, findOneOptionFn func(opt *options.FindOneOptions) *options.FindOneOptions) *MongoClient {
@@ -120,7 +120,7 @@ func (my *MongoClient) FindOne(result any, findOneOptionFn func(opt *options.Fin
 		findOneOption = findOneOptionFn(options.FindOne())
 	}
 
-	my.Err = my.CurrentCollection.FindOne(context.TODO(), my.condition, findOneOption).Decode(result)
+	my.Err = my.CurrentCollection.FindOne(context.TODO(), my.condition[0], findOneOption).Decode(result)
 	return my
 }
 
@@ -137,7 +137,22 @@ func (my *MongoClient) FindMany(results any, findOptionFn func(opt *options.Find
 		findOption = findOptionFn(options.Find())
 	}
 
-	cursor, my.Err = my.CurrentCollection.Find(context.TODO(), my.condition, findOption)
+	cursor, my.Err = my.CurrentCollection.Find(context.TODO(), my.condition[0], findOption)
+	if my.Err != nil {
+		return my
+	}
+
+	my.Err = cursor.All(context.TODO(), results)
+	return my
+}
+
+// Aggregate 聚合查询
+func (my *MongoClient) Aggregate(results any) *MongoClient {
+	var cursor *mongo.Cursor
+
+	defer my.CleanCondition()
+
+	cursor, my.Err = my.CurrentCollection.Aggregate(context.TODO(), my.condition)
 	if my.Err != nil {
 		return my
 	}

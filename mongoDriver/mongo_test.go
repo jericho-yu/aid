@@ -7,10 +7,19 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type User struct {
-	Name string `bson:"name"`
-	Age  uint64 `bson:"age"`
-}
+type (
+	Student struct {
+		Name    string `bson:"name"`
+		Age     uint64 `bson:"age"`
+		ClassId any    `bson:"class_id"`
+		Class   Class  `bson:"class"`
+	}
+
+	Class struct {
+		Name     string `bson:"name"`
+		Students []Student
+	}
+)
 
 func getDB(t *testing.T) (*MongoClientPool, *MongoClient) {
 	var err error
@@ -33,7 +42,7 @@ func Test1InsertOne(t *testing.T) {
 			err          error
 			insertOneRes *mongo.InsertOneResult
 			mp, mc       = getDB(t)
-			user         = User{Name: "张三", Age: 18}
+			user         = Student{Name: "张三", Age: 18}
 		)
 		// 清空数据
 		_ = mc.DeleteMany(nil)
@@ -54,18 +63,34 @@ func Test1InsertOne(t *testing.T) {
 func Test2InsertMany(t *testing.T) {
 	t.Run("操作多条数据", func(t *testing.T) {
 		var (
-			err           error
+			insertOneRes  *mongo.InsertOneResult
 			insertManyRes *mongo.InsertManyResult
 			mp, mc        = getDB(t)
 		)
 		// 插入多条数据
-		if mc.InsertMany([]any{
-			&User{Name: "李四", Age: 19},
-			&User{Name: "王五", Age: 20},
-			&User{Name: "赵六", Age: 21},
-		}, &insertManyRes).Err != nil {
-			t.Fatalf("插入多条数据失败：%v", err)
+		if mc.SetCollection("classes").InsertOne(Class{Name: "一班"}, &insertOneRes).Err != nil {
+			t.Fatalf("插入班级失败：%v", mc.Err)
 		}
+		t.Logf("插入班级成功：%s\n", insertOneRes.InsertedID.(OID).String())
+
+		if mc.SetCollection("students").InsertMany([]any{
+			Student{Name: "张三", Age: 18, ClassId: insertOneRes.InsertedID},
+			Student{Name: "李四", Age: 19, ClassId: insertOneRes.InsertedID},
+		}, &insertManyRes).Err != nil {
+			t.Fatalf("插入多条数据失败：%v", mc.Err)
+		}
+
+		if mc.SetCollection("classes").InsertOne(Map{"name": "二班"}, &insertOneRes).Err != nil {
+			t.Fatalf("插入班级失败：%v", mc.Err)
+		}
+
+		if mc.SetCollection("students").InsertMany([]any{
+			Student{Name: "王五", Age: 20, ClassId: insertOneRes.InsertedID.(OID)},
+			Student{Name: "赵六", Age: 21, ClassId: insertOneRes.InsertedID.(OID)},
+		}, &insertManyRes).Err != nil {
+			t.Fatalf("插入学生失败：%v", mc.Err)
+		}
+
 		t.Logf("插入多条数据成功：%v\n", insertManyRes.InsertedIDs)
 
 		mp.Clean()
@@ -78,7 +103,7 @@ func Test3UpdateOne(t *testing.T) {
 		mp, mc       = getDB(t)
 	)
 
-	if mc.Where(Map{"name": "张三"}).UpdateOne(User{Name: "张三", Age: 1}, &updateOneRes).Err != nil {
+	if mc.Where(Map{"name": "张三"}).UpdateOne(Student{Name: "张三", Age: 1}, &updateOneRes).Err != nil {
 		t.Fatalf("更新单条数据失败：%v", mc.Err)
 	}
 	t.Logf("更新成功：%d\n", updateOneRes.ModifiedCount)
@@ -92,7 +117,7 @@ func Test4UpdateMany(t *testing.T) {
 		mp, mc        = getDB(t)
 	)
 
-	if mc.Where(Map{"name": Map{"$ne": "张三"}}).UpdateMany(Map{"age": 0}, &updateManyRes).Err != nil {
+	if mc.SetCollection("students").Where(Map{"name": Map{"$ne": "张三"}}).UpdateMany(Map{"age": 0}, &updateManyRes).Err != nil {
 		t.Fatalf("更新单条数据失败：%v", mc.Err)
 	}
 	t.Logf("更新成功：%d\n", updateManyRes.ModifiedCount)
@@ -102,31 +127,42 @@ func Test4UpdateMany(t *testing.T) {
 
 func Test5FindOne(t *testing.T) {
 	var (
-		user   *User
-		mp, mc = getDB(t)
+		student *Student
+		mp, mc  = getDB(t)
 	)
 
 	t.Run("查询单条数据", func(t *testing.T) {
-		if mc.Where(Map{"name": "张三"}).FindOne(&user, nil).Err != nil {
+		if mc.SetCollection("students").Where(Map{"name": "张三"}).FindOne(&student, nil).Err != nil {
 			t.Fatalf("查询单条数据失败：%v", mc.Err)
 		}
-		t.Errorf("查询单条数据成功：%#v\n", user)
+		t.Errorf("查询单条数据成功：%#v\n", student)
 
 		mp.Clean()
 	})
 }
 
-func Test6FindAny(t *testing.T) {
+func Test6FindMany(t *testing.T) {
 	var (
-		users  []*User
-		mp, mc = getDB(t)
+		// students []Student
+		// classA Class
+		classes []Map
+		mp, mc  = getDB(t)
 	)
 
 	t.Run("查询多条数据", func(t *testing.T) {
-		if mc.Where(Map{"name": Map{"$ne": "张三"}}).FindMany(&users, nil).Err != nil {
+		if mc.SetCollection("classes").Where(Map{
+			"$lookup": Map{
+				"from":         "students",
+				"localField":   "_id",
+				"foreignField": "class_id",
+				"as":           "students",
+			},
+		}, Map{
+			"$match": Map{"name": "一班"},
+		}).Aggregate(&classes).Err != nil {
 			t.Fatalf("查询多条数据失败：%v", mc.Err)
 		}
-		t.Errorf("查询多条数据成功：%#v\n", users)
+		t.Logf("查询多条数据成功：%#v\n", classes)
 	})
 
 	mp.Clean()
