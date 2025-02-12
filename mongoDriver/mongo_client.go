@@ -15,7 +15,7 @@ type (
 		client            *mongo.Client
 		CurrentDatabase   *mongo.Database
 		CurrentCollection *mongo.Collection
-		condition         []Map
+		conditions        []Map
 		Err               error
 	}
 
@@ -29,7 +29,7 @@ type (
 func NewMongoClient(url string) (*MongoClient, error) {
 	var (
 		err           error
-		mc            = &MongoClient{url: url, condition: []Map{}}
+		mc            = &MongoClient{url: url, conditions: []Map{}}
 		clientOptions = options.Client().ApplyURI(mc.url)
 	)
 
@@ -91,36 +91,51 @@ func (my *MongoClient) InsertMany(data []any, res **mongo.InsertManyResult) *Mon
 
 // UpdateOne 修改一条数据
 func (my *MongoClient) UpdateOne(data any, res **mongo.UpdateResult, opts ...*options.UpdateOptions) *MongoClient {
-	*res, my.Err = my.CurrentCollection.UpdateOne(context.TODO(), my.condition, Map{"$set": data}, opts...)
+	*res, my.Err = my.CurrentCollection.UpdateOne(context.TODO(), my.GetFirstCondition(), Map{"$set": data}, opts...)
 	return my
 }
 
 // UpdateMany 修改多条数据
 func (my *MongoClient) UpdateMany(data any, res **mongo.UpdateResult, opts ...*options.UpdateOptions) *MongoClient {
-	*res, my.Err = my.CurrentCollection.UpdateMany(context.TODO(), my.condition, Map{"$set": data}, opts...)
+	*res, my.Err = my.CurrentCollection.UpdateMany(context.TODO(), my.GetFirstCondition(), Map{"$set": data}, opts...)
 	return my
 }
 
 // Where 设置查询条件
 func (my *MongoClient) Where(condition ...Map) *MongoClient {
-	my.condition = append(my.condition, condition...)
+	my.conditions = append(my.conditions, condition...)
 	return my
 }
 
-// CleanCondition 清理查询条件
-func (my *MongoClient) CleanCondition() { my.condition = []Map{} }
+// CleanConditions 清理查询条件
+func (my *MongoClient) CleanConditions() { my.conditions = []Map{} }
+
+// GetFirstCondition 获取第一个查询条件（非聚合条件）
+func (my *MongoClient) GetFirstCondition() Map {
+	if len(my.conditions) > 0 {
+		return my.conditions[0]
+	} else {
+		return nil
+	}
+}
+
+// GetConditions 获取全部查询条件（聚合条件）
+func (my *MongoClient) GetConditions() []Map {
+	return my.conditions
+}
 
 // FindOne 查询一条数据
 func (my *MongoClient) FindOne(result any, findOneOptionFn func(opt *options.FindOneOptions) *options.FindOneOptions) *MongoClient {
 	var findOneOption *options.FindOneOptions
 
-	defer my.CleanCondition()
+	defer my.CleanConditions()
 
 	if findOneOptionFn != nil {
 		findOneOption = findOneOptionFn(options.FindOne())
 	}
 
-	my.Err = my.CurrentCollection.FindOne(context.TODO(), my.condition[0], findOneOption).Decode(result)
+	my.Err = my.CurrentCollection.FindOne(context.TODO(), my.GetFirstCondition(), findOneOption).Decode(result)
+
 	return my
 }
 
@@ -131,13 +146,14 @@ func (my *MongoClient) FindMany(results any, findOptionFn func(opt *options.Find
 		cursor     *mongo.Cursor
 	)
 
-	defer my.CleanCondition()
+	defer my.CleanConditions()
 
 	if findOptionFn != nil {
 		findOption = findOptionFn(options.Find())
 	}
 
-	cursor, my.Err = my.CurrentCollection.Find(context.TODO(), my.condition[0], findOption)
+	cursor, my.Err = my.CurrentCollection.Find(context.TODO(), my.GetFirstCondition(), findOption)
+
 	if my.Err != nil {
 		return my
 	}
@@ -150,9 +166,9 @@ func (my *MongoClient) FindMany(results any, findOptionFn func(opt *options.Find
 func (my *MongoClient) Aggregate(results any) *MongoClient {
 	var cursor *mongo.Cursor
 
-	defer my.CleanCondition()
+	defer my.CleanConditions()
 
-	cursor, my.Err = my.CurrentCollection.Aggregate(context.TODO(), my.condition)
+	cursor, my.Err = my.CurrentCollection.Aggregate(context.TODO(), my.GetConditions())
 	if my.Err != nil {
 		return my
 	}
@@ -163,12 +179,12 @@ func (my *MongoClient) Aggregate(results any) *MongoClient {
 
 // DeleteOne 删除单条数据
 func (my *MongoClient) DeleteOne(res **mongo.DeleteResult) *MongoClient {
-	defer my.CleanCondition()
+	defer my.CleanConditions()
 
 	if res == nil {
-		_, my.Err = my.CurrentCollection.DeleteOne(context.TODO(), my.condition)
+		_, my.Err = my.CurrentCollection.DeleteOne(context.TODO(), my.GetFirstCondition())
 	} else {
-		*res, my.Err = my.CurrentCollection.DeleteOne(context.TODO(), my.condition)
+		*res, my.Err = my.CurrentCollection.DeleteOne(context.TODO(), my.GetFirstCondition())
 	}
 
 	return my
@@ -176,12 +192,12 @@ func (my *MongoClient) DeleteOne(res **mongo.DeleteResult) *MongoClient {
 
 // DeleteMany 删除多条数据
 func (my *MongoClient) DeleteMany(res **mongo.DeleteResult) *MongoClient {
-	defer my.CleanCondition()
+	defer my.CleanConditions()
 
 	if res == nil {
-		_, my.Err = my.CurrentCollection.DeleteMany(context.TODO(), my.condition)
+		_, my.Err = my.CurrentCollection.DeleteMany(context.TODO(), my.GetFirstCondition())
 	} else {
-		*res, my.Err = my.CurrentCollection.DeleteMany(context.TODO(), my.condition)
+		*res, my.Err = my.CurrentCollection.DeleteMany(context.TODO(), my.GetFirstCondition())
 	}
 
 	return my

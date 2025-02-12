@@ -1,23 +1,27 @@
 package mongoDriver
 
 import (
+	"github.com/jericho-yu/aid/array"
 	"log"
 	"testing"
 
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type (
 	Student struct {
+		Id      OID    `bson:"_id"`
 		Name    string `bson:"name"`
 		Age     uint64 `bson:"age"`
-		ClassId any    `bson:"class_id"`
-		Class   Class  `bson:"class"`
+		ClassId OID    `bson:"class_id"`
+		Class   Class  `bson:"-"`
 	}
 
 	Class struct {
-		Name     string `bson:"name"`
-		Students []Student
+		Id       OID       `bson:"_id"`
+		Name     string    `bson:"name"`
+		Students []Student `bson:"-"`
 	}
 )
 
@@ -68,14 +72,14 @@ func Test2InsertMany(t *testing.T) {
 			mp, mc        = getDB(t)
 		)
 		// 插入多条数据
-		if mc.SetCollection("classes").InsertOne(Class{Name: "一班"}, &insertOneRes).Err != nil {
+		if mc.SetCollection("classes").InsertOne(Class{Id: primitive.NewObjectID(), Name: "一班"}, &insertOneRes).Err != nil {
 			t.Fatalf("插入班级失败：%v", mc.Err)
 		}
 		t.Logf("插入班级成功：%s\n", insertOneRes.InsertedID.(OID).String())
 
 		if mc.SetCollection("students").InsertMany([]any{
-			Student{Name: "张三", Age: 18, ClassId: insertOneRes.InsertedID},
-			Student{Name: "李四", Age: 19, ClassId: insertOneRes.InsertedID},
+			Student{Id: primitive.NewObjectID(), Name: "张三", Age: 18, ClassId: insertOneRes.InsertedID.(OID)},
+			Student{Id: primitive.NewObjectID(), Name: "李四", Age: 19, ClassId: insertOneRes.InsertedID.(OID)},
 		}, &insertManyRes).Err != nil {
 			t.Fatalf("插入多条数据失败：%v", mc.Err)
 		}
@@ -85,8 +89,8 @@ func Test2InsertMany(t *testing.T) {
 		}
 
 		if mc.SetCollection("students").InsertMany([]any{
-			Student{Name: "王五", Age: 20, ClassId: insertOneRes.InsertedID.(OID)},
-			Student{Name: "赵六", Age: 21, ClassId: insertOneRes.InsertedID.(OID)},
+			Student{Id: primitive.NewObjectID(), Name: "王五", Age: 20, ClassId: insertOneRes.InsertedID.(OID)},
+			Student{Id: primitive.NewObjectID(), Name: "赵六", Age: 21, ClassId: insertOneRes.InsertedID.(OID)},
 		}, &insertManyRes).Err != nil {
 			t.Fatalf("插入学生失败：%v", mc.Err)
 		}
@@ -143,26 +147,74 @@ func Test5FindOne(t *testing.T) {
 
 func Test6FindMany(t *testing.T) {
 	var (
-		// students []Student
-		// classA Class
-		classes []Map
-		mp, mc  = getDB(t)
+		classes  []Map
+		classes2 []Class
+		classA   Class
+		students []Student
+		mp, mc   = getDB(t)
 	)
 
-	t.Run("查询多条数据", func(t *testing.T) {
-		if mc.SetCollection("classes").Where(Map{
-			"$lookup": Map{
-				"from":         "students",
-				"localField":   "_id",
-				"foreignField": "class_id",
-				"as":           "students",
-			},
-		}, Map{
-			"$match": Map{"name": "一班"},
-		}).Aggregate(&classes).Err != nil {
+	t.Run("查询多条数据1", func(t *testing.T) {
+		if mc.SetCollection("classes").
+			Where(Map{
+				"$lookup": Map{
+					"from":         "students",
+					"localField":   "_id",
+					"foreignField": "class_id",
+					"as":           "students",
+				},
+			}, Map{
+				"$match": Map{"name": "一班"},
+			}).
+			Aggregate(&classes).
+			Err != nil {
 			t.Fatalf("查询多条数据失败：%v", mc.Err)
 		}
 		t.Logf("查询多条数据成功：%#v\n", classes)
+	})
+
+	t.Run("查询多条数据2", func(t *testing.T) {
+		if mc.SetCollection("classes").
+			Where(Map{"name": "一班"}).
+			FindOne(&classA, nil).
+			Err != nil {
+			t.Fatalf("查询多条数据失败：%v", mc.Err)
+		}
+
+		if mc.SetCollection("students").
+			Where(Map{"class_id": classA.Id}).
+			FindMany(&students, nil).
+			Err != nil {
+			t.Fatalf("查询多条数据失败：%v", mc.Err)
+		}
+
+		classA.Students = students
+		t.Logf("查询成功：%#v\n", classA)
+	})
+
+	t.Run("查询多条数据3", func(t *testing.T) {
+		var classIds []OID
+		if mc.SetCollection("students").
+			FindMany(&students, nil).Err != nil {
+			t.Fatalf("查询多条数据失败：%v", mc.Err)
+		}
+
+		classIds = array.FromAnyArray[OID](array.NewAnyArray[Student](students).Pluck(func(item Student) any { return item.ClassId }))
+		if mc.SetCollection("classes").
+			Where(Map{"_id": Map{"$in": classIds}}).
+			FindMany(&classes2, nil).Err != nil {
+			t.Fatalf("查询多条数据失败：%v", mc.Err)
+		}
+
+		for idx := range students {
+			for _, class := range classes2 {
+				if students[idx].ClassId == class.Id {
+					students[idx].Class = class
+				}
+			}
+		}
+
+		t.Logf("查询成功：%v\n", students)
 	})
 
 	mp.Clean()
