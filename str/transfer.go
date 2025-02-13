@@ -8,9 +8,7 @@ import (
 
 type Transfer struct{ original string }
 
-func NewTransfer(original string) *Transfer {
-	return &Transfer{original: original}
-}
+func NewTransfer(original string) *Transfer { return &Transfer{original: original} }
 
 // PascalToCamel 大驼峰 -> 小驼峰
 func (my *Transfer) PascalToCamel() string {

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jericho-yu/aid/common"
+	"github.com/spf13/cast"
 )
 
 type (
@@ -98,7 +98,7 @@ func NewTerminalLog(format ...string) *TerminalLog {
 	for _, v := range format {
 		f += v
 	}
-	return &TerminalLog{format: f, enable: common.ToBool(os.Getenv("AID__STR__TERMINAL_LOG__ENABLE"))}
+	return &TerminalLog{format: f, enable: cast.ToBool(os.Getenv("AID__STR__TERMINAL_LOG__ENABLE"))}
 }
 
 // Default 打印日志行
