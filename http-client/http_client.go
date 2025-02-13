@@ -474,12 +474,7 @@ func (my *Client) Download(filename, processContent string) *Client {
 	defer f.Close()
 
 	if processContent != "" {
-		bar := processBar.DefaultBytes(
-			my.response.ContentLength,
-			processContent,
-		)
-
-		io.Copy(io.MultiWriter(f, bar), my.response.Body)
+		io.Copy(io.MultiWriter(f, processBar.DefaultBytes(my.response.ContentLength, processContent)), my.response.Body)
 	} else {
 		io.Copy(f, my.response.Body)
 	}
