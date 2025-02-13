@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"github.com/jericho-yu/aid/str"
+	processBar "github.com/schollz/progressbar/v3"
 )
 
 type (
@@ -434,12 +435,11 @@ func (my *Client) GenerateRequest() *Client {
 	return my
 }
 
-// Send 发送请求
-func (my *Client) Send() *Client {
+func (my *Client) beforeSend() *http.Client {
 	if !my.isReady {
 		my.GenerateRequest()
 		if my.Err != nil {
-			return my
+			return nil
 		}
 	}
 
@@ -453,16 +453,47 @@ func (my *Client) Send() *Client {
 		client.Timeout = time.Duration(my.timeoutSecond) * time.Second
 	}
 
-	my.response, my.Err = client.Do(my.request)
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			my.Err = fmt.Errorf("发送失败：%v", err)
-		}
-	}(my.response.Body)
+	return client
+}
+
+// Download 下载文件
+func (my *Client) Download(filename, processContent string) *Client {
+	client := my.beforeSend()
 	if my.Err != nil {
 		return my
 	}
+
+	my.response, my.Err = client.Do(my.request)
+	if my.Err != nil {
+		return my
+	}
+	defer my.response.Body.Close()
+
+	f, _ := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY, 0644)
+	defer f.Close()
+
+	bar := processBar.DefaultBytes(
+		my.response.ContentLength,
+		processContent,
+	)
+
+	io.Copy(io.MultiWriter(f, bar), my.response.Body)
+
+	return my
+}
+
+// Send 发送请求
+func (my *Client) Send() *Client {
+	client := my.beforeSend()
+	if my.Err != nil {
+		return my
+	}
+
+	my.response, my.Err = client.Do(my.request)
+	if my.Err != nil {
+		return my
+	}
+	defer my.response.Body.Close()
 
 	// 读取新的响应的主体
 	if my.response.ContentLength > 1*1024*1024 { // 1MB
