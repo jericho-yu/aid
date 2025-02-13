@@ -131,13 +131,12 @@ func (my *Cell) GetBorder() *array.AnyArray[border] {
 // SetWrapText 设置自动换行
 func (my *Cell) SetWrapText(wrapText bool) *Cell {
 	my.wrapText = wrapText
+
 	return my
 }
 
 // GetWrapText 获取自动换行
-func (my *Cell) GetWrapText() bool {
-	return my.wrapText
-}
+func (my *Cell) GetWrapText() bool { return my.wrapText }
 
 // SetBorderSurrounding 设置四周边框
 func (my *Cell) SetBorderSurrounding(borderRgb string, borderStyle int, condition bool) *Cell {
@@ -160,6 +159,7 @@ func (my *Cell) SetBorderSurroundingFunc(condition func() (string, int, bool)) *
 	if condition != nil {
 		my.SetBorderSurrounding(condition())
 	}
+
 	return my
 }
 
@@ -168,6 +168,7 @@ func (my *Cell) SetBorderTopRgb(borderTopRgb string, condition bool) *Cell {
 	if condition {
 		my.borderTopRgb = borderTopRgb
 	}
+
 	return my
 }
 
@@ -176,6 +177,7 @@ func (my *Cell) SetBorderTopRbgFunc(condition func() (string, bool)) *Cell {
 	if condition != nil {
 		my.SetBorderTopRgb(condition())
 	}
+
 	return my
 }
 
@@ -184,6 +186,7 @@ func (my *Cell) SetBorderTopStyle(borderTopStyle int, condition bool) *Cell {
 	if condition {
 		my.borderTopStyle = borderTopStyle
 	}
+
 	return my
 }
 
@@ -192,6 +195,7 @@ func (my *Cell) SetBorderTopStyleFunc(condition func() (int, bool)) *Cell {
 	if condition != nil {
 		my.SetBorderTopStyle(condition())
 	}
+
 	return my
 }
 
@@ -200,6 +204,7 @@ func (my *Cell) SetBorderBottomRgb(borderBottomRgb string, condition bool) *Cell
 	if condition {
 		my.borderBottomRgb = borderBottomRgb
 	}
+
 	return my
 }
 
@@ -208,6 +213,7 @@ func (my *Cell) SetBorderBottomRbgFunc(condition func() (string, bool)) *Cell {
 	if condition != nil {
 		my.SetBorderBottomRgb(condition())
 	}
+
 	return my
 }
 
@@ -216,6 +222,7 @@ func (my *Cell) SetBorderBottomStyle(borderBottomStyle int, condition bool) *Cel
 	if condition {
 		my.borderBottomStyle = borderBottomStyle
 	}
+
 	return my
 }
 
@@ -224,6 +231,7 @@ func (my *Cell) SetBorderBottomStyleFunc(condition func() (int, bool)) *Cell {
 	if condition != nil {
 		my.SetBorderBottomStyle(condition())
 	}
+
 	return my
 }
 
@@ -232,6 +240,7 @@ func (my *Cell) SetBorderLeftRgb(borderLeftRgb string, condition bool) *Cell {
 	if condition {
 		my.borderLeftRgb = borderLeftRgb
 	}
+
 	return my
 }
 
@@ -240,6 +249,7 @@ func (my *Cell) SetBorderLeftRbgFunc(condition func() (string, bool)) *Cell {
 	if condition != nil {
 		my.SetBorderLeftRgb(condition())
 	}
+
 	return my
 }
 
@@ -248,6 +258,7 @@ func (my *Cell) SetBorderLeftStyle(borderLeftStyle int, condition bool) *Cell {
 	if condition {
 		my.borderLeftStyle = borderLeftStyle
 	}
+
 	return my
 }
 
@@ -256,6 +267,7 @@ func (my *Cell) SetBorderLeftStyleFunc(condition func() (int, bool)) *Cell {
 	if condition != nil {
 		my.SetBorderLeftStyle(condition())
 	}
+
 	return my
 }
 
@@ -264,6 +276,7 @@ func (my *Cell) SetBorderRightRgb(borderRightRgb string, condition bool) *Cell {
 	if condition {
 		my.borderRightRgb = borderRightRgb
 	}
+
 	return my
 }
 
@@ -272,6 +285,7 @@ func (my *Cell) SetBorderRightRbgFunc(condition func() (string, bool)) *Cell {
 	if condition != nil {
 		my.SetBorderRightRgb(condition())
 	}
+
 	return my
 }
 
@@ -280,6 +294,7 @@ func (my *Cell) SetBorderRightStyle(borderRightStyle int, condition bool) *Cell 
 	if condition {
 		my.borderRightStyle = borderRightStyle
 	}
+
 	return my
 }
 
@@ -288,6 +303,7 @@ func (my *Cell) SetBorderRightStyleFunc(condition func() (int, bool)) *Cell {
 	if condition != nil {
 		my.SetBorderRightStyle(condition())
 	}
+
 	return my
 }
 
@@ -296,6 +312,7 @@ func (my *Cell) SetBorderDiagonalUpRgb(borderDiagonalUpRgb string, condition boo
 	if condition {
 		my.borderDiagonalUpRgb = borderDiagonalUpRgb
 	}
+
 	return my
 }
 
@@ -304,6 +321,7 @@ func (my *Cell) SetBorderDiagonalUpRbgFunc(condition func() (string, bool)) *Cel
 	if condition != nil {
 		my.SetBorderDiagonalUpRgb(condition())
 	}
+
 	return my
 }
 
@@ -312,6 +330,7 @@ func (my *Cell) SetBorderDiagonalUpStyle(borderDiagonalUpStyle int, condition bo
 	if condition {
 		my.borderDiagonalUpStyle = borderDiagonalUpStyle
 	}
+
 	return my
 }
 
@@ -320,6 +339,7 @@ func (my *Cell) SetBorderDiagonalUpStyleFunc(condition func() (int, bool)) *Cell
 	if condition != nil {
 		my.SetBorderDiagonalUpStyle(condition())
 	}
+
 	return my
 }
 
@@ -328,6 +348,7 @@ func (my *Cell) SetBorderDiagonalDownRgb(borderDiagonalDownRgb string, condition
 	if condition {
 		my.borderDiagonalDownRgb = borderDiagonalDownRgb
 	}
+
 	return my
 }
 
@@ -336,6 +357,7 @@ func (my *Cell) SetBorderDiagonalDownRbgFunc(condition func() (string, bool)) *C
 	if condition != nil {
 		my.SetBorderDiagonalDownRgb(condition())
 	}
+
 	return my
 }
 
@@ -344,6 +366,7 @@ func (my *Cell) SetBorderDiagonalDownStyle(borderDiagonalDownStyle int, conditio
 	if condition {
 		my.borderDiagonalDownStyle = borderDiagonalDownStyle
 	}
+
 	return my
 }
 
@@ -352,19 +375,19 @@ func (my *Cell) SetBorderDiagonalDownStyleFunc(condition func() (int, bool)) *Ce
 	if condition != nil {
 		my.SetBorderDiagonalDownStyle(condition())
 	}
+
 	return my
 }
 
 // GetFontRgb 获取字体颜色
-func (my *Cell) GetFontRgb() string {
-	return my.fontRgb
-}
+func (my *Cell) GetFontRgb() string { return my.fontRgb }
 
 // SetFontRgb 设置字体颜色
 func (my *Cell) SetFontRgb(fontRgb string, condition bool) *Cell {
 	if condition {
 		my.fontRgb = fontRgb
 	}
+
 	return my
 }
 
@@ -373,19 +396,19 @@ func (my *Cell) SetFontRgbFunc(condition func() (string, bool)) *Cell {
 	if condition != nil {
 		my.SetFontRgb(condition())
 	}
+
 	return my
 }
 
 // GetPatternRgb 获取填充色
-func (my *Cell) GetPatternRgb() string {
-	return my.patternRgb
-}
+func (my *Cell) GetPatternRgb() string { return my.patternRgb }
 
 // SetPatternRgb 设置填充色
 func (my *Cell) SetPatternRgb(patternRgb string, condition bool) *Cell {
 	if condition {
 		my.patternRgb = patternRgb
 	}
+
 	return my
 }
 
@@ -394,19 +417,19 @@ func (my *Cell) SetPatternRgbFunc(condition func() (string, bool)) *Cell {
 	if condition != nil {
 		my.SetPatternRgb(condition())
 	}
+
 	return my
 }
 
 // GetFontBold 获取字体粗体
-func (my *Cell) GetFontBold() bool {
-	return my.fontBold
-}
+func (my *Cell) GetFontBold() bool { return my.fontBold }
 
 // SetFontBold 设置字体粗体
 func (my *Cell) SetFontBold(fontBold bool, condition bool) *Cell {
 	if condition {
 		my.fontBold = fontBold
 	}
+
 	return my
 }
 
@@ -415,19 +438,19 @@ func (my *Cell) SetFontBoldFunc(condition func() (bool, bool)) *Cell {
 	if condition != nil {
 		my.SetFontBold(condition())
 	}
+
 	return my
 }
 
 // GetFontItalic 获取字体斜体
-func (my *Cell) GetFontItalic() bool {
-	return my.fontItalic
-}
+func (my *Cell) GetFontItalic() bool { return my.fontItalic }
 
 // SetFontItalic 设置字体斜体
 func (my *Cell) SetFontItalic(fontItalic bool, condition bool) *Cell {
 	if condition {
 		my.fontItalic = fontItalic
 	}
+
 	return my
 }
 
@@ -436,19 +459,19 @@ func (my *Cell) SetFontItalicFunc(condition func() (bool, bool)) *Cell {
 	if condition != nil {
 		my.SetFontItalic(condition())
 	}
+
 	return my
 }
 
 // GetFontFamily 获取字体
-func (my *Cell) GetFontFamily() string {
-	return my.fontFamily
-}
+func (my *Cell) GetFontFamily() string { return my.fontFamily }
 
 // SetFontFamily 设置字体
 func (my *Cell) SetFontFamily(fontFamily string, condition bool) *Cell {
 	if condition {
 		my.fontFamily = fontFamily
 	}
+
 	return my
 }
 
@@ -457,19 +480,19 @@ func (my *Cell) SetFontFamilyFunc(condition func() (string, bool)) *Cell {
 	if condition != nil {
 		my.SetFontFamily(condition())
 	}
+
 	return my
 }
 
 // GetFontSize 获取字体字号
-func (my *Cell) GetFontSize() float64 {
-	return my.fontSize
-}
+func (my *Cell) GetFontSize() float64 { return my.fontSize }
 
 // SetFontSize 设置字体字号
 func (my *Cell) SetFontSize(fontSize float64, condition bool) *Cell {
 	if condition {
 		my.fontSize = fontSize
 	}
+
 	return my
 }
 
@@ -478,44 +501,43 @@ func (my *Cell) SetFontSizeFunc(condition func() (float64, bool)) *Cell {
 	if condition != nil {
 		my.SetFontSize(condition())
 	}
+
 	return my
 }
 
 // Init 初始化
 func (my *Cell) Init(content any) *Cell {
 	my.content = content
+
 	return my
 }
 
 // GetContent 获取内容
-func (my *Cell) GetContent() any {
-	return my.content
-}
+func (my *Cell) GetContent() any { return my.content }
 
 // SetContent 设置内容
 func (my *Cell) SetContent(content any) *Cell {
 	my.content = content
+
 	return my
 }
 
 // GetCoordinate 获取单元格坐标
-func (my *Cell) GetCoordinate() string {
-	return my.coordinate
-}
+func (my *Cell) GetCoordinate() string { return my.coordinate }
 
 // SetCoordinate 设置单元格坐标
 func (my *Cell) SetCoordinate(coordinate string) *Cell {
 	my.coordinate = coordinate
+
 	return my
 }
 
 // GetContentType 获取单元格类型
-func (my *Cell) GetContentType() CellContentType {
-	return my.contentType
-}
+func (my *Cell) GetContentType() CellContentType { return my.contentType }
 
 // SetContentType 设置单元格类型
 func (my *Cell) SetContentType(contentType CellContentType) *Cell {
 	my.contentType = contentType
+
 	return my
 }

@@ -86,12 +86,13 @@ func OncePostgresPool(dbSetting *DbSetting) GormPool {
 	}
 
 	postgresPoolIns.mainConn = postgresPoolIns.mainConn.Session(&gorm.Session{})
-
-	sqlDb, _ := postgresPoolIns.mainConn.DB()
-	sqlDb.SetConnMaxIdleTime(time.Duration(postgresPoolIns.maxIdleTime) * time.Hour)
-	sqlDb.SetConnMaxLifetime(time.Duration(postgresPoolIns.maxLifetime) * time.Hour)
-	sqlDb.SetMaxIdleConns(postgresPoolIns.maxIdleConns)
-	sqlDb.SetMaxOpenConns(postgresPoolIns.maxOpenConns)
+	{
+		sqlDb, _ := postgresPoolIns.mainConn.DB()
+		sqlDb.SetConnMaxIdleTime(time.Duration(postgresPoolIns.maxIdleTime) * time.Hour)
+		sqlDb.SetConnMaxLifetime(time.Duration(postgresPoolIns.maxLifetime) * time.Hour)
+		sqlDb.SetMaxIdleConns(postgresPoolIns.maxIdleConns)
+		sqlDb.SetMaxOpenConns(postgresPoolIns.maxOpenConns)
+	}
 
 	return postgresPoolIns
 }
@@ -195,5 +196,6 @@ func (my *PostgresPool) Close() error {
 			return fmt.Errorf("关闭数据库连接失败 %s", err.Error())
 		}
 	}
+
 	return nil
 }

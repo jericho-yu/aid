@@ -18,6 +18,7 @@ func ColumnTextToNumber(columnText string) int {
 	for i, char := range columnText {
 		result += (int(char - 'A' + 1)) * pow(26, len(columnText)-i-1)
 	}
+
 	return result
 }
 
@@ -27,6 +28,7 @@ func pow(base, exponent int) int {
 	for i := 0; i < exponent; i++ {
 		result *= base
 	}
+
 	return result
 }
 

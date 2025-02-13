@@ -8,9 +8,7 @@ import (
 // Md5 编码
 func Md5(original []byte) (string, error) {
 	hash := md5.New()
-
-	_, err := hash.Write(original)
-	if err != nil {
+	if _, err := hash.Write(original); err != nil {
 		return "", err
 	}
 

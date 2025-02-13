@@ -21,10 +21,7 @@ type (
 
 // NewOrderlyDict 实例化：有序字典项
 func NewOrderlyDict[K comparable, V any](key K, value V) *OrderlyDict[K, V] {
-	return &OrderlyDict[K, V]{
-		Key:   key,
-		Value: value,
-	}
+	return &OrderlyDict[K, V]{Key: key, Value: value}
 }
 
 // NewAnyOrderlyDict 实例化：有序字典
@@ -105,43 +102,30 @@ func (my *AnyOrderlyDict[K, V]) Get(key K) (V, bool) {
 // Has 检查是否具备谋个key
 func (my *AnyOrderlyDict[K, V]) Has(key K) bool {
 	_, exist := my.Get(key)
+
 	return exist
 }
 
 // First 获取第一个键值对
-func (my *AnyOrderlyDict[K, V]) First() *OrderlyDict[K, V] {
-	return my.data.First()
-}
+func (my *AnyOrderlyDict[K, V]) First() *OrderlyDict[K, V] { return my.data.First() }
 
 // FirstKey 获取第一个key
-func (my *AnyOrderlyDict[K, V]) FirstKey() K {
-	return my.data.First().Key
-}
+func (my *AnyOrderlyDict[K, V]) FirstKey() K { return my.data.First().Key }
 
 // FirstValue 获取第一个值
-func (my *AnyOrderlyDict[K, V]) FirstValue() V {
-	return my.data.First().Value
-}
+func (my *AnyOrderlyDict[K, V]) FirstValue() V { return my.data.First().Value }
 
 // Last 获取最后一个键值对
-func (my *AnyOrderlyDict[K, V]) Last() *OrderlyDict[K, V] {
-	return my.data.Last()
-}
+func (my *AnyOrderlyDict[K, V]) Last() *OrderlyDict[K, V] { return my.data.Last() }
 
 // LastKey 获取最后一个key
-func (my *AnyOrderlyDict[K, V]) LastKey() K {
-	return my.data.Last().Key
-}
+func (my *AnyOrderlyDict[K, V]) LastKey() K { return my.data.Last().Key }
 
 // LastValue 获取最后一个值
-func (my *AnyOrderlyDict[K, V]) LastValue() V {
-	return my.data.Last().Value
-}
+func (my *AnyOrderlyDict[K, V]) LastValue() V { return my.data.Last().Value }
 
 // Keys 获取所有key
-func (my *AnyOrderlyDict[K, V]) Keys() []K {
-	return my.keys.All()
-}
+func (my *AnyOrderlyDict[K, V]) Keys() []K { return my.keys.All() }
 
 // ToMap 获取map格式数据
 func (my *AnyOrderlyDict[K, V]) ToMap() map[K]V {
@@ -173,9 +157,7 @@ func (my *AnyOrderlyDict[K, V]) Clean() *AnyOrderlyDict[K, V] {
 }
 
 // Len 长度
-func (my *AnyOrderlyDict[K, V]) Len() int {
-	return my.data.Len()
-}
+func (my *AnyOrderlyDict[K, V]) Len() int { return my.data.Len() }
 
 // Filter 通过条件过滤
 func (my *AnyOrderlyDict[K, V]) Filter(fn func(dict *OrderlyDict[K, V]) bool) *AnyOrderlyDict[K, V] {
@@ -193,6 +175,7 @@ func (my *AnyOrderlyDict[K, V]) Filter(fn func(dict *OrderlyDict[K, V]) bool) *A
 
 	my.data.Clean()
 	my.data = array.NewAnyArray[*OrderlyDict[K, V]](ret)
+
 	return my
 }
 

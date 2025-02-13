@@ -84,12 +84,13 @@ func OnceMySqlPool(dbSetting *DbSetting) GormPool {
 	}
 
 	mysqlPoolIns.mainConn = mysqlPoolIns.mainConn.Session(&gorm.Session{})
-
-	sqlDb, _ := mysqlPoolIns.mainConn.DB()
-	sqlDb.SetConnMaxIdleTime(time.Duration(mysqlPoolIns.dbSetting.Common.MaxIdleTime) * time.Hour)
-	sqlDb.SetConnMaxLifetime(time.Duration(mysqlPoolIns.dbSetting.Common.MaxLifetime) * time.Hour)
-	sqlDb.SetMaxIdleConns(mysqlPoolIns.dbSetting.Common.MaxIdleConnections)
-	sqlDb.SetMaxOpenConns(mysqlPoolIns.dbSetting.Common.MaxOpenConnections)
+	{
+		sqlDb, _ := mysqlPoolIns.mainConn.DB()
+		sqlDb.SetConnMaxIdleTime(time.Duration(mysqlPoolIns.dbSetting.Common.MaxIdleTime) * time.Hour)
+		sqlDb.SetConnMaxLifetime(time.Duration(mysqlPoolIns.dbSetting.Common.MaxLifetime) * time.Hour)
+		sqlDb.SetMaxIdleConns(mysqlPoolIns.dbSetting.Common.MaxIdleConnections)
+		sqlDb.SetMaxOpenConns(mysqlPoolIns.dbSetting.Common.MaxOpenConnections)
+	}
 
 	return mysqlPoolIns
 }
@@ -191,5 +192,6 @@ func (my *MySqlPool) Close() error {
 			return fmt.Errorf("关闭数据库连接失败 %s", err.Error())
 		}
 	}
+
 	return nil
 }

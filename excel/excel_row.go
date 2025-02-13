@@ -17,14 +17,10 @@ type Row struct {
 }
 
 // NewRow 构造函数
-func NewRow() *Row {
-	return &Row{}
-}
+func NewRow() *Row { return &Row{} }
 
 // GetCells 获取单元格组
-func (my *Row) GetCells() *array.AnyArray[*Cell] {
-	return my.cells
-}
+func (my *Row) GetCells() *array.AnyArray[*Cell] { return my.cells }
 
 // SetCells 设置单元格组
 func (my *Row) SetCells(cells []*Cell) *Row {
@@ -46,12 +42,11 @@ func (my *Row) SetCells(cells []*Cell) *Row {
 }
 
 // GetRowNumber 获取行标
-func (my *Row) GetRowNumber() uint64 {
-	return my.rowNumber
-}
+func (my *Row) GetRowNumber() uint64 { return my.rowNumber }
 
 // SetRowNumber 设置行标
 func (my *Row) SetRowNumber(rowNumber uint64) *Row {
 	my.rowNumber = rowNumber
+
 	return my
 }

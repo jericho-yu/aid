@@ -18,34 +18,22 @@ type AnyArray[T any] struct {
 
 // NewAnyArray 实例化
 func NewAnyArray[T any](list []T) *AnyArray[T] {
-	return &AnyArray[T]{
-		data: list,
-		mu:   sync.RWMutex{},
-	}
+	return &AnyArray[T]{data: list, mu: sync.RWMutex{}}
 }
 
 // MakeAnyArray 初始化
 func MakeAnyArray[T any](size int) *AnyArray[T] {
-	return &AnyArray[T]{
-		data: make([]T, size),
-		mu:   sync.RWMutex{},
-	}
+	return &AnyArray[T]{data: make([]T, size), mu: sync.RWMutex{}}
 }
 
 // IsEmpty 是否为空
-func (my *AnyArray[T]) IsEmpty() bool {
-	return len(my.data) == 0
-}
+func (my *AnyArray[T]) IsEmpty() bool { return len(my.data) == 0 }
 
 // IsNotEmpty 是否不为空
-func (my *AnyArray[T]) IsNotEmpty() bool {
-	return len(my.data) > 0
-}
+func (my *AnyArray[T]) IsNotEmpty() bool { return len(my.data) > 0 }
 
 // Has 检查是否存在
-func (my *AnyArray[T]) Has(k int) bool {
-	return k >= 0 && k < len(my.data)
-}
+func (my *AnyArray[T]) Has(k int) bool { return k >= 0 && k < len(my.data) }
 
 // Set 设置值
 func (my *AnyArray[T]) Set(k int, v T) *AnyArray[T] {
@@ -53,6 +41,7 @@ func (my *AnyArray[T]) Set(k int, v T) *AnyArray[T] {
 	defer my.mu.Unlock()
 
 	my.data[k] = v
+
 	return my
 }
 
@@ -70,6 +59,7 @@ func (my *AnyArray[T]) Append(v ...T) *AnyArray[T] {
 	defer my.mu.Unlock()
 
 	my.data = append(my.data, v...)
+
 	return my
 }
 
@@ -98,6 +88,7 @@ func (my *AnyArray[T]) All() []T {
 
 	var ret = make([]T, len(my.data))
 	copy(ret, my.data)
+
 	return ret
 }
 
@@ -108,6 +99,7 @@ func (my *AnyArray[T]) GetIndexByValue(value T) int {
 			return idx
 		}
 	}
+
 	return -1
 }
 
@@ -157,6 +149,7 @@ func (my *AnyArray[T]) Filter(fn func(v T) bool) *AnyArray[T] {
 	}
 
 	my.data = ret[:j]
+
 	return my
 }
 
@@ -214,6 +207,7 @@ func (my *AnyArray[T]) JoinWithoutEmpty(sep string) string {
 		values[j] = fmt.Sprintf("%v", datum)
 		j++
 	}
+
 	return strings.Join(values, sep)
 }
 
@@ -227,6 +221,7 @@ func (my *AnyArray[T]) In(target T) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -298,6 +293,7 @@ func (my *AnyArray[T]) Unique() *AnyArray[T] {
 	}
 
 	my.data = result
+
 	return my
 }
 
@@ -332,6 +328,7 @@ func (my *AnyArray[T]) RemoveByValue(target T) *AnyArray[T] {
 		}
 	}
 	my.data = ret[:j]
+
 	return my
 }
 
@@ -343,6 +340,7 @@ func (my *AnyArray[T]) RemoveByValues(targets ...T) *AnyArray[T] {
 	for _, target := range targets {
 		my.RemoveByValue(target)
 	}
+
 	return my
 }
 

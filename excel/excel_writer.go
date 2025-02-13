@@ -32,13 +32,12 @@ func NewWriter(filename ...any) *Writer {
 }
 
 // GetFilename 获取文件名
-func (my *Writer) GetFilename() string {
-	return my.filename
-}
+func (my *Writer) GetFilename() string { return my.filename }
 
 // SetFilename 设置文件名
 func (my *Writer) SetFilename(filename string) *Writer {
 	my.filename = filename
+
 	return my
 }
 
@@ -76,6 +75,7 @@ func (my *Writer) ActiveSheetByIndex(sheetIndex int) *Writer {
 	}
 	my.excel.SetActiveSheet(sheetIndex)
 	my.sheetName = my.excel.GetSheetName(sheetIndex)
+
 	return my
 }
 
@@ -83,6 +83,7 @@ func (my *Writer) ActiveSheetByIndex(sheetIndex int) *Writer {
 func (my *Writer) SetSheetName(sheetName string) *Writer {
 	my.excel.SetSheetName(my.sheetName, sheetName)
 	my.sheetName = sheetName
+
 	return my
 }
 
@@ -128,12 +129,14 @@ func (my *Writer) setStyleFont(cell *Cell) {
 // SetColumnWidthByIndex 设置单列宽：通过列索引
 func (my *Writer) SetColumnWidthByIndex(col int, width float64) *Writer {
 	my.SetColumnsWidthByIndex(col, col, width)
+
 	return my
 }
 
 // SetColumnWidthByText 设置单列宽：通过列名称
 func (my *Writer) SetColumnWidthByText(col string, width float64) *Writer {
 	my.SetColumnsWidthByText(col, col, width)
+
 	return my
 }
 
@@ -143,13 +146,16 @@ func (my *Writer) SetColumnsWidthByIndex(startCol, endCol int, width float64) *W
 	if err != nil {
 		my.Err = fmt.Errorf("设置列宽错误：%s", err)
 	}
+
 	endColText, err := ColumnNumberToText(endCol)
 	if err != nil {
 		my.Err = fmt.Errorf("设置列宽错误：%s", err)
 	}
+
 	if err = my.excel.SetColWidth(my.sheetName, startColText, endColText, width); err != nil {
 		my.Err = fmt.Errorf("设置列宽错误：%s", err)
 	}
+
 	return my
 }
 
@@ -158,6 +164,7 @@ func (my *Writer) SetColumnsWidthByText(startCol, endCol string, width float64) 
 	if err := my.excel.SetColWidth(my.sheetName, startCol, endCol, width); err != nil {
 		my.Err = fmt.Errorf("设置列宽错误：%s", err)
 	}
+
 	return my
 }
 
@@ -166,6 +173,7 @@ func (my *Writer) SetRows(excelRows []*Row) *Writer {
 	for _, row := range excelRows {
 		my.AddRow(row)
 	}
+
 	return my
 }
 
@@ -235,19 +243,21 @@ func (my *Writer) Save() error {
 	if my.filename == "" {
 		return errors.New("未设置文件名")
 	}
+
 	return my.excel.SaveAs(my.filename)
 }
 
 // Download 下载Excel
 func (my *Writer) Download(writer http.ResponseWriter) error {
-	writer.Header().Set("Content-Type", "application/octet-stream")
-	writer.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", url.QueryEscape(my.filename)))
-	writer.Header().Set("Content-Transfer-Encoding", "binary")
-	writer.Header().Set("Access-Control-Expose-Headers", "Content-Disposition")
+	{
+		writer.Header().Set("Content-Type", "application/octet-stream")
+		writer.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", url.QueryEscape(my.filename)))
+		writer.Header().Set("Content-Transfer-Encoding", "binary")
+		writer.Header().Set("Access-Control-Expose-Headers", "Content-Disposition")
+	}
+
 	return my.excel.Write(writer)
 }
 
 // GetExcelizeFile 获取excelize文件对象
-func (my *Writer) GetExcelizeFile() *excelize.File {
-	return my.excel
-}
+func (my *Writer) GetExcelizeFile() *excelize.File { return my.excel }

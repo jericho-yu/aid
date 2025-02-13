@@ -22,6 +22,7 @@ func RemoveEmpty[T comparable](slice []T) []T {
 			j++
 		}
 	}
+
 	return slice[:j]
 }
 
@@ -32,6 +33,7 @@ func In[T comparable](target T, elements []T) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -44,6 +46,7 @@ func Filter[T any](fn func(v T) bool, values []T) (ret []T) {
 		}
 
 	}
+
 	return
 }
 
@@ -74,6 +77,7 @@ func Max[T int | int8 | int16 | int32 | int64 |
 			max = value
 		}
 	}
+
 	return
 }
 
@@ -86,6 +90,7 @@ func Min[T int | int8 | int16 | int32 | int64 |
 			min = value
 		}
 	}
+
 	return
 }
 
@@ -96,6 +101,7 @@ func Sum[T int | int8 | int16 | int32 | int64 |
 	for _, num := range numbers {
 		sum += num
 	}
+
 	return sum
 }
 
@@ -114,6 +120,7 @@ func All[T comparable](values []T) bool {
 			return false
 		}
 	}
+
 	return true
 }
 
@@ -125,6 +132,7 @@ func Any[T comparable](values []T) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -159,6 +167,7 @@ func Chunk[T any](slice []T, chunkSize int) ([][]T, error) {
 		}
 		chunks = append(chunks, slice[i:end])
 	}
+
 	return chunks, nil
 }
 
@@ -168,6 +177,7 @@ func Pluck[V any, R any](slice []V, key string) ([]R, error) {
 	for _, value := range slice {
 		ret = append(ret, reflect.ValueOf(value).FieldByName(key).Interface().(R))
 	}
+
 	return ret, nil
 }
 
@@ -191,9 +201,7 @@ func Unique[V any](slice []V) ([]V, error) {
 }
 
 // NotEmptyLen 判断切片非零值的长度
-func NotEmptyLen[T comparable](values []T) int {
-	return len(RemoveEmpty(values))
-}
+func NotEmptyLen[T comparable](values []T) int { return len(RemoveEmpty(values)) }
 
 // RemoveTarget 删除数组中对应的目标
 func RemoveTarget[T comparable](values []T, target T) (ret []T) {
@@ -202,6 +210,7 @@ func RemoveTarget[T comparable](values []T, target T) (ret []T) {
 			ret = append(ret, value)
 		}
 	}
+
 	return ret
 }
 
@@ -212,6 +221,7 @@ func RemoveTargets[T comparable](values []T, targets ...T) (ret []T) {
 			ret = append(ret, value)
 		}
 	}
+
 	return ret
 }
 
@@ -237,6 +247,7 @@ func ToAny(slice interface{}) []any {
 	for i := 0; i < v.Len(); i++ {
 		result[i] = v.Index(i).Interface()
 	}
+
 	return result
 }
 

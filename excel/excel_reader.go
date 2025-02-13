@@ -51,9 +51,7 @@ func (my *Reader) AutoReadBySheetName(sheetName string, filename ...any) *Reader
 }
 
 // Data 获取数据：有序字典
-func (my *Reader) Data() *dict.AnyOrderlyDict[uint64, *array.AnyArray[string]] {
-	return my.data
-}
+func (my *Reader) Data() *dict.AnyOrderlyDict[uint64, *array.AnyArray[string]] { return my.data }
 
 // DataWithTitle 获取数据：带有title的有序字典
 func (my *Reader) DataWithTitle() (*dict.AnyOrderlyDict[uint64, *dict.AnyDict[string, string]], error) {
@@ -73,57 +71,52 @@ func (my *Reader) DataWithTitle() (*dict.AnyOrderlyDict[uint64, *dict.AnyDict[st
 // SetDataByRow 设置单行数据
 func (my *Reader) SetDataByRow(rowNumber uint64, data []string) *Reader {
 	my.data.SetByKey(rowNumber, array.NewAnyArray(data))
+
 	return my
 }
 
 // GetSheetName 获取工作表名称
-func (my *Reader) GetSheetName() string {
-	return my.sheetName
-}
+func (my *Reader) GetSheetName() string { return my.sheetName }
 
 // SetSheetName 设置工作表名称
 func (my *Reader) SetSheetName(sheetName string) *Reader {
 	my.sheetName = sheetName
+
 	return my
 }
 
 // GetOriginalRow 获取读取起始行
-func (my *Reader) GetOriginalRow() int {
-	return my.originalRow
-}
+func (my *Reader) GetOriginalRow() int { return my.originalRow }
 
 // SetOriginalRow 设置读取起始行
 func (my *Reader) SetOriginalRow(originalRow int) *Reader {
 	my.originalRow = originalRow - 1
+
 	return my
 }
 
 // GetFinishedRow 获取读取终止行
-func (my *Reader) GetFinishedRow() int {
-	return my.finishedRow
-}
+func (my *Reader) GetFinishedRow() int { return my.finishedRow }
 
 // SetFinishedRow 设置读取终止行
 func (my *Reader) SetFinishedRow(finishedRow int) *Reader {
 	my.finishedRow = finishedRow - 1
+
 	return my
 }
 
 // GetTitleRow 获取表头行
-func (my *Reader) GetTitleRow() int {
-	return my.titleRow
-}
+func (my *Reader) GetTitleRow() int { return my.titleRow }
 
 // SetTitleRow 设置表头行
 func (my *Reader) SetTitleRow(titleRow int) *Reader {
 	my.titleRow = titleRow - 1
+
 	return my
 }
 
 // GetTitle 获取表头
-func (my *Reader) GetTitle() *array.AnyArray[string] {
-	return my.titles
-}
+func (my *Reader) GetTitle() *array.AnyArray[string] { return my.titles }
 
 // SetTitle 设置表头
 func (my *Reader) SetTitle(titles []string) *Reader {
@@ -132,6 +125,7 @@ func (my *Reader) SetTitle(titles []string) *Reader {
 		return my
 	}
 	my.titles = array.NewAnyArray[string](titles)
+
 	return my
 }
 

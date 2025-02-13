@@ -33,41 +33,44 @@ var FileSystemApp FileSystem
 // NewByRelative 实例化：文件系统（相对路径）
 func (FileSystem) NewByRelative(dir string) *FileSystem {
 	ins := &FileSystem{dir: filepath.Clean(filepath.Join(FileSystem{}.GetRootPath(), dir))}
+
 	return ins.init()
 }
 
 // NewByAbsolute 实例化：文件系统（绝对路径）
 func (FileSystem) NewByAbsolute(dir string) *FileSystem {
 	ins := &FileSystem{dir: dir}
+
 	return ins.init()
 }
 
 // Copy 复制一个新的对象
 func (my *FileSystem) Copy() *FileSystem {
 	copied := *my
+
 	return &copied
 }
 
 // SetDirByRelative 设置路径：相对路径
 func (my *FileSystem) SetDirByRelative(dir string) *FileSystem {
 	my.dir = filepath.Clean(filepath.Join(FileSystem{}.GetRootPath(), dir))
-
 	my.init()
+
 	return my
 }
 
 // SetDirByAbs 设置路径：绝对路径
 func (my *FileSystem) SetDirByAbs(dir string) *FileSystem {
 	my.dir = dir
-
 	my.init()
+
 	return my
 }
 
 func (my *FileSystem) Join(dir string) *FileSystem {
 	my.dir = filepath.Join(my.dir, dir)
-
 	my.init()
+
 	return my
 }
 
@@ -78,40 +81,48 @@ func (my *FileSystem) Joins(dir ...string) *FileSystem {
 	}
 
 	my.init()
+
 	return my
 }
 
 func (FileSystem) GetRootPath() string {
 	rootPath, _ := filepath.Abs(".")
+
 	return rootPath
 }
 
 // GetCurrentPath 最终方案-全兼容
 func (FileSystem) GetCurrentPath(paths ...string) string {
 	dir := getGoBuildPath()
+
 	if strings.Contains(dir, getTmpDir()) {
 		return getGoRunPath()
 	}
+
 	return dir
 }
 
 // 获取系统临时目录，兼容go run
 func getTmpDir() string {
 	dir := os.Getenv("TEMP")
+
 	if dir == "" {
 		dir = os.Getenv("TMP")
 	}
 	res, _ := filepath.EvalSymlinks(dir)
+
 	return res
 }
 
 // 获取当前执行文件绝对路径
 func getGoBuildPath() string {
 	exePath, err := os.Executable()
+
 	if err != nil {
 		log.Fatal(err)
 	}
 	res, _ := filepath.EvalSymlinks(filepath.Dir(exePath))
+
 	return res
 }
 
@@ -119,9 +130,11 @@ func getGoBuildPath() string {
 func getGoRunPath() string {
 	var abPath string
 	_, filename, _, ok := runtime.Caller(0)
+
 	if ok {
 		abPath = path.Dir(filename)
 	}
+
 	return abPath
 }
 
@@ -132,12 +145,14 @@ func (my *FileSystem) init() *FileSystem {
 	if e != nil {
 		panic(fmt.Errorf("检查路径错误：%s", e.Error()))
 	}
+
 	if my.IsExist {
 		e = my.CheckPathType() // 检查路径类型
 		if e != nil {
 			panic(fmt.Errorf("检查路径类型错误：%s", e.Error()))
 		}
 	}
+
 	return my
 }
 
@@ -147,9 +162,11 @@ func (my *FileSystem) Exist() (bool, error) {
 	if err == nil {
 		return true, nil
 	}
+
 	if os.IsNotExist(err) {
 		return false, nil
 	}
+
 	return false, err
 }
 
@@ -195,9 +212,7 @@ func (my *FileSystem) MkDir() error {
 }
 
 // GetDir 获取当前路径
-func (my *FileSystem) GetDir() string {
-	return my.dir
-}
+func (my *FileSystem) GetDir() string { return my.dir }
 
 // CheckPathType 判断一个路径是文件还是文件夹
 func (my *FileSystem) CheckPathType() error {
@@ -227,6 +242,7 @@ func (my *FileSystem) Delete() error {
 			return my.DelFile()
 		}
 	}
+
 	return nil
 }
 
@@ -236,6 +252,7 @@ func (my *FileSystem) DelDir() error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -245,13 +262,12 @@ func (my *FileSystem) DelFile() error {
 	if e != nil {
 		return e
 	}
+
 	return nil
 }
 
 // Read 读取文件
-func (my *FileSystem) Read() ([]byte, error) {
-	return os.ReadFile(my.dir)
-}
+func (my *FileSystem) Read() ([]byte, error) { return os.ReadFile(my.dir) }
 
 // RenameFile 修改文件名并获取新的文件对象
 func (my *FileSystem) RenameFile(newFilename string, deleteRepetition bool) (*FileSystem, error) {
@@ -375,7 +391,7 @@ func (my *FileSystem) CopyDir(dstDir string, abs bool) error {
 	}
 
 	// 遍历源目录
-	err := filepath.Walk(my.GetDir(), func(srcPath string, info os.FileInfo, err error) error {
+	if err := filepath.Walk(my.GetDir(), func(srcPath string, info os.FileInfo, err error) error {
 		var (
 			src         *FileSystem
 			dst         *FileSystem
@@ -407,8 +423,7 @@ func (my *FileSystem) CopyDir(dstDir string, abs bool) error {
 		}
 
 		return nil
-	})
-	if err != nil {
+	}); err != nil {
 		return err
 	}
 

@@ -15,17 +15,11 @@ type AnyDict[K comparable, V any] struct {
 }
 
 func NewAnyDict[K comparable, V any](dict map[K]V) *AnyDict[K, V] {
-	return &AnyDict[K, V]{
-		data: dict,
-		mu:   sync.RWMutex{},
-	}
+	return &AnyDict[K, V]{data: dict, mu: sync.RWMutex{}}
 }
 
 func MakeAnyDict[K comparable, V any]() *AnyDict[K, V] {
-	return &AnyDict[K, V]{
-		data: make(map[K]V),
-		mu:   sync.RWMutex{},
-	}
+	return &AnyDict[K, V]{data: make(map[K]V), mu: sync.RWMutex{}}
 }
 
 // Set 设置元素
@@ -34,6 +28,7 @@ func (my *AnyDict[K, V]) Set(key K, value V) *AnyDict[K, V] {
 	defer my.mu.Unlock()
 
 	my.data[key] = value
+
 	return my
 }
 
@@ -62,6 +57,7 @@ func (my *AnyDict[K, V]) GetByKeys(keys ...K) []V {
 // Has 检查是否具备谋元素
 func (my *AnyDict[K, V]) Has(key K) bool {
 	_, exist := my.Get(key)
+
 	return exist
 }
 
@@ -91,6 +87,7 @@ func (my *AnyDict[K, V]) Filter(fn func(V) bool) *AnyDict[K, V] {
 			delete(my.data, key)
 		}
 	}
+
 	return my
 }
 
@@ -115,6 +112,7 @@ func (my *AnyDict[K, T]) RemoveEmpty() *AnyDict[K, T] {
 			}
 		}
 	}
+
 	return my
 }
 
@@ -129,6 +127,7 @@ func (my *AnyDict[K, V]) JoinWithoutEmpty(sep string) string {
 		values[j] = fmt.Sprintf("%v", datum)
 		j++
 	}
+
 	return strings.Join(values, sep)
 }
 
@@ -153,6 +152,7 @@ func (my *AnyDict[K, V]) InKey(target K) bool {
 	defer my.mu.RUnlock()
 
 	_, exit := my.data[target]
+
 	return exit
 }
 
@@ -201,6 +201,7 @@ func (my *AnyDict[K, V]) RemoveByKey(key K) *AnyDict[K, V] {
 	defer my.mu.Unlock()
 
 	delete(my.data, key)
+
 	return my
 }
 
@@ -212,6 +213,7 @@ func (my *AnyDict[K, V]) RemoveByKeys(keys ...K) *AnyDict[K, V] {
 	for _, key := range keys {
 		my.RemoveByKey(key)
 	}
+
 	return my
 }
 
@@ -225,6 +227,7 @@ func (my *AnyDict[K, V]) RemoveByValue(value V) *AnyDict[K, V] {
 			delete(my.data, key)
 		}
 	}
+
 	return my
 }
 
@@ -234,6 +237,7 @@ func (my *AnyDict[K, V]) RemoveByValues(values ...V) *AnyDict[K, V] {
 	defer my.mu.Unlock()
 
 	my.RemoveByKeys(my.GetKeysByValue(values...).All()...)
+
 	return my
 }
 

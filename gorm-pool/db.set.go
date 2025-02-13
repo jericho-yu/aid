@@ -90,10 +90,11 @@ var DbSet DbSetting
 // New 初始化：数据库配置
 func (DbSetting) New(path string) *DbSetting {
 	var dbSetting *DbSetting = &DbSetting{}
-	err := honestMan.App.New(path).LoadYaml(dbSetting)
-	if err != nil {
+
+	if err := honestMan.App.New(path).LoadYaml(dbSetting); err != nil {
 		return nil
 	}
+
 	return dbSetting
 }
 

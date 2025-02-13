@@ -33,11 +33,7 @@ const (
 )
 
 // NewFileManager 初始化：文件管理
-func NewFileManager(config *FileManagerConfig) *FileManager {
-	return &FileManager{
-		config: config,
-	}
-}
+func NewFileManager(config *FileManagerConfig) *FileManager { return &FileManager{config: config} }
 
 // NewFileManagerByLocalFile 初始化：文件管理器（通过本地文件）
 func NewFileManagerByLocalFile(srcDir, dstDir string, config *FileManagerConfig) (*FileManager, error) {
@@ -51,23 +47,12 @@ func NewFileManagerByLocalFile(srcDir, dstDir string, config *FileManagerConfig)
 		return nil, err
 	}
 
-	return &FileManager{
-		dstDir:    dstDir,
-		srcDir:    srcDir,
-		fileBytes: fileBytes,
-		fileSize:  int64(len(fileBytes)),
-		config:    config,
-	}, nil
+	return &FileManager{dstDir: dstDir, srcDir: srcDir, fileBytes: fileBytes, fileSize: int64(len(fileBytes)), config: config}, nil
 }
 
 // NewFileManagerByBytes 实例化：文件管理器（通过字节）
 func NewFileManagerByBytes(srcFileBytes []byte, dstDir string, config *FileManagerConfig) *FileManager {
-	return &FileManager{
-		dstDir:    dstDir,
-		fileBytes: srcFileBytes,
-		fileSize:  int64(len(srcFileBytes)),
-		config:    config,
-	}
+	return &FileManager{dstDir: dstDir, fileBytes: srcFileBytes, fileSize: int64(len(srcFileBytes)), config: config}
 }
 
 // SetSrcDir 设置源文件
@@ -81,10 +66,11 @@ func (my *FileManager) SetSrcDir(srcDir string) (*FileManager, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	my.srcDir = fs.GetDir()
-	my.fileBytes = fileBytes
-	my.fileSize = int64(len(fileBytes))
+	{
+		my.srcDir = fs.GetDir()
+		my.fileBytes = fileBytes
+		my.fileSize = int64(len(fileBytes))
+	}
 
 	return my, nil
 }
@@ -92,6 +78,7 @@ func (my *FileManager) SetSrcDir(srcDir string) (*FileManager, error) {
 // SetDstDir 设置目标目录
 func (my *FileManager) SetDstDir(dstDir string) *FileManager {
 	my.dstDir = dstDir
+
 	return my
 }
 
@@ -119,12 +106,14 @@ func (my *FileManager) Delete() error {
 	case FileManagerConfigDriverOss:
 		return my.deleteFromOss()
 	}
+
 	return fmt.Errorf("不支持的驱动类型：%s", my.config.Driver)
 }
 
 // 上传到本地
 func (my *FileManager) uploadToLocal() (int64, error) {
 	dst := FileSystemApp.NewByAbsolute(my.dstDir)
+
 	return dst.WriteBytes(my.fileBytes)
 }
 
@@ -146,9 +135,7 @@ func (my *FileManager) uploadToNexus() (int64, error) {
 }
 
 // 上传到oss
-func (my *FileManager) uploadToOss() (int64, error) {
-	return 0, errors.New("暂不支持oss方式")
-}
+func (my *FileManager) uploadToOss() (int64, error) { return 0, errors.New("暂不支持oss方式") }
 
 // 从本地删除文件
 func (my *FileManager) deleteFromLocal() error {
@@ -157,7 +144,8 @@ func (my *FileManager) deleteFromLocal() error {
 
 // 从nexus删除文件
 func (my *FileManager) deleteFromNexus() error {
-	return httpClient.NewHttpClientDelete(my.dstDir).
+	return httpClient.
+		NewHttpClientDelete(my.dstDir).
 		SetAuthorization(my.config.Username, my.config.Password, my.config.AuthTitle).
 		Send().Err
 }
