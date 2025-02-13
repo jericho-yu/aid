@@ -435,6 +435,7 @@ func (my *Client) GenerateRequest() *Client {
 	return my
 }
 
+// beforeSend 发送请求前置动作
 func (my *Client) beforeSend() *http.Client {
 	if !my.isReady {
 		my.GenerateRequest()
@@ -472,12 +473,16 @@ func (my *Client) Download(filename, processContent string) *Client {
 	f, _ := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY, 0644)
 	defer f.Close()
 
-	bar := processBar.DefaultBytes(
-		my.response.ContentLength,
-		processContent,
-	)
+	if processContent != "" {
+		bar := processBar.DefaultBytes(
+			my.response.ContentLength,
+			processContent,
+		)
 
-	io.Copy(io.MultiWriter(f, bar), my.response.Body)
+		io.Copy(io.MultiWriter(f, bar), my.response.Body)
+	} else {
+		io.Copy(f, my.response.Body)
+	}
 
 	return my
 }
