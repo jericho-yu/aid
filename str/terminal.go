@@ -10,9 +10,7 @@ import (
 )
 
 type (
-	Str struct {
-		original string
-	}
+	Str struct{ original string }
 
 	TerminalLog struct {
 		format string
