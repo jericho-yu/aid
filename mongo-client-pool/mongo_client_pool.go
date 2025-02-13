@@ -1,4 +1,4 @@
-package mongoDriver
+package mongoClientPool
 
 import (
 	"errors"
