@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/jericho-yu/aid/filesystem"
+	"github.com/jericho-yu/aid/operation"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -99,16 +100,15 @@ func (c *Cutter) Write(bytes []byte) (n int, err error) {
 	if err != nil {
 		return 0, err
 	}
+
 	return c.file.Write(bytes)
 }
 
 // GetWriteSync 获取 zapcore.WriteSync
 func GetWriteSync(path string, level zapcore.Level, inConsole bool) zapcore.WriteSyncer {
 	fileWriter := NewCutter(path, level.String(), func(c *Cutter) { c.format = time.DateOnly })
-	if inConsole {
-		return zapcore.NewMultiWriteSyncer(zapcore.AddSync(fileWriter), zapcore.AddSync(os.Stdout))
-	}
-	return zapcore.AddSync(fileWriter)
+
+	return operation.Ternary[zapcore.WriteSyncer](inConsole, zapcore.NewMultiWriteSyncer(zapcore.AddSync(fileWriter), zapcore.AddSync(os.Stdout)), zapcore.AddSync(fileWriter))
 }
 
 // NewZapProvider 实例化：Zap日志服务提供者
