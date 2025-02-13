@@ -187,5 +187,6 @@ func (my *SqlServerPool) Close() error {
 			return fmt.Errorf("关闭数据库连接失败 %s", err.Error())
 		}
 	}
+
 	return nil
 }
