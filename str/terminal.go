@@ -83,12 +83,14 @@ func (my *Str) PadRightZeros(length int) (string, error) {
 // PadRight 后置填充
 func (my *Str) PadRight(length int, s string) string {
 	my.original += strings.Repeat(s, length-(len(my.original)%length))
+
 	return my.original
 }
 
 // PadLeft 前置补充
 func (my *Str) PadLeft(length int, s string) string {
 	my.original = strings.Repeat(s, length-(len(my.original)%length)) + s
+
 	return my.original
 }
 
@@ -98,6 +100,7 @@ func NewTerminalLog(format ...string) *TerminalLog {
 	for _, v := range format {
 		f += v
 	}
+
 	return &TerminalLog{format: f, enable: cast.ToBool(os.Getenv("AID__STR__TERMINAL_LOG__ENABLE"))}
 }
 
