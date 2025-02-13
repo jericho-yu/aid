@@ -418,7 +418,10 @@ func (my *Client) GenerateRequest() *Client {
 
 	// 创建一个新的证书池，并将证书添加到池中
 	certPool := x509.NewCertPool()
-	certPool.AppendCertsFromPEM(my.cert)
+	if !certPool.AppendCertsFromPEM(my.cert) {
+		my.Err = errors.New("生成证书失败")
+		return my
+	}
 
 	// 创建一个新的TLS配置
 	tlsConfig := &tls.Config{RootCAs: certPool}
@@ -451,16 +454,15 @@ func (my *Client) Send() *Client {
 	}
 
 	my.response, my.Err = client.Do(my.request)
-	if my.Err != nil {
-		my.Err = fmt.Errorf("发送失败：%s", my.Err.Error())
-		return my
-	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			panic(err)
+			my.Err = fmt.Errorf("发送失败：%v", err)
 		}
 	}(my.response.Body)
+	if my.Err != nil {
+		return my
+	}
 
 	// 读取新的响应的主体
 	if my.response.ContentLength > 1*1024*1024 { // 1MB
@@ -487,9 +489,11 @@ func (my *Client) check() error {
 	if my.requestUrl == "" {
 		return errors.New("url不能为空")
 	}
+
 	if my.requestMethod == "" {
 		my.requestMethod = http.MethodGet
 	}
+
 	return nil
 }
 

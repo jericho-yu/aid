@@ -11,6 +11,7 @@ type (
 func NewBufferByString(original string) *Buffer {
 	return &Buffer{original: bytes.NewBufferString(original)}
 }
+
 func NewBufferByBytes(original []byte) *Buffer { return &Buffer{original: bytes.NewBuffer(original)} }
 
 func (my *Buffer) WriteString(stringList ...string) *Buffer {
