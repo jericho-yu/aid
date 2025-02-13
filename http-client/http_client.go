@@ -15,6 +15,8 @@ import (
 	"net/url"
 	"os"
 	"time"
+
+	"github.com/jericho-yu/aid/str"
 )
 
 type (
@@ -498,7 +500,8 @@ func (my *Client) setQueries() {
 		for k, v := range my.requestQueries {
 			queries.Add(k, v)
 		}
-		my.requestUrl += "?" + queries.Encode()
+
+		my.requestUrl = str.NewBufferByString(my.requestUrl).WriteString("?", queries.Encode()).ToString()
 	}
 }
 
