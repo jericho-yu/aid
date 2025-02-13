@@ -55,6 +55,7 @@ func (*RedisPool) GetClient(key string) (string, *rds.Client) {
 	if client, exist := redisPoolIns.connections.Get(key); exist {
 		return client.prefix, client.conn
 	}
+
 	return "", nil
 }
 
@@ -79,6 +80,7 @@ func (*RedisPool) Get(clientName, key string) (string, error) {
 			return "", err
 		}
 	}
+
 	return ret, nil
 }
 
@@ -102,6 +104,7 @@ func (my *RedisPool) Close(key string) error {
 	if client, exist := redisPoolIns.connections.Get(key); exist {
 		return client.conn.Close()
 	}
+
 	return nil
 }
 
