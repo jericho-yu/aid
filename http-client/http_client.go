@@ -116,6 +116,7 @@ func (my *Client) SetAuthorization(username, password, title string) *Client {
 // SetBody 设置请求体
 func (my *Client) SetBody(body []byte) *Client {
 	my.requestBody = body
+
 	return my
 }
 
@@ -132,6 +133,7 @@ func (my *Client) SetXmlBody(body any) *Client {
 	my.SetHeaderContentType("xml")
 
 	my.requestBody, my.Err = xml.Marshal(body)
+
 	return my
 }
 
@@ -144,6 +146,7 @@ func (my *Client) SetFormBody(body map[string]string) *Client {
 		params.Add(k, v)
 	}
 	my.requestBody = []byte(params.Encode())
+
 	return my
 }
 
