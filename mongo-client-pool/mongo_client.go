@@ -86,18 +86,21 @@ func (my *MongoClient) InsertOne(data any, res **mongo.InsertOneResult) *MongoCl
 // InsertMany 插入多条数据
 func (my *MongoClient) InsertMany(data []any, res **mongo.InsertManyResult) *MongoClient {
 	*res, my.Err = my.CurrentCollection.InsertMany(context.TODO(), data)
+
 	return my
 }
 
 // UpdateOne 修改一条数据
 func (my *MongoClient) UpdateOne(data any, res **mongo.UpdateResult, opts ...*options.UpdateOptions) *MongoClient {
 	*res, my.Err = my.CurrentCollection.UpdateOne(context.TODO(), my.GetFirstCondition(), Map{"$set": data}, opts...)
+
 	return my
 }
 
 // UpdateMany 修改多条数据
 func (my *MongoClient) UpdateMany(data any, res **mongo.UpdateResult, opts ...*options.UpdateOptions) *MongoClient {
 	*res, my.Err = my.CurrentCollection.UpdateMany(context.TODO(), my.GetFirstCondition(), Map{"$set": data}, opts...)
+
 	return my
 }
 
@@ -105,6 +108,7 @@ func (my *MongoClient) UpdateMany(data any, res **mongo.UpdateResult, opts ...*o
 func (my *MongoClient) Where(condition ...Map) *MongoClient {
 	my.CleanConditions()
 	my.conditions = append(my.conditions, condition...)
+
 	return my
 }
 
@@ -121,9 +125,7 @@ func (my *MongoClient) GetFirstCondition() Map {
 }
 
 // GetConditions 获取全部查询条件（聚合条件）
-func (my *MongoClient) GetConditions() []Map {
-	return my.conditions
-}
+func (my *MongoClient) GetConditions() []Map { return my.conditions }
 
 // FindOne 查询一条数据
 func (my *MongoClient) FindOne(result any, findOneOptionFn func(opt *options.FindOneOptions) *options.FindOneOptions) *MongoClient {
@@ -160,6 +162,7 @@ func (my *MongoClient) FindMany(results any, findOptionFn func(opt *options.Find
 	}
 
 	my.Err = cursor.All(context.TODO(), results)
+
 	return my
 }
 
@@ -175,6 +178,7 @@ func (my *MongoClient) Aggregate(results any) *MongoClient {
 	}
 
 	my.Err = cursor.All(context.TODO(), results)
+
 	return my
 }
 

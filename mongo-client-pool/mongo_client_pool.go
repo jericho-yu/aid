@@ -21,6 +21,7 @@ func OnceMongoPool() *MongoClientPool {
 	mongoPoolOnce.Do(func() {
 		mongoClientPool = &MongoClientPool{clients: dict.MakeAnyDict[string, *MongoClient]()}
 	})
+
 	return mongoClientPool
 }
 
@@ -67,5 +68,6 @@ func (*MongoClientPool) Clean() *MongoClientPool {
 	for _, key := range mongoClientPool.clients.Keys() {
 		_, _ = mongoClientPool.Remove(key)
 	}
+
 	return mongoClientPool
 }
