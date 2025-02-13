@@ -84,20 +84,19 @@ func OnceSqlServerPool(dbSetting *DbSetting) GormPool {
 	}
 
 	sqlServerPoolIns.mainConn = sqlServerPoolIns.mainConn.Session(&gorm.Session{})
-
-	sqlDb, _ := sqlServerPoolIns.mainConn.DB()
-	sqlDb.SetConnMaxIdleTime(time.Duration(sqlServerPoolIns.maxIdleTime) * time.Hour)
-	sqlDb.SetConnMaxLifetime(time.Duration(sqlServerPoolIns.maxLifetime) * time.Hour)
-	sqlDb.SetMaxIdleConns(sqlServerPoolIns.maxIdleConns)
-	sqlDb.SetMaxOpenConns(sqlServerPoolIns.maxOpenConns)
+	{
+		sqlDb, _ := sqlServerPoolIns.mainConn.DB()
+		sqlDb.SetConnMaxIdleTime(time.Duration(sqlServerPoolIns.maxIdleTime) * time.Hour)
+		sqlDb.SetConnMaxLifetime(time.Duration(sqlServerPoolIns.maxLifetime) * time.Hour)
+		sqlDb.SetMaxIdleConns(sqlServerPoolIns.maxIdleConns)
+		sqlDb.SetMaxOpenConns(sqlServerPoolIns.maxOpenConns)
+	}
 
 	return sqlServerPoolIns
 }
 
 // GetConn 获取主数据库链接
-func (my *SqlServerPool) GetConn() *gorm.DB {
-	return my.mainConn
-}
+func (my *SqlServerPool) GetConn() *gorm.DB { return my.mainConn }
 
 // getRws 获取带有读写分离的数据库链接
 func (my *SqlServerPool) getRws() *gorm.DB {
