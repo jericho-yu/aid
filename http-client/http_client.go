@@ -334,9 +334,7 @@ func (my *Client) SetTimeoutSecond(timeoutSecond int64) *Client {
 }
 
 // GetResponse 获取响应对象
-func (my *Client) GetResponse() *http.Response {
-	return my.response
-}
+func (my *Client) GetResponse() *http.Response { return my.response }
 
 // ParseByContentType 根据响应头Content-Type自动解析响应体
 func (my *Client) ParseByContentType(target any) *Client {
@@ -346,19 +344,19 @@ func (my *Client) ParseByContentType(target any) *Client {
 	case ContentTypeXml:
 		my.GetResponseXmlBody(target)
 	}
+
 	return my
 }
 
 // GetResponseRawBody 获取原始响应体
-func (my *Client) GetResponseRawBody() []byte {
-	return my.responseBody
-}
+func (my *Client) GetResponseRawBody() []byte { return my.responseBody }
 
 // GetResponseJsonBody 获取json格式响应体
 func (my *Client) GetResponseJsonBody(target any) *Client {
 	if e := json.Unmarshal(my.responseBody, &target); e != nil {
 		my.Err = e
 	}
+
 	return my
 }
 
@@ -371,6 +369,8 @@ func (my *Client) GetResponseXmlBody(target any) *Client {
 }
 
 // SaveResponseSteamFile 保存二进制到文件
+//
+//go:fix 建议使用Download方法
 func (my *Client) SaveResponseSteamFile(filename string) *Client {
 	// 创建一个新的文件
 	file, err := os.Create(filename)
