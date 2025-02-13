@@ -43,8 +43,8 @@ func NewHttpClient(url string) *Client {
 		requestUrl:     url,
 		requestQueries: map[string]string{},
 		requestHeaders: map[string][]string{
-			"Accept":       []string{},
-			"Content-Type": []string{},
+			"Accept":       {},
+			"Content-Type": {},
 		},
 		responseBody:       []byte{},
 		responseBodyBuffer: bytes.NewBuffer([]byte{}),

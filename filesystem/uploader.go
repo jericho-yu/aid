@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/jericho-yu/aid/httpClient"
+	httpClient "github.com/jericho-yu/aid/http-client"
 )
 
 type (

@@ -6,11 +6,7 @@ import (
 	"unicode"
 )
 
-type (
-	Transfer struct {
-		original string
-	}
-)
+type Transfer struct{ original string }
 
 func NewTransfer(original string) *Transfer {
 	return &Transfer{original: original}

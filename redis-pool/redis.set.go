@@ -1,6 +1,6 @@
 package redisPool
 
-import "github.com/jericho-yu/aid/honestMan"
+import honestMan "github.com/jericho-yu/aid/honest-man"
 
 type RedisSetting struct {
 	Host     string `yaml:"host"`

@@ -15,24 +15,14 @@ var (
 	characters   = Letters + Digits + Symbols                             // 94
 )
 
-type (
-	Rand struct {
-		// bufferChan is the buffer for random bytes,
-		// every item storing 4 bytes.
-		bufferChan chan []byte
-	}
-)
+type Rand struct {
+	// bufferChan is the buffer for random bytes,
+	// every item storing 4 bytes.
+	bufferChan chan []byte
+}
 
-const (
-	// Buffer size for uint32 random number.
-	bufferChanSize = 10000
-)
-
-var (
-// bufferChan is the buffer for random bytes,
-// every item storing 4 bytes.
-
-)
+// Buffer size for uint32 random number.
+const bufferChanSize = 10000
 
 func NewRand() *Rand {
 	ins := &Rand{}

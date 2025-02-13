@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/jericho-yu/aid/dict"
-	redis "github.com/redis/go-redis/v9"
+	rds "github.com/redis/go-redis/v9"
 )
 
 type (
@@ -18,7 +18,7 @@ type (
 
 	redisConn struct {
 		prefix string
-		conn   *redis.Client
+		conn   *rds.Client
 	}
 )
 
@@ -37,7 +37,7 @@ func OnceRedisPool(redisSetting *RedisSetting) *RedisPool {
 			for _, pool := range redisSetting.Pool {
 				redisPoolIns.connections.Set(pool.Key, &redisConn{
 					prefix: fmt.Sprintf("%s:%s", redisSetting.Prefix, pool.Prefix),
-					conn: redis.NewClient(&redis.Options{
+					conn: rds.NewClient(&rds.Options{
 						Addr:     fmt.Sprintf("%s:%d", redisSetting.Host, redisSetting.Port),
 						Password: redisSetting.Password,
 						DB:       pool.DbNum,
@@ -51,7 +51,7 @@ func OnceRedisPool(redisSetting *RedisSetting) *RedisPool {
 }
 
 // GetClient 获取链接和链接前缀
-func (*RedisPool) GetClient(key string) (string, *redis.Client) {
+func (*RedisPool) GetClient(key string) (string, *rds.Client) {
 	if client, exist := redisPoolIns.connections.Get(key); exist {
 		return client.prefix, client.conn
 	}
@@ -63,7 +63,7 @@ func (*RedisPool) Get(clientName, key string) (string, error) {
 	var (
 		err         error
 		prefix, ret string
-		client      *redis.Client
+		client      *rds.Client
 	)
 
 	prefix, client = redisPoolIns.GetClient(clientName)
@@ -73,7 +73,7 @@ func (*RedisPool) Get(clientName, key string) (string, error) {
 
 	ret, err = client.Get(context.Background(), fmt.Sprintf("%s:%s", prefix, key)).Result()
 	if err != nil {
-		if errors.Is(err, redis.Nil) {
+		if errors.Is(err, rds.Nil) {
 			return "", nil
 		} else {
 			return "", err
@@ -86,7 +86,7 @@ func (*RedisPool) Get(clientName, key string) (string, error) {
 func (*RedisPool) Set(clientName, key string, val any, exp time.Duration) (string, error) {
 	var (
 		prefix string
-		client *redis.Client
+		client *rds.Client
 	)
 
 	prefix, client = redisPoolIns.GetClient(clientName)
