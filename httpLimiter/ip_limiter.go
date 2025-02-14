@@ -47,8 +47,8 @@ func (my *IpLimiter) Affirm(ip string, t time.Duration, maxVisitTimes uint64) (*
 	return nil, true
 }
 
-// GetLastVisiter 获取最后访问时间
-func (r *Visit) GetLastVisiter() time.Time { return r.lastVisit }
+// GetLastVisitor 获取最后访问时间
+func (r *Visit) GetLastVisitor() time.Time { return r.lastVisit }
 
 // GetVisitTimes 获取窗口期内访问次数
 func (r *Visit) GetVisitTimes() uint64 { return r.visitTimes }
