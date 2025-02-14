@@ -30,13 +30,12 @@ var (
 )
 
 // NewMapLock 实例化：字典锁
-func NewMapLock() *MapLock {
-	return &MapLock{locks: dict.MakeAnyDict[string, *itemLock]()}
-}
+func NewMapLock() *MapLock { return &MapLock{locks: dict.MakeAnyDict[string, *itemLock]()} }
 
 // OnceMapLock 单例化：字典锁
 func OnceMapLock() *MapLock {
 	onceMapLock.Do(func() { mapLockIns = &MapLock{locks: dict.MakeAnyDict[string, *itemLock]()} })
+
 	return mapLockIns
 }
 
@@ -61,6 +60,7 @@ func (my *MapLock) SetMany(items map[string]any) error {
 			return err
 		}
 	}
+
 	return nil
 }
 
