@@ -1,7 +1,7 @@
 package gormPool
 
 import (
-	honestMan "github.com/jericho-yu/aid/honest-man"
+	"github.com/jericho-yu/aid/honestMan"
 )
 
 type (
