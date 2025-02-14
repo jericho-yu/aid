@@ -68,18 +68,21 @@ func (my *MongoClient) Ping() error {
 // SetDatabase 设置数据库
 func (my *MongoClient) SetDatabase(database string, opts ...*options.DatabaseOptions) *MongoClient {
 	my.CurrentDatabase = my.client.Database(database, opts...)
+
 	return my
 }
 
 // SetCollection 设置文档
 func (my *MongoClient) SetCollection(collection string, opts ...*options.CollectionOptions) *MongoClient {
 	my.CurrentCollection = my.CurrentDatabase.Collection(collection, opts...)
+
 	return my
 }
 
 // InsertOne 插入一条数据
 func (my *MongoClient) InsertOne(data any, res **mongo.InsertOneResult) *MongoClient {
 	*res, my.Err = my.CurrentCollection.InsertOne(context.TODO(), data)
+
 	return my
 }
 

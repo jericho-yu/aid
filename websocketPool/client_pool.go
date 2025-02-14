@@ -26,36 +26,42 @@ func OnceClientPool() *ClientPool {
 		clientPoolIns = &ClientPool{}
 		clientPoolIns.clientInstances = dict.MakeAnyDict[string, *ClientInstance]()
 	})
+
 	return clientPoolIns
 }
 
 // SetOnConnect 设置回调：成功创建链接
 func (ClientPool) SetOnConnect(fn func(instanceName, clientName string)) *ClientPool {
 	clientPoolIns.onConnect = fn
+
 	return clientPoolIns
 }
 
 // SetOnConnectErr 设置回调：链接错误
 func (ClientPool) SetOnConnectErr(fn func(instanceName, clientName string, err error)) *ClientPool {
 	clientPoolIns.onConnectErr = fn
+
 	return clientPoolIns
 }
 
 // SetOnCloseClientErr 设置回调：关闭客户端链接错
 func (ClientPool) SetOnCloseClientErr(fn func(instanceName, clientName string, err error)) *ClientPool {
 	clientPoolIns.onCloseErr = fn
+
 	return clientPoolIns
 }
 
 // SetOnSendMsgErr 设置回调：发送消息错误
 func (ClientPool) SetOnSendMsgErr(fn func(instanceName, clientName string, err error)) *ClientPool {
 	clientPoolIns.onSendMsgErr = fn
+
 	return clientPoolIns
 }
 
 // SetOnReceiveMsgErr 设置回调：接收消息错误
 func (ClientPool) SetOnReceiveMsgErr(fn func(instanceName, clientName string, propertyMessage []byte, err error)) *ClientPool {
 	clientPoolIns.onReceiveMsgErr = fn
+
 	return clientPoolIns
 }
 

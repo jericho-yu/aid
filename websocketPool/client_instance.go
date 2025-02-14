@@ -2,6 +2,7 @@ package websocketPool
 
 import (
 	"errors"
+
 	"github.com/jericho-yu/aid/dict"
 )
 
@@ -22,6 +23,7 @@ func (my *ClientInstance) GetClient(clientName string) (*Client, bool) {
 	if !exist {
 		return nil, exist
 	}
+
 	return websocketClient, true
 }
 

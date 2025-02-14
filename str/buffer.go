@@ -16,6 +16,7 @@ func (my *Buffer) WriteString(stringList ...string) *Buffer {
 	for _, s := range stringList {
 		my.original.WriteString(s)
 	}
+
 	return my
 }
 
@@ -23,6 +24,7 @@ func (my *Buffer) WriterByte(byteList ...byte) *Buffer {
 	for _, b := range byteList {
 		my.original.WriteByte(b)
 	}
+
 	return my
 }
 
@@ -30,6 +32,7 @@ func (my *Buffer) WriteRune(runeList ...rune) *Buffer {
 	for _, v := range runeList {
 		my.original.WriteRune(v)
 	}
+
 	return my
 }
 

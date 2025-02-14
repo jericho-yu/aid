@@ -51,9 +51,7 @@ func Filter[T any](fn func(v T) bool, values []T) (ret []T) {
 }
 
 func FilterDemo() {
-	type A struct {
-		Name string
-	}
+	type A struct{ Name string }
 	a := []*A{
 		{Name: "1"},
 		{Name: "2"},

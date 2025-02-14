@@ -65,6 +65,7 @@ func (my *Rand) Intn(max int) int {
 	if (max > 0 && n < 0) || (max < 0 && n > 0) {
 		return -n
 	}
+
 	return n
 }
 
@@ -82,6 +83,7 @@ func (my *Rand) B(n int) []byte {
 			break
 		}
 	}
+
 	return b
 }
 
@@ -119,6 +121,7 @@ func (my *Rand) S(n int, symbols ...bool) string {
 			b[i] = characters[numberBytes[i]%62]
 		}
 	}
+
 	return string(b)
 }
 
@@ -133,6 +136,7 @@ func (my *Rand) D(min, max time.Duration) time.Duration {
 		}
 	}
 	n := int64(my.N(int(min), int(max)))
+
 	return time.Duration(n * multiple)
 }
 
@@ -156,6 +160,7 @@ func (my *Rand) GetString(s string, n int) string {
 			b[i] = runes[my.Intn(len(runes))]
 		}
 	}
+
 	return string(b)
 }
 
@@ -186,6 +191,7 @@ func (my *Rand) GetLetters(n int) string {
 	for i := range b {
 		b[i] = Letters[numberBytes[i]%52]
 	}
+
 	return string(b)
 }
 
@@ -201,6 +207,7 @@ func (my *Rand) GetSymbols(n int) string {
 	for i := range b {
 		b[i] = Symbols[numberBytes[i]%32]
 	}
+
 	return string(b)
 }
 
@@ -213,15 +220,12 @@ func (my *Rand) Perm(n int) []int {
 		m[i] = m[j]
 		m[j] = i
 	}
+
 	return m
 }
 
 // Meet randomly calculate whether the given probability `num`/`total` is met.
-func (my *Rand) Meet(num, total int) bool {
-	return my.Intn(total) < num
-}
+func (my *Rand) Meet(num, total int) bool { return my.Intn(total) < num }
 
 // MeetProb randomly calculate whether the given probability is met.
-func (my *Rand) MeetProb(prob float32) bool {
-	return my.Intn(1e7) < int(prob*1e7)
-}
+func (my *Rand) MeetProb(prob float32) bool { return my.Intn(1e7) < int(prob*1e7) }

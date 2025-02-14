@@ -28,9 +28,7 @@ type (
 	}
 
 	// ServerInstance websocket服务端实例
-	ServerInstance struct {
-		Connections *array.AnyArray[*Server]
-	}
+	ServerInstance struct{ Connections *array.AnyArray[*Server] }
 
 	// Server websocket服务端链接
 	Server struct {
@@ -54,6 +52,7 @@ func (ServerPool) Once() *ServerPool {
 		serverPoolIns.serverInstances = dict.MakeAnyDict[string, *ServerInstance]()
 		serverPoolIns.router = dict.MakeAnyDict[string, func(*websocket.Conn)]()
 	})
+
 	return serverPoolIns
 }
 
@@ -65,48 +64,56 @@ func (ServerInstance) New() *ServerInstance {
 // SetOnConnect 设置回调：链接成功后
 func (ServerPool) SetOnConnect(onConnect func(*websocket.Conn)) *ServerPool {
 	serverPoolIns.onConnect = onConnect
+
 	return serverPoolIns
 }
 
 // SetOnConnectErr 设置回调：链接失败后
 func (ServerPool) SetOnConnectErr(onConnectErr func(error)) *ServerPool {
 	serverPoolIns.onConnectErr = onConnectErr
+
 	return serverPoolIns
 }
 
 // SetOnReceiveMsg 设置回调：接收消息
 func (ServerPool) SetOnReceiveMsg(onMessage func(*websocket.Conn, []byte) string) *ServerPool {
 	serverPoolIns.onReceiveMsg = onMessage
+
 	return serverPoolIns
 }
 
 // SetOnReceiveMsgErr 设置回调：接收消息失败
 func (ServerPool) SetOnReceiveMsgErr(onMessageErr func(*websocket.Conn, error)) *ServerPool {
 	serverPoolIns.onReceiveMsgErr = onMessageErr
+
 	return serverPoolIns
 }
 
 // SetOnRouterErr 设置回调：路由解析失败
 func (ServerPool) SetOnRouterErr(onRouterErr func(*websocket.Conn, error)) *ServerPool {
 	serverPoolIns.onRouterErr = onRouterErr
+
 	return serverPoolIns
 }
 
 // SetOnCloseConnErr 设置回调：关闭链接错误
 func (ServerPool) SetOnCloseConnErr(onCloseConnectionErr func(conn *websocket.Conn, err error)) *ServerPool {
 	serverPoolIns.onCloseConnErr = onCloseConnectionErr
+
 	return serverPoolIns
 }
 
 // SetOnSendMsgErr 设置回调：发送消息失败
 func (ServerPool) SetOnSendMsgErr(onSendMessageErr func(conn *websocket.Conn, err error)) *ServerPool {
 	serverPoolIns.onSendMsgErr = onSendMessageErr
+
 	return serverPoolIns
 }
 
 // SetOnPing 设置回调：ping
 func (ServerPool) SetOnPing(fn func(*websocket.Conn)) *ServerPool {
 	serverPoolIns.onPing = fn
+
 	return serverPoolIns
 }
 
@@ -197,6 +204,7 @@ func (ServerPool) SendMsgByWsConn(ws *websocket.Conn, message []byte) error {
 		}
 		return fmt.Errorf("发送消息失败：%s ==> %s", err.Error(), ws.RemoteAddr())
 	}
+
 	return nil
 }
 
@@ -232,6 +240,7 @@ func (ServerPool) RegisterRouter(routerKey string, fn func(ws *websocket.Conn)) 
 		serverPoolIns.router.RemoveByKey(routerKey)
 	}
 	serverPoolIns.router.Set(routerKey, fn)
+
 	return serverPoolIns
 }
 

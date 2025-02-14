@@ -21,6 +21,7 @@ func (RedisSetting) New(path string) *RedisSetting {
 	if err != nil {
 		return nil
 	}
+
 	return redisSetting
 }
 

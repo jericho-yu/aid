@@ -111,9 +111,7 @@ func New(object any) *Reflection {
 }
 
 // NewByReflectValue 实例化：通过reflect.Value
-func NewByReflectValue(refValue reflect.Value) *Reflection {
-	return New(refValue.Interface())
-}
+func NewByReflectValue(refValue reflect.Value) *Reflection { return New(refValue.Interface()) }
 
 // GetValue 获取reflect.Value
 func (my *Reflection) GetValue() reflect.Value { return my.refValue }
@@ -212,6 +210,7 @@ func (my *Reflection) GetReflectionType() ReflectionType {
 			return Any
 		}
 	}
+
 	return UnKnowType
 }
 

@@ -14,9 +14,7 @@ type (
 	}
 
 	// RouteLimiter 路由限流器
-	RouteLimiter struct {
-		RouteSetMap *sync.Map
-	}
+	RouteLimiter struct{ RouteSetMap *sync.Map }
 )
 
 var (
@@ -27,6 +25,7 @@ var (
 // OnceRouteLimiter 单例化：路由限流
 func OnceRouteLimiter() *RouteLimiter {
 	routerLimiterOnce.Do(func() { routerLimiterIns = &RouteLimiter{RouteSetMap: &sync.Map{}} })
+
 	return routerLimiterIns
 }
 

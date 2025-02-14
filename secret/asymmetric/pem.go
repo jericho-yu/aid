@@ -21,25 +21,21 @@ func NewPemBase64() *PemBase64 { return &PemBase64{} }
 
 func (my *PemBase64) SetBase64PublicKey(base64PublicKey string) *PemBase64 {
 	my.base64PublicKey = base64PublicKey
+
 	return my
 }
 
-func (my *PemBase64) SetBase64PrivateKye(base64PrivateKye string) *PemBase64 {
-	my.base64PrivateKey = base64PrivateKye
+func (my *PemBase64) SetBase64PrivateKye(base64PrivateKey string) *PemBase64 {
+	my.base64PrivateKey = base64PrivateKey
+
 	return my
 }
 
-func (my *PemBase64) GetBase64PublicKey() string {
-	return my.base64PublicKey
-}
+func (my *PemBase64) GetBase64PublicKey() string { return my.base64PublicKey }
 
-func (my *PemBase64) GetBase64PrivateKey() string {
-	return my.base64PrivateKey
-}
+func (my *PemBase64) GetBase64PrivateKey() string { return my.base64PrivateKey }
 
-func (my *PemBase64) GetPemPublicKey() []byte {
-	return my.publicKey
-}
+func (my *PemBase64) GetPemPublicKey() []byte { return my.publicKey }
 
 func (my *PemBase64) GeneratePemPublicKey() (*PemBase64, error) {
 	// 解码Base64字符串
@@ -71,9 +67,7 @@ func (my *PemBase64) GeneratePemPublicKey() (*PemBase64, error) {
 }
 
 // GetPemPrivateKey 获取pem私钥
-func (my *PemBase64) GetPemPrivateKey() []byte {
-	return my.privateKey
-}
+func (my *PemBase64) GetPemPrivateKey() []byte { return my.privateKey }
 
 // GeneratePemPrivateKey 生成pem密钥
 func (my *PemBase64) GeneratePemPrivateKey() (*PemBase64, error) {

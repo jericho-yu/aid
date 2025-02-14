@@ -367,9 +367,7 @@ func ToInt64(original any) int64 {
 	}
 }
 
-func ToDatetimeUnixMilli(original any) time.Time {
-	return time.UnixMilli(ToInt64(original))
-}
+func ToDatetimeUnixMilli(original any) time.Time { return time.UnixMilli(ToInt64(original)) }
 
 // ToFloat32 converts `any` to float32.
 func ToFloat32(original any) float32 {
@@ -460,9 +458,9 @@ func ToString(original any) string {
 		return value.String()
 	default:
 		// Empty checks.
-		if value == nil {
-			return ""
-		}
+		// if value == nil {
+		// 	return ""
+		// }
 		if f, ok := value.(iString); ok {
 			// If the variable implements the String() interface,
 			// then use that interface to perform the conversion

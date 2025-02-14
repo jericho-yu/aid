@@ -138,9 +138,7 @@ func (ResponseWrt) Write([]byte) (int, error) { return 0, nil }
 func (ResponseWrt) WriteHeader(statusCode int) {}
 
 func ServerDemo() {
-	var wsp *ServerPool
-
-	wsp = ServerPoolApp.
+	wsp := ServerPoolApp.
 		Once().
 		SetOnConnect(func(conn *websocket.Conn) {
 			str.NewTerminalLog("[server] 链接成功：%s").Info(conn.RemoteAddr().String())

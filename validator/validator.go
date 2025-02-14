@@ -67,30 +67,32 @@ func (my *Validator[T]) Validate(rules ...func(item T) error) error {
 // EmailFormat 设置email默认规则
 func (my *Validator[T]) EmailFormat(emailFormat string) *Validator[T] {
 	my.emailFormat = emailFormat
+
 	return my
 }
 
 // DateFormat 设置日期默认规则
 func (my *Validator[T]) DateFormat(dateFormat string) *Validator[T] {
 	my.dateFormat = dateFormat
+
 	return my
 }
 
 // TimeFormat 设置时间默认规则
 func (my *Validator[T]) TimeFormat(timeFormat string) *Validator[T] {
 	my.timeFormat = timeFormat
+
 	return my
 }
 
 // DatetimeFormat 设置日期+时间默认规则
 func (my *Validator[T]) DatetimeFormat(datetimeFormat string) *Validator[T] {
 	my.datetimeFormat = datetimeFormat
+
 	return my
 }
 
-func (my *Validator[T]) clean() {
-	my.err = nil
-}
+func (my *Validator[T]) clean() { my.err = nil }
 
 // validate 执行验证
 func (my *Validator[T]) validate(v any) error {

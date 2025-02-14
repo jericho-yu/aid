@@ -17,9 +17,7 @@ type AnyArray[T any] struct {
 }
 
 // NewAnyArray 实例化
-func NewAnyArray[T any](list []T) *AnyArray[T] {
-	return &AnyArray[T]{data: list, mu: sync.RWMutex{}}
-}
+func NewAnyArray[T any](list []T) *AnyArray[T] { return &AnyArray[T]{data: list, mu: sync.RWMutex{}} }
 
 // MakeAnyArray 初始化
 func MakeAnyArray[T any](size int) *AnyArray[T] {
@@ -226,9 +224,7 @@ func (my *AnyArray[T]) In(target T) bool {
 }
 
 // NotIn 检查值是否不存在
-func (my *AnyArray[T]) NotIn(target T) bool {
-	return !my.In(target)
-}
+func (my *AnyArray[T]) NotIn(target T) bool { return !my.In(target) }
 
 // AllEmpty 判断当前数组是否全空
 func (my *AnyArray[T]) AllEmpty() bool {

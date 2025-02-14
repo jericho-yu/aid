@@ -14,15 +14,11 @@ type (
 	}
 
 	// IpLimiter ip限流器
-	IpLimiter struct {
-		visitMap map[string]*Visit
-	}
+	IpLimiter struct{ visitMap map[string]*Visit }
 )
 
 // NewIpLimiter 实例化：Ip 限流
-func NewIpLimiter() *IpLimiter {
-	return &IpLimiter{visitMap: make(map[string]*Visit)}
-}
+func NewIpLimiter() *IpLimiter { return &IpLimiter{visitMap: make(map[string]*Visit)} }
 
 // Affirm 检查限流
 func (my *IpLimiter) Affirm(ip string, t time.Duration, maxVisitTimes uint64) (*Visit, bool) {
@@ -52,11 +48,7 @@ func (my *IpLimiter) Affirm(ip string, t time.Duration, maxVisitTimes uint64) (*
 }
 
 // GetLastVisiter 获取最后访问时间
-func (r *Visit) GetLastVisiter() time.Time {
-	return r.lastVisit
-}
+func (r *Visit) GetLastVisiter() time.Time { return r.lastVisit }
 
 // GetVisitTimes 获取窗口期内访问次数
-func (r *Visit) GetVisitTimes() uint64 {
-	return r.visitTimes
-}
+func (r *Visit) GetVisitTimes() uint64 { return r.visitTimes }

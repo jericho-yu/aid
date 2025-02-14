@@ -89,20 +89,17 @@ func (r *AesEncrypt) sailByByte() *AesEncrypt {
 }
 
 // GetAesKey 获取加盐后的密钥
-func (r *AesEncrypt) GetAesKey() []byte {
-	return r.aesKey
-}
+func (r *AesEncrypt) GetAesKey() []byte { return r.aesKey }
 
 // SetAesKey 设置加盐后的密钥
 func (r *AesEncrypt) SetAesKey(aesKey []byte) *AesEncrypt {
 	r.aesKey = aesKey
+
 	return r
 }
 
 // GetOpenKey 获取公开密码
-func (r *AesEncrypt) GetOpenKey() string {
-	return r.openKey
-}
+func (r *AesEncrypt) GetOpenKey() string { return r.openKey }
 
 // NewAesDecrypt 实例化：Aes解密密钥对象
 func NewAesDecrypt(sailStr, openKey string) *AesDecrypt {

@@ -20,6 +20,7 @@ func (my *Transfer) PascalToCamel() string {
 	if unicode.IsUpper(firstRune) {
 		firstRune = unicode.ToLower(firstRune)
 	}
+
 	// 拼接第一个字符和剩余部分
 	return string(firstRune) + my.original[1:]
 }
@@ -61,6 +62,7 @@ func (my *Transfer) CamelToPascal() string {
 	if unicode.IsLower(firstRune) {
 		firstRune = unicode.ToUpper(firstRune)
 	}
+
 	return string(firstRune) + my.original[1:]
 }
 
@@ -148,6 +150,7 @@ func (my *Transfer) BabelToPascal() string {
 		}
 	}
 	pascal := strings.Join(words, "")
+
 	return pascal
 }
 
@@ -179,9 +182,7 @@ func (my *Transfer) KebabToCamel() string {
 }
 
 // BabelToSnake babel -> 下划线
-func (my *Transfer) BabelToSnake() string {
-	return strings.ReplaceAll(my.original, "_", "-")
-}
+func (my *Transfer) BabelToSnake() string { return strings.ReplaceAll(my.original, "_", "-") }
 
 // Pluralize 单数变复数
 func (my *Transfer) Pluralize() string {
