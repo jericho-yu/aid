@@ -24,8 +24,6 @@ type (
 	}
 )
 
-var FileManagerApp FileManager
-
 const (
 	FileManagerConfigDriverLocal FileManagerConfigDriver = "LOCAL"
 	FileManagerConfigDriverNexus FileManagerConfigDriver = "NEXUS"
@@ -37,7 +35,7 @@ func NewFileManager(config *FileManagerConfig) *FileManager { return &FileManage
 
 // NewFileManagerByLocalFile 初始化：文件管理器（通过本地文件）
 func NewFileManagerByLocalFile(srcDir, dstDir string, config *FileManagerConfig) (*FileManager, error) {
-	fs := FileSystemApp.NewByAbsolute(srcDir)
+	fs := NewFileSystemByAbsolute(srcDir)
 	if !fs.IsExist {
 		return nil, errors.New("目标文件不存在")
 	}
@@ -57,7 +55,7 @@ func NewFileManagerByBytes(srcFileBytes []byte, dstDir string, config *FileManag
 
 // SetSrcDir 设置源文件
 func (my *FileManager) SetSrcDir(srcDir string) (*FileManager, error) {
-	fs := FileSystemApp.NewByAbsolute(srcDir)
+	fs := NewFileSystemByAbsolute(srcDir)
 	if !fs.IsExist {
 		return nil, errors.New("目标文件不存在")
 	}
@@ -119,11 +117,10 @@ func (my *FileManager) uploadToLocal() (int64, error) {
 
 // 上传到nexus
 func (my *FileManager) uploadToNexus() (int64, error) {
-	client := httpClient.NewHttpClientPut(my.dstDir).
+	client := httpClient.
+		NewHttpClientPut(my.dstDir).
 		SetAuthorization(my.config.Username, my.config.Password, my.config.AuthTitle).
-		AddHeaders(map[string][]string{
-			"Content-Length": {fmt.Sprintf("%d", my.fileSize)},
-		}).
+		AddHeaders(map[string][]string{"Content-Length": {fmt.Sprintf("%d", my.fileSize)}}).
 		SetBody(my.fileBytes).
 		Send()
 
@@ -139,7 +136,7 @@ func (my *FileManager) uploadToOss() (int64, error) { return 0, errors.New("暂�
 
 // 从本地删除文件
 func (my *FileManager) deleteFromLocal() error {
-	return FileSystemApp.NewByAbsolute(my.dstDir).DelFile()
+	return NewFileSystemByAbsolute(my.dstDir).DelFile()
 }
 
 // 从nexus删除文件

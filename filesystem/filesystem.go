@@ -31,6 +31,8 @@ type (
 var FileSystemApp FileSystem
 
 // NewByRelative 实例化：文件系统（相对路径）
+//
+//go:fix 建议使用NewFileSystemByRelative
 func (FileSystem) NewByRelative(dir string) *FileSystem {
 	ins := &FileSystem{dir: filepath.Clean(filepath.Join(FileSystem{}.GetRootPath(), dir))}
 
@@ -38,7 +40,23 @@ func (FileSystem) NewByRelative(dir string) *FileSystem {
 }
 
 // NewByAbsolute 实例化：文件系统（绝对路径）
+//
+//go:fix 建议使用NewFileSystemByAbsolute
 func (FileSystem) NewByAbsolute(dir string) *FileSystem {
+	ins := &FileSystem{dir: dir}
+
+	return ins.init()
+}
+
+// 实例化：文件系统（相对路径）
+func NewFileSystemByRelative(dir string) *FileSystem {
+	ins := &FileSystem{dir: filepath.Clean(filepath.Join(FileSystem{}.GetRootPath(), dir))}
+
+	return ins.init()
+}
+
+// 实例化：文件系统（绝对路径）
+func NewFileSystemByAbsolute(dir string) *FileSystem {
 	ins := &FileSystem{dir: dir}
 
 	return ins.init()
