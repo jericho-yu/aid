@@ -135,9 +135,7 @@ func (my *FileManager) uploadToNexus() (int64, error) {
 func (my *FileManager) uploadToOss() (int64, error) { return 0, errors.New("暂不支持oss方式") }
 
 // 从本地删除文件
-func (my *FileManager) deleteFromLocal() error {
-	return NewFileSystemByAbsolute(my.dstDir).DelFile()
-}
+func (my *FileManager) deleteFromLocal() error { return NewFileSystemByAbsolute(my.dstDir).DelFile() }
 
 // 从nexus删除文件
 func (my *FileManager) deleteFromNexus() error {
@@ -148,6 +146,4 @@ func (my *FileManager) deleteFromNexus() error {
 }
 
 // 从oss删除文件
-func (my *FileManager) deleteFromOss() error {
-	return errors.New("暂不支持oss方式")
-}
+func (my *FileManager) deleteFromOss() error { return errors.New("暂不支持oss方式") }
