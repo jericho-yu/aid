@@ -93,6 +93,7 @@ func ToBytes(original any) []byte {
 	if original == nil {
 		return nil
 	}
+
 	switch value := original.(type) {
 	case string:
 		return []byte(value)
@@ -104,8 +105,10 @@ func ToBytes(original any) []byte {
 		if f, ok := value.(iBytes); ok {
 			return f.Bytes()
 		}
+
 		refType := reflect.TypeOf(original)
 		refValue := reflect.ValueOf(original)
+
 		switch refType.Kind() {
 		case reflect.Map:
 			bytes, err := json.Marshal(original)
@@ -119,6 +122,7 @@ func ToBytes(original any) []byte {
 				ok    = true
 				bytes = make([]byte, refValue.Len())
 			)
+
 			for i := range bytes {
 				int32Value := ToInt32(refValue.Index(i).Interface())
 				if int32Value < 0 || int32Value > math.MaxUint8 {
@@ -127,10 +131,12 @@ func ToBytes(original any) []byte {
 				}
 				bytes[i] = byte(int32Value)
 			}
+
 			if ok {
 				return bytes
 			}
 		}
+
 		return LeEncode(original)
 	}
 }
