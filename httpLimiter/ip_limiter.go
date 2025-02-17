@@ -10,7 +10,7 @@ type (
 		// 最后一次请求时间
 		lastVisit time.Time
 		// 对应Time窗口内的访问次数
-		visitTimes uint64
+		visitTimes uint16
 	}
 
 	// IpLimiter ip限流器
@@ -21,7 +21,7 @@ type (
 func NewIpLimiter() *IpLimiter { return &IpLimiter{visitMap: make(map[string]*Visit)} }
 
 // Affirm 检查限流
-func (my *IpLimiter) Affirm(ip string, t time.Duration, maxVisitTimes uint64) (*Visit, bool) {
+func (my *IpLimiter) Affirm(ip string, t time.Duration, maxVisitTimes uint16) (*Visit, bool) {
 	if maxVisitTimes == 0 || t == 0 {
 		// 如果限流为0，直接通过
 		return nil, true
@@ -51,4 +51,4 @@ func (my *IpLimiter) Affirm(ip string, t time.Duration, maxVisitTimes uint64) (*
 func (r *Visit) GetLastVisitor() time.Time { return r.lastVisit }
 
 // GetVisitTimes 获取窗口期内访问次数
-func (r *Visit) GetVisitTimes() uint64 { return r.visitTimes }
+func (r *Visit) GetVisitTimes() uint16 { return r.visitTimes }

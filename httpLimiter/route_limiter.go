@@ -10,7 +10,7 @@ type (
 	visitor struct {
 		ipLimiter     *IpLimiter
 		t             time.Duration
-		maxVisitTimes uint64
+		maxVisitTimes uint16
 	}
 
 	// RouteLimiter 路由限流器
@@ -30,7 +30,7 @@ func OnceRouteLimiter() *RouteLimiter {
 }
 
 // Add 添加限流规则
-func (my *RouteLimiter) Add(router string, t time.Duration, maxVisitTimes uint64) *RouteLimiter {
+func (my *RouteLimiter) Add(router string, t time.Duration, maxVisitTimes uint16) *RouteLimiter {
 
 	if _, exist := my.RouteSetMap.Load(router); exist {
 		my.RouteSetMap.Delete(router)
