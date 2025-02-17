@@ -177,16 +177,19 @@ func (my *Client) SetFormDataBody(texts map[string]string, files map[string]stri
 	if len(files) > 0 {
 		for k, v := range files {
 			fileWriter, _ := writer.CreateFormFile("fileField", k)
-			file, _ := os.Open(v)
+			file, e := os.Open(v)
+			if e != nil {
+				my.Err = e
+				return my
+			}
 			_, e = io.Copy(fileWriter, file)
 			if e != nil {
 				my.Err = e
 				return my
 			}
 			defer func(file *os.File) {
-				e = file.Close()
-				if e != nil {
-					panic(e)
+				if err := file.Close(); err != nil {
+					fmt.Printf("Failed to close file: %v", err)
 				}
 			}(file)
 		}
@@ -245,6 +248,11 @@ func (my *Client) SetSteamBody(filename string) *Client {
 		my.Err = err
 		return my
 	}
+	defer func(file *os.File) {
+		if err := file.Close(); err != nil {
+			fmt.Printf("Failed to close file: %v", err)
+		}
+	}(file)
 
 	// 获取文件大小
 	stat, _ := file.Stat()
@@ -265,9 +273,7 @@ func (my *Client) SetSteamBody(filename string) *Client {
 		}
 	}
 
-	my.request.Header.Set("Content-Length", fmt.Sprintf("%d", size))
-
-	my.Err = file.Close()
+	//my.request.Header.Set("Content-Length", fmt.Sprintf("%d", size))
 
 	return my
 }
@@ -464,22 +470,22 @@ func (my *Client) Download(filename, processContent string) *Client {
 		return my
 	}
 
-	my.response, my.Err = client.Do(my.request)
-	if my.Err != nil {
+	if my.response, my.Err = client.Do(my.request); my.Err != nil {
+		return my
+	} else {
+		defer my.response.Body.Close()
+
+		f, _ := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0644)
+		defer f.Close()
+
+		if processContent != "" {
+			io.Copy(io.MultiWriter(f, processBar.DefaultBytes(my.response.ContentLength, processContent)), my.response.Body)
+		} else {
+			io.Copy(f, my.response.Body)
+		}
+
 		return my
 	}
-	defer my.response.Body.Close()
-
-	f, _ := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY, 0644)
-	defer f.Close()
-
-	if processContent != "" {
-		io.Copy(io.MultiWriter(f, processBar.DefaultBytes(my.response.ContentLength, processContent)), my.response.Body)
-	} else {
-		io.Copy(f, my.response.Body)
-	}
-
-	return my
 }
 
 // Send 发送请求
