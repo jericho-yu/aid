@@ -160,7 +160,7 @@ func NewZapProvider(
 		level = zapcore.FatalLevel
 	}
 
-	for idx, logLevel := range []zapcore.Level{
+	for _, logLevel := range []zapcore.Level{
 		zapcore.DebugLevel,
 		zapcore.InfoLevel,
 		zapcore.WarnLevel,
