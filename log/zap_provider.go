@@ -171,8 +171,8 @@ func NewZapProvider(
 	} {
 		if level >= logLevel {
 			writer := GetWriteSync(path, logLevel, inConsole)
-			zapCores[idx] = zapcore.NewCore(encoderTypes[encoderType](zapLoggerConfig), writer, logLevel)
-			// zapCores = append(zapCores, zapcore.NewCore(encoderTypes[encoderType](zapLoggerConfig), writer, logLevel))
+			// zapCores[idx] = zapcore.NewCore(encoderTypes[encoderType](zapLoggerConfig), writer, logLevel)
+			zapCores = append(zapCores, zapcore.NewCore(encoderTypes[encoderType](zapLoggerConfig), writer, logLevel))
 		}
 	}
 
