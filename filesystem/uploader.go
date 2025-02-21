@@ -24,6 +24,10 @@ type (
 	}
 )
 
+var FileManagerApp FileManager
+
+func (*FileManager) New(config *FileManagerConfig) *FileManager { return NewFileManager(config) }
+
 const (
 	FileManagerConfigDriverLocal FileManagerConfigDriver = "LOCAL"
 	FileManagerConfigDriverNexus FileManagerConfigDriver = "NEXUS"

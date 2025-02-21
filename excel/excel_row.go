@@ -16,6 +16,10 @@ type Row struct {
 	rowNumber uint64
 }
 
+var RowApp Row
+
+func (*Row) New() *Row { return NewRow() }
+
 // NewRow 构造函数
 func NewRow() *Row { return &Row{} }
 

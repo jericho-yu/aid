@@ -23,6 +23,10 @@ type Reader struct {
 	titles      *array.AnyArray[string]
 }
 
+var ReaderApp Reader
+
+func (*Reader) New() *Reader { return NewReader() }
+
 // NewReader 构造函数
 func NewReader() *Reader {
 	return &Reader{data: dict.MakeAnyOrderlyDict[uint64, *array.AnyArray[string]](0)}

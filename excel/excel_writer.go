@@ -18,6 +18,10 @@ type Writer struct {
 	sheetName string
 }
 
+var WriterApp Writer
+
+func (*Writer) New(filename ...any) *Writer { return NewWriter(filename...) }
+
 // NewWriter 初始化
 func NewWriter(filename ...any) *Writer {
 	ins := &Writer{}

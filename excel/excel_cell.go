@@ -34,6 +34,15 @@ type (
 	}
 )
 
+var CellApp Cell
+
+func (*Cell) NewByAny(content any) *Cell        { return NewCellAny(content) }
+func (*Cell) NewByInt(content any) *Cell        { return NewCellInt(content) }
+func (*Cell) NewByFloat64(content any) *Cell    { return NewCellFloat64(content) }
+func (*Cell) NewByBool(content any) *Cell       { return NewCellBool(content) }
+func (*Cell) NewByTime(content time.Time) *Cell { return NewCellTime(content) }
+func (*Cell) NewByFormula(content string) *Cell { return NewCellFormula(content) }
+
 const (
 	CellContentTypeAny     CellContentType = "any"
 	CellContentTypeFormula CellContentType = "formula"
