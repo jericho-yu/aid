@@ -542,7 +542,7 @@ func (my *Client) setQueries() {
 			queries.Add(k, v)
 		}
 
-		my.requestUrl = str.NewByString(my.requestUrl).WriteString("?", queries.Encode()).ToString()
+		my.requestUrl = str.NewBufferByString(my.requestUrl).String("?", queries.Encode()).ToString()
 	}
 }
 

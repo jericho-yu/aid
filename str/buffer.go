@@ -8,11 +8,13 @@ type (
 	}
 )
 
-func NewByString(original string) *Buffer { return &Buffer{original: bytes.NewBufferString(original)} }
+func NewBufferByString(original string) *Buffer {
+	return &Buffer{original: bytes.NewBufferString(original)}
+}
 
-func NewByBytes(original []byte) *Buffer { return &Buffer{original: bytes.NewBuffer(original)} }
+func NewBufferByBytes(original []byte) *Buffer { return &Buffer{original: bytes.NewBuffer(original)} }
 
-func (my *Buffer) WriteString(stringList ...string) *Buffer {
+func (my *Buffer) String(stringList ...string) *Buffer {
 	for _, s := range stringList {
 		my.original.WriteString(s)
 	}
@@ -20,7 +22,7 @@ func (my *Buffer) WriteString(stringList ...string) *Buffer {
 	return my
 }
 
-func (my *Buffer) WriterByte(byteList ...byte) *Buffer {
+func (my *Buffer) Byte(byteList ...byte) *Buffer {
 	for _, b := range byteList {
 		my.original.WriteByte(b)
 	}
@@ -28,7 +30,7 @@ func (my *Buffer) WriterByte(byteList ...byte) *Buffer {
 	return my
 }
 
-func (my *Buffer) WriteRune(runeList ...rune) *Buffer {
+func (my *Buffer) Rune(runeList ...rune) *Buffer {
 	for _, v := range runeList {
 		my.original.WriteRune(v)
 	}
