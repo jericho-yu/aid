@@ -17,6 +17,13 @@ type (
 	IpLimiter struct{ visitMap map[string]*Visit }
 )
 
+var (
+	VisitApp     Visit
+	IpLimiterApp IpLimiter
+)
+
+func (*IpLimiter) New() *IpLimiter { return NewIpLimiter() }
+
 // NewIpLimiter 实例化：Ip 限流
 func NewIpLimiter() *IpLimiter { return &IpLimiter{visitMap: make(map[string]*Visit)} }
 

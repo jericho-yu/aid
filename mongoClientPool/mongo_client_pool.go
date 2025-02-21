@@ -12,9 +12,12 @@ type MongoClientPool struct {
 }
 
 var (
-	mongoClientPool *MongoClientPool
-	mongoPoolOnce   sync.Once
+	mongoClientPool    *MongoClientPool
+	mongoPoolOnce      sync.Once
+	MongoClientPoolApp MongoClientPool
 )
+
+func (*MongoClientPool) Once() *MongoClientPool { return OnceMongoPool() }
 
 // OnceMongoPool 单例化：mongodb连接池
 func OnceMongoPool() *MongoClientPool {

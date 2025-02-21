@@ -8,6 +8,10 @@ import (
 
 type Transfer struct{ original string }
 
+var TransferApp Transfer
+
+func (*Transfer) New(original string) *Transfer { return &Transfer{original: original} }
+
 func NewTransfer(original string) *Transfer { return &Transfer{original: original} }
 
 // PascalToCamel 大驼峰 -> 小驼峰

@@ -17,6 +17,10 @@ type (
 	}
 )
 
+var PemBase64App PemBase64
+
+func (*PemBase64) New() *PemBase64 { return &PemBase64{} }
+
 func NewPemBase64() *PemBase64 { return &PemBase64{} }
 
 func (my *PemBase64) SetBase64PublicKey(base64PublicKey string) *PemBase64 {

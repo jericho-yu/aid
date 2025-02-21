@@ -20,7 +20,10 @@ type (
 var (
 	routerLimiterOnce = sync.Once{}
 	routerLimiterIns  *RouteLimiter
+	RouterLimiterApp  RouteLimiter
 )
+
+func (*RouteLimiter) Once() *RouteLimiter { return OnceRouteLimiter() }
 
 // OnceRouteLimiter 单例化：路由限流
 func OnceRouteLimiter() *RouteLimiter {

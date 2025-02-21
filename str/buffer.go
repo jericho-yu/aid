@@ -8,11 +8,11 @@ type (
 	}
 )
 
-func NewBufferByString(original string) *Buffer {
-	return &Buffer{original: bytes.NewBufferString(original)}
-}
+var BufferApp Buffer
 
-func NewBufferByBytes(original []byte) *Buffer { return &Buffer{original: bytes.NewBuffer(original)} }
+func (*Buffer) NewByString(original string) *Buffer { return &Buffer{bytes.NewBufferString(original)} }
+
+func (*Buffer) NewByBytes(original []byte) *Buffer { return &Buffer{bytes.NewBuffer(original)} }
 
 func (my *Buffer) String(stringList ...string) *Buffer {
 	for _, s := range stringList {

@@ -8,6 +8,10 @@ import (
 
 type Zlib struct{}
 
+var ZlibApp Zlib
+
+func (*Zlib) New() *Zlib { return &Zlib{} }
+
 func NewZlib() *Zlib { return &Zlib{} }
 
 // Compress 压缩

@@ -27,7 +27,12 @@ type (
 var (
 	onceMapLock sync.Once
 	mapLockIns  *MapLock
+	MapLockApp  MapLock
 )
+
+func (*MapLock) New() *MapLock { return NewMapLock() }
+
+func (*MapLock) Once() *MapLock { return OnceMapLock() }
 
 // NewMapLock 实例化：字典锁
 func NewMapLock() *MapLock { return &MapLock{locks: dict.MakeAnyDict[string, *itemLock]()} }

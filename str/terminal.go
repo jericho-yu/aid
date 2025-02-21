@@ -20,6 +20,11 @@ type (
 	TerminalLogColor string
 )
 
+var (
+	StrApp         Str
+	TerminalLogApp TerminalLog
+)
+
 const (
 	TerminalLogColorBlack   TerminalLogColor = "\033[30m"
 	TerminalLogColorRed     TerminalLogColor = "\033[31m"
@@ -31,6 +36,8 @@ const (
 	TerminalLogColorWhite   TerminalLogColor = "\033[37m"
 	TerminalLogColorReset   TerminalLogColor = "\033[0m"
 )
+
+func (*Str) New(original string) *Str { return &Str{original: original} }
 
 func NewStr(original string) *Str { return &Str{original: original} }
 
@@ -90,6 +97,16 @@ func (my *Str) PadLeft(length int, s string) string {
 	my.original = strings.Repeat(s, length-(len(my.original)%length)) + s
 
 	return my.original
+}
+
+// New 实例化：控制台日志
+func (*TerminalLog) New(format ...string) *TerminalLog {
+	var f string
+	for _, v := range format {
+		f += v
+	}
+
+	return &TerminalLog{format: f, enable: cast.ToBool(os.Getenv("AID__STR__TERMINAL_LOG__ENABLE"))}
 }
 
 // NewTerminalLog 实例化：控制台日志

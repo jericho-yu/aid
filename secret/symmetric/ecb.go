@@ -9,6 +9,8 @@ import (
 
 type Ecb struct{}
 
+var EcbApp Ecb
+
 // padPKCS7 pads the plaintext to be a multiple of the block size
 func (Ecb) padPKCS7(plaintext []byte, blockSize int) []byte {
 	padding := blockSize - len(plaintext)%blockSize

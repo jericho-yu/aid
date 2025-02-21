@@ -14,17 +14,17 @@ import (
 
 type HonestMan struct{ dir string }
 
-var App HonestMan
+var HonestManApp HonestMan
 
-func (HonestMan) New(dirs ...string) *HonestMan {
+func (*HonestMan) New(dirs ...string) *HonestMan {
 	return &HonestMan{dir: path.Join(dirs...)}
 }
 
-func (HonestMan) NewByAbsolute(dirs ...string) *HonestMan {
+func (*HonestMan) NewByAbsolute(dirs ...string) *HonestMan {
 	return &HonestMan{dir: filesystem.FileSystemApp.NewByAbsolute(dirs[0]).Joins(dirs[1:]...).GetDir()}
 }
 
-func (HonestMan) NewByRelative(dirs ...string) *HonestMan {
+func (*HonestMan) NewByRelative(dirs ...string) *HonestMan {
 	return &HonestMan{dir: filesystem.FileSystemApp.NewByRelative(".").Joins(dirs...).GetDir()}
 }
 

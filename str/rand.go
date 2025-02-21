@@ -21,8 +21,21 @@ type Rand struct {
 	bufferChan chan []byte
 }
 
+var (
+	RandApp Rand
+)
+
 // Buffer size for uint32 random number.
 const bufferChanSize = 10000
+
+func (*Rand) New() *Rand {
+	ins := &Rand{}
+	ins.bufferChan = make(chan []byte, bufferChanSize)
+
+	go ins.asyncProducingRandomBufferBytesLoop()
+
+	return ins
+}
 
 func NewRand() *Rand {
 	ins := &Rand{}

@@ -36,18 +36,24 @@ type (
 	}
 )
 
+var AesApp Aes
+
+func (*Aes) New(sail string) *Aes { return &Aes{sailStr: sail} }
+
 // NewAes 实例化：Aes密钥
 func NewAes(sail string) *Aes { return &Aes{sailStr: sail} }
 
 // NewEncrypt 实例化：Aes加密密钥对象
 func (my *Aes) NewEncrypt() *Aes {
 	my.Encrypt = NewAesEncrypt(my.sailStr)
+
 	return my
 }
 
 // NewDecrypt 实例化：Aes解密密钥对象
 func (my *Aes) NewDecrypt(openKey string) *Aes {
 	my.Decrypt = NewAesDecrypt(my.sailStr, openKey)
+
 	return my
 }
 

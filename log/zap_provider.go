@@ -17,7 +17,8 @@ import (
 
 // ZapProvider Zap日志服务提供者
 type (
-	Cutter struct {
+	ZapProvider struct{}
+	Cutter      struct {
 		level    string        // 日志级别(debug, info, warn, error, dpanic, panic, fatal)
 		format   string        // 时间格式(2006-01-02)
 		Director string        // 日志文件夹
@@ -27,6 +28,8 @@ type (
 
 	EncoderType string
 )
+
+var ZapProviderApp ZapProvider
 
 const (
 	EncoderTypeConsole EncoderType = "CONSOLE"
@@ -109,6 +112,15 @@ func GetWriteSync(path string, level zapcore.Level, inConsole bool) zapcore.Writ
 	fileWriter := NewCutter(path, level.String(), func(c *Cutter) { c.format = time.DateOnly })
 
 	return operation.Ternary[zapcore.WriteSyncer](inConsole, zapcore.NewMultiWriteSyncer(zapcore.AddSync(fileWriter), zapcore.AddSync(os.Stdout)), zapcore.AddSync(fileWriter))
+}
+
+func (*ZapProvider) New(
+	path string,
+	inConsole bool,
+	encoderType EncoderType,
+	level zapcore.Level,
+) *zap.Logger {
+	return NewZapProvider(path, inConsole, encoderType, level)
 }
 
 // NewZapProvider 实例化：Zap日志服务提供者

@@ -25,7 +25,10 @@ type (
 var (
 	redisPoolIns  *RedisPool
 	redisPoolOnce sync.Once
+	RedisPoolApp  RedisPool
 )
+
+func (*RedisPool) Once(redisSetting *RedisSetting) *RedisPool { return OnceRedisPool(redisSetting) }
 
 // OnceRedisPool 单例化：redis 链接
 func OnceRedisPool(redisSetting *RedisSetting) *RedisPool {

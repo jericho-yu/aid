@@ -25,6 +25,10 @@ type (
 	OID    = primitive.ObjectID
 )
 
+var MongoClientApp MongoClient
+
+func (*MongoClient) New(url string) (*MongoClient, error) { return NewMongoClient(url) }
+
 // NewMongoClient 实例化：mongo客户端
 func NewMongoClient(url string) (*MongoClient, error) {
 	var (
