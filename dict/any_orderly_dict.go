@@ -1,6 +1,9 @@
 package dict
 
 import (
+	"fmt"
+	"reflect"
+	"strings"
 	"sync"
 
 	"github.com/jericho-yu/aid/array"
@@ -16,6 +19,12 @@ type (
 		data *array.AnyArray[*OrderlyDict[K, V]]
 		keys *array.AnyArray[K]
 		mu   sync.RWMutex
+	}
+
+	seenStruct[K comparable, V any] struct {
+		key   K
+		value V
+		total uint
 	}
 )
 
@@ -182,4 +191,282 @@ func (my *AnyOrderlyDict[K, V]) Filter(fn func(dict *OrderlyDict[K, V]) bool) *A
 // Copy 拷贝对象
 func (my *AnyOrderlyDict[K, V]) Copy() *AnyOrderlyDict[K, V] {
 	return NewAnyOrderlyDict(my.ToMap(), my.keys.All()...)
+}
+
+// RemoveEmpty 清空空值
+func (my *AnyOrderlyDict[K, V]) RemoveEmpty() *AnyOrderlyDict[K, V] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
+
+	for idx := range my.keys.All() {
+		ref := reflect.ValueOf(my.data.Get(idx))
+
+		if ref.Kind() == reflect.Ptr {
+			if ref.IsNil() {
+				my.data.RemoveByIndexes(idx)
+				my.keys.RemoveByIndexes(idx)
+			}
+			if ref.Elem().IsZero() {
+				my.data.RemoveByIndexes(idx)
+				my.keys.RemoveByIndexes(idx)
+			}
+		} else {
+			if ref.IsZero() {
+				my.data.RemoveByIndexes(idx)
+				my.keys.RemoveByIndexes(idx)
+			}
+		}
+	}
+
+	return my
+}
+
+// Join 拼接字符串
+func (my *AnyOrderlyDict[K, V]) Join(sep string) string {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
+
+	values := make([]string, my.Len())
+	for idx, datum := range my.data.All() {
+		values[idx] = fmt.Sprintf("%v", datum.Value)
+	}
+
+	return strings.Join(values, sep)
+}
+
+// JoinWithoutEmpty 拼接非空字符串
+func (my *AnyOrderlyDict[K, V]) JoinWithoutEmpty(sep string) string {
+	values := make([]string, my.Copy().RemoveEmpty().Len())
+	j := 0
+	for _, datum := range my.Copy().RemoveEmpty().All() {
+		values[j] = fmt.Sprintf("%v", datum.Value)
+		j++
+	}
+
+	return strings.Join(values, sep)
+}
+
+// ToAnyArray 转AnyArray
+func (my *AnyOrderlyDict[K, V]) ToAnyArray() *array.AnyArray[V] {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
+
+	var arr = make([]V, my.Len())
+
+	for idx, datum := range my.data.All() {
+		arr[idx] = datum.Value
+	}
+
+	return array.NewAnyArray[V](arr)
+}
+
+// ToAnyDict 转AndDict
+func (my *AnyOrderlyDict[K, V]) ToAnyDict() *AnyDict[K, V] {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
+
+	var m = make(map[K]V)
+
+	for _, datum := range my.data.All() {
+		m[datum.Key] = datum.Value
+	}
+
+	return NewAnyDict(m)
+}
+
+// InKey 检查key是否存在
+func (my *AnyOrderlyDict[K, V]) InKey(k K) bool {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
+
+	for _, datum := range my.data.All() {
+		if datum.Key == k {
+			return true
+		}
+	}
+
+	return false
+}
+
+// InValue 检查value是否存在
+func (my *AnyOrderlyDict[K, V]) InValue(v V) bool {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
+
+	for _, datum := range my.data.All() {
+		if reflect.DeepEqual(datum.Value, v) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// NotInKey 检查key是否不存在
+func (my *AnyOrderlyDict[K, V]) NotInKey(k K) bool { return !my.InKey(k) }
+
+// NotInValue 检查value是否不存在
+func (my *AnyOrderlyDict[K, V]) NotInValue(v V) bool { return !my.InValue(v) }
+
+// AllEmpty 检查是否非0值
+func (my *AnyOrderlyDict[K, V]) AllEmpty() bool {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
+
+	return my.Copy().RemoveEmpty().Len() == 0
+}
+
+// AnyEmpty 判断当前数组中是否存在空值
+func (my *AnyOrderlyDict[K, V]) AnyEmpty() bool {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
+
+	return my.Copy().RemoveEmpty().Len() != len(my.data.All())
+}
+
+// Chunk 分块
+func (my *AnyOrderlyDict[K, V]) Chunk(chunkSize int) [][]V {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
+
+	var chunks [][]V
+	for i := 0; i < len(my.data.All()); i += chunkSize {
+		end := i + chunkSize
+
+		if end > my.data.Len() {
+			end = my.data.Len()
+		}
+
+		chunks = append(chunks, my.ToAnyArray().All()[i:end])
+	}
+
+	return chunks
+}
+
+// Pluck 获取数组中指定字段的值
+func (my *AnyOrderlyDict[K, V]) Pluck(fn func(item V) V) *AnyOrderlyDict[K, V] {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
+
+	var ret = make(map[K]V)
+	for _, v := range my.data.All() {
+		ret[v.Key] = v.Value
+	}
+
+	return NewAnyOrderlyDict(ret)
+}
+
+// Unique 切片去重
+func (my *AnyOrderlyDict[K, V]) Unique() *AnyOrderlyDict[K, V] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
+
+	seen := make(map[string]seenStruct[K, V])
+	for _, datum := range my.data.All() {
+		key := fmt.Sprintf("%v", datum.Value)
+		if _, exists := seen[key]; !exists {
+			seen[key] = seenStruct[K, V]{
+				key:   datum.Key,
+				value: datum.Value,
+				total: 0,
+			}
+		}
+		temp := seen[key]
+		temp.total += 1
+		seen[key] = temp
+	}
+
+	result := make(map[K]V, len(seen))
+	for _, datum := range seen {
+		result[datum.key] = datum.value
+	}
+
+	return NewAnyOrderlyDict(result)
+}
+
+func (my *AnyOrderlyDict[K, V]) RemoveByIndexes(indexes ...int) *AnyOrderlyDict[K, V] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
+
+	my.keys.RemoveByIndexes(indexes...)
+	my.data.RemoveByIndexes(indexes...)
+
+	return my
+}
+
+// RemoveByKeys 通过key删除内容
+func (my *AnyOrderlyDict[K, V]) RemoveByKeys(keys ...K) *AnyOrderlyDict[K, V] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
+
+	indexes := make([]int, 0)
+
+	for _, key := range keys {
+		for idx, datum := range my.data.All() {
+			if datum.Key == key {
+				indexes = append(indexes, idx)
+			}
+		}
+	}
+
+	my.keys.RemoveByIndexes(indexes...)
+	my.data.RemoveByIndexes(indexes...)
+
+	return my
+}
+
+// RemoveByKeys 通过value删除内容
+func (my *AnyOrderlyDict[K, V]) RemoveByValues(values ...V) *AnyOrderlyDict[K, V] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
+
+	indexes := make([]int, 0)
+
+	for _, value := range values {
+		for idx, datum := range my.data.All() {
+			if reflect.DeepEqual(value, datum.Value) {
+				indexes = append(indexes, idx)
+			}
+		}
+	}
+
+	my.keys.RemoveByIndexes(indexes...)
+	my.data.RemoveByIndexes(indexes...)
+
+	return my
+}
+
+// Append 追加内容
+func (my *AnyOrderlyDict[K, V]) Append(key K, value V) *AnyOrderlyDict[K, V] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
+
+	my.keys.Append(key)
+	my.data.Append(NewOrderlyDict(key, value))
+
+	return my
+}
+
+// Every 循环处理每一个
+func (my *AnyOrderlyDict[K, V]) Every(fn func(item V) V) *AnyOrderlyDict[K, V] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
+
+	for idx := range my.data.All() {
+		my.data.All()[idx] = &OrderlyDict[K, V]{Key: my.data.All()[idx].Key, Value: fn(my.data.All()[idx].Value)}
+	}
+
+	return my
+}
+
+// Each 遍历数组
+func (my *AnyOrderlyDict[K, V]) Each(fn func(idx int, key K, value V)) *AnyOrderlyDict[K, V] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
+
+	for idx := range my.data.All() {
+		fn(idx, my.data.All()[idx].Key, my.data.All()[idx].Value)
+	}
+
+	return my
 }

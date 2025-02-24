@@ -118,9 +118,6 @@ func (my *AnyDict[K, T]) RemoveEmpty() *AnyDict[K, T] {
 
 // JoinWithoutEmpty 拼接非空元素
 func (my *AnyDict[K, V]) JoinWithoutEmpty(sep string) string {
-	my.mu.RLock()
-	defer my.mu.RUnlock()
-
 	values := make([]string, my.RemoveEmpty().Len())
 	j := 0
 	for _, datum := range my.data {

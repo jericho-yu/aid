@@ -51,6 +51,20 @@ func (my *AnyArray[T]) Get(idx int) T {
 	return my.data[idx]
 }
 
+// GetByIndexes 通过多索引获取内容
+func (my *AnyArray[T]) GetByIndexes(indexes ...int) []T {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
+
+	res := make([]T, len(indexes))
+
+	for k, idx := range indexes {
+		res[k] = my.data[idx]
+	}
+
+	return res
+}
+
 // Append 追加
 func (my *AnyArray[T]) Append(v ...T) *AnyArray[T] {
 	my.mu.Lock()
@@ -196,9 +210,6 @@ func (my *AnyArray[T]) Join(sep string) string {
 
 // JoinWithoutEmpty 拼接非空元素
 func (my *AnyArray[T]) JoinWithoutEmpty(sep string) string {
-	my.mu.Lock()
-	defer my.mu.Unlock()
-
 	values := make([]string, my.Copy().RemoveEmpty().Len())
 	j := 0
 	for _, datum := range my.Copy().RemoveEmpty().All() {
