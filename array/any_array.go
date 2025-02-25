@@ -318,7 +318,7 @@ func (my *AnyArray[T]) RemoveByIndexes(indexes ...int) *AnyArray[T] {
 		}
 	}
 
-	return NewAnyArray[T](newData)
+	return NewAnyArray(newData)
 }
 
 // RemoveByValue 删除数组中对应的目标
