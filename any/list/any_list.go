@@ -432,3 +432,20 @@ func Clean[T any](list *AnyList[T]) {
 
 	list.data = make([]T, 0)
 }
+
+func CastTo[T any, T2 any](list *AnyList[T], fn func(value T) T2) []T2 {
+	if list == nil {
+		return []T2{}
+	}
+
+	var ret = make([]T2, len(list.data))
+
+	list.mu.RLock()
+	defer list.mu.RUnlock()
+
+	for idx, datum := range list.data {
+		ret[idx] = fn(datum)
+	}
+
+	return ret
+}
