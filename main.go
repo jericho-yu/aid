@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	anyList "github.com/jericho-yu/aid/any/list"
+	anyList "github.com/jericho-yu/aid/any/anyList"
 )
 
 func main() {

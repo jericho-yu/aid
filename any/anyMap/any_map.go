@@ -1,4 +1,4 @@
-package anySet
+package anyMap
 
 import (
 	"fmt"

@@ -79,16 +79,11 @@ func GetByIndexes[T any](list *AnyList[T], keys ...int) []T {
 	list.mu.RLock()
 	defer list.mu.RUnlock()
 
-	var (
-		zero T
-		ret  = make([]T, 0)
-	)
+	var ret = make([]T, 0)
 
-	for idx, key := range keys {
+	for _, key := range keys {
 		if Has(list, key) {
-			ret[idx] = list.data[key]
-		} else {
-			ret[idx] = zero
+			ret = append(ret, list.data[key])
 		}
 	}
 
