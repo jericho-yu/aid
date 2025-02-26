@@ -427,7 +427,7 @@ func RemoveByKeys[K comparable, V any](am *AnyMap[K, V], keys ...K) {
 	for _, key := range keys {
 		delete(data, key)
 	}
-	newMap = NewAnyMap[K, V](data)
+	newMap = NewAnyMap(data)
 
 	am.keys = newMap.keys
 	am.values = newMap.values

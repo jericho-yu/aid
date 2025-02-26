@@ -57,7 +57,7 @@ func FilterDemo() {
 		{Name: "2"},
 		{Name: "3"},
 	}
-	b := Filter[*A](func(a *A) bool {
+	b := Filter(func(a *A) bool {
 		return a.Name != "1"
 	}, a)
 
@@ -215,7 +215,7 @@ func RemoveTarget[T comparable](values []T, target T) (ret []T) {
 // RemoveTargets 删除数组中对应的多个目标
 func RemoveTargets[T comparable](values []T, targets ...T) (ret []T) {
 	for _, value := range values {
-		if !In[T](value, targets) {
+		if !In(value, targets) {
 			ret = append(ret, value)
 		}
 	}

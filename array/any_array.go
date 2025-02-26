@@ -192,7 +192,7 @@ func (my *AnyArray[T]) RemoveEmpty() *AnyArray[T] {
 		data = append(data, item)
 	}
 
-	return NewAnyArray[T](data)
+	return NewAnyArray(data)
 }
 
 // Join 拼接字符串
