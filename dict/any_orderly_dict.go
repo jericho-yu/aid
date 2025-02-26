@@ -38,12 +38,12 @@ func NewAnyOrderlyDict[K comparable, V any](m map[K]V, keys ...K) *AnyOrderlyDic
 	anyOrderlyDict := &AnyOrderlyDict[K, V]{
 		data: array.MakeAnyArray[*OrderlyDict[K, V]](len(keys)),
 		mu:   sync.RWMutex{},
-		keys: array.NewAnyArray[K](keys),
+		keys: array.NewAnyArray(keys),
 	}
 
 	count := 0
 	for _, key := range keys {
-		anyOrderlyDict.data.Set(count, NewOrderlyDict[K, V](key, m[key]))
+		anyOrderlyDict.data.Set(count, NewOrderlyDict(key, m[key]))
 		count++
 	}
 
@@ -183,7 +183,7 @@ func (my *AnyOrderlyDict[K, V]) Filter(fn func(dict *OrderlyDict[K, V]) bool) *A
 	}
 
 	my.data.Clean()
-	my.data = array.NewAnyArray[*OrderlyDict[K, V]](ret)
+	my.data = array.NewAnyArray(ret)
 
 	return my
 }
@@ -257,7 +257,7 @@ func (my *AnyOrderlyDict[K, V]) ToAnyArray() *array.AnyArray[V] {
 		arr[idx] = datum.Value
 	}
 
-	return array.NewAnyArray[V](arr)
+	return array.NewAnyArray(arr)
 }
 
 // ToAnyDict 转AndDict
@@ -469,4 +469,16 @@ func (my *AnyOrderlyDict[K, V]) Each(fn func(idx int, key K, value V)) *AnyOrder
 	}
 
 	return my
+}
+
+func CastOrderlyDict[K comparable, SRC, DST any](ad *AnyOrderlyDict[K, SRC], fn func(value SRC) DST) *AnyOrderlyDict[K, DST] {
+	ad.mu.RLock()
+	defer ad.mu.RUnlock()
+
+	var ret = make(map[K]DST)
+	for _, datum := range ad.data.All() {
+		ret[datum.Key] = fn(datum.Value)
+	}
+
+	return NewAnyOrderlyDict(ret)
 }

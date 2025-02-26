@@ -184,7 +184,7 @@ func (my *AnyDict[K, V]) GetKeysByValue(value ...V) *array.AnyArray[K] {
 
 	l := array.MakeAnyArray[K](0)
 	for key, val := range my.data {
-		if array.NewAnyArray[V](value).In(val) {
+		if array.NewAnyArray(value).In(val) {
 			l.Append(key)
 		}
 	}
@@ -249,7 +249,24 @@ func (my *AnyDict[K, V]) Clean() *AnyDict[K, V] {
 }
 
 // Keys 获取所有的key
-func (my *AnyDict[K, V]) Keys() []K { return GetKeys[K, V](my.All()) }
+func (my *AnyDict[K, V]) Keys() []K { return GetKeys(my.All()) }
 
 // Values 获取所有的value
-func (my *AnyDict[K, V]) Values() []V { return GetValues[K, V](my.All()) }
+func (my *AnyDict[K, V]) Values() []V { return GetValues(my.All()) }
+
+// Cast 转换值类型
+func Cast[K comparable, SRC, DST any](ad *AnyDict[K, SRC], fn func(value SRC) DST) *AnyDict[K, DST] {
+	if ad == nil {
+		return nil
+	}
+
+	ad.mu.Lock()
+	defer ad.mu.Unlock()
+
+	var data = make(map[K]DST)
+	for key, value := range ad.data {
+		data[key] = fn(value)
+	}
+
+	return NewAnyDict(data)
+}

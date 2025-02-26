@@ -384,3 +384,20 @@ func (my *AnyArray[T]) Clean() *AnyArray[T] {
 
 	return my
 }
+
+// Cast 转换值类型
+func Cast[SRC, DST any](aa *AnyArray[SRC], fn func(value SRC) DST) *AnyArray[DST] {
+	if aa == nil {
+		return nil
+	}
+
+	aa.mu.Lock()
+	defer aa.mu.Unlock()
+
+	data := make([]DST, len(aa.data))
+	for i, v := range aa.data {
+		data[i] = fn(v)
+	}
+
+	return NewAnyArray(data)
+}
