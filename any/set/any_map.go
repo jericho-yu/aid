@@ -493,3 +493,19 @@ func Clean[K comparable, V any](am *AnyMap[K, V]) {
 	am.keys = make([]K, 0)
 	am.values = make([]V, 0)
 }
+
+func Cast[K comparable, SRC any, DST any](am *AnyMap[K, SRC], fn func(value SRC) DST) *AnyMap[K, DST] {
+	if am == nil {
+		return nil
+	}
+
+	am.mu.Lock()
+	defer am.mu.Unlock()
+
+	var data = make(map[K]DST)
+	for idx, key := range am.keys {
+		data[key] = fn(am.values[idx])
+	}
+
+	return NewAnyMap(data)
+}

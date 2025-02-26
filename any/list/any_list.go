@@ -433,12 +433,12 @@ func Clean[T any](list *AnyList[T]) {
 	list.data = make([]T, 0)
 }
 
-func CastTo[T any, T2 any](list *AnyList[T], fn func(value T) T2) []T2 {
+func Cast[SRC any, DST any](list *AnyList[SRC], fn func(value SRC) DST) *AnyList[DST] {
 	if list == nil {
-		return []T2{}
+		return MakeAnyList[DST](0)
 	}
 
-	var ret = make([]T2, len(list.data))
+	var ret = make([]DST, len(list.data))
 
 	list.mu.RLock()
 	defer list.mu.RUnlock()
@@ -447,5 +447,5 @@ func CastTo[T any, T2 any](list *AnyList[T], fn func(value T) T2) []T2 {
 		ret[idx] = fn(datum)
 	}
 
-	return ret
+	return NewAnyList(ret)
 }
