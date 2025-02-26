@@ -134,7 +134,7 @@ func Last[T any](list *AnyList[T]) T {
 	return list.data[len(list.data)-1]
 }
 
-func FindIndex[T any](list *AnyList[T], val T, comparator func(a, b T) bool) int {
+func FindIndex[T any](list *AnyList[T], comparator func(val T) bool) int {
 	if list == nil {
 		return -1
 	}
@@ -143,7 +143,7 @@ func FindIndex[T any](list *AnyList[T], val T, comparator func(a, b T) bool) int
 	defer list.mu.RUnlock()
 
 	for idx, v := range list.data {
-		if comparator(v, val) {
+		if comparator(v) {
 			return idx
 		}
 	}
@@ -151,7 +151,7 @@ func FindIndex[T any](list *AnyList[T], val T, comparator func(a, b T) bool) int
 	return -1
 }
 
-func FindIndexes[T any](list *AnyList[T], val T, comparator func(a, b T) bool) []int {
+func FindIndexes[T any](list *AnyList[T], comparator func(val T) bool) []int {
 	var ret []int
 
 	if list == nil {
@@ -162,7 +162,7 @@ func FindIndexes[T any](list *AnyList[T], val T, comparator func(a, b T) bool) [
 	defer list.mu.RUnlock()
 
 	for idx, v := range list.data {
-		if comparator(v, val) {
+		if comparator(v) {
 			ret = append(ret, idx)
 		}
 	}

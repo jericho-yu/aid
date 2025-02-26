@@ -21,7 +21,6 @@ func Test2(t *testing.T) {
 		if !Has(al, 2) {
 			t.Fatal("Has error")
 		}
-		t.Log("测试成功\n")
 	})
 }
 
@@ -40,7 +39,6 @@ func Test3(t *testing.T) {
 				t.Fatal("测试值错误")
 			}
 		}
-		t.Log("测试成功\n")
 	})
 }
 
@@ -50,7 +48,6 @@ func Test4(t *testing.T) {
 		if fmt.Sprintf("%#v", All(al)) != "[]int{1, 2, 3}" {
 			t.Fatal("值错误")
 		}
-		t.Logf("成功：%#v\n", All(al))
 	})
 }
 
@@ -60,6 +57,42 @@ func Test5(t *testing.T) {
 		if fmt.Sprintf("%#v", GetByIndexes(al, 0, 2)) != "[]int{1, 3}" {
 			t.Fatal("值错误")
 		}
-		t.Logf("成功：%#v\n", GetByIndexes(al, 0, 2))
+	})
+}
+
+func Test6(t *testing.T) {
+	t.Run("test6 Append功能", func(t *testing.T) {
+		al := NewAnyList([]int{1, 2, 3})
+		Append(al, 4)
+		if fmt.Sprintf("%#v", All(al)) != "[]int{1, 2, 3, 4}" {
+			t.Fatal("值错误")
+		}
+	})
+}
+
+func Test7(t *testing.T) {
+	t.Run("test7 First功能", func(t *testing.T) {
+		al := NewAnyList([]int{1, 2, 3})
+		if First(al) != 1 {
+			t.Fatal("值错误")
+		}
+	})
+}
+
+func Test8(t *testing.T) {
+	t.Run("test Last功能", func(t *testing.T) {
+		al := NewAnyList([]int{1, 2, 3})
+		if Last(al) != 3 {
+			t.Fatal("值错误")
+		}
+	})
+}
+
+func Test9(t *testing.T) {
+	t.Run("test FindIndex功能", func(t *testing.T) {
+		al := NewAnyList([]int{1, 2, 3})
+		if FindIndex(al, func(val int) bool { return val == 2 }) != 1 {
+			t.Fatal("值错误")
+		}
 	})
 }
