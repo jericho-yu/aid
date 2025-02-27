@@ -324,7 +324,8 @@ func Test31(t *testing.T) {
 		al := NewAnyList([]int{1, 2, 3, 4, 5})
 		RemoveByIndexes(al, 1, 3)
 
-		if fmt.Sprintf("%#v", ToSlice(al)) != "[]int{1, 4, 5}" {
+		t.Log(fmt.Sprintf("%#v", ToSlice(al)))
+		if fmt.Sprintf("%#v", ToSlice(al)) != "[]int{1, 3, 5}" {
 			t.Fatal("错误")
 		}
 	})

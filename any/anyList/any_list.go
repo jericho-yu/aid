@@ -387,15 +387,22 @@ func RemoveByIndexes[T any](list *AnyList[T], indexes ...int) {
 	list.mu.Lock()
 	defer list.mu.Unlock()
 
-	newData := make([]T, len(list.data)-len(indexes)+1)
-	idx := 0
+	keysMap := make(map[int]T)
+	newData := make([]T, len(list.data)-len(indexes))
+	i := 0
 
-	for key, val := range list.data {
-		for _, i := range indexes {
-			if key != i {
-				newData[idx] = val
-				idx++
-			}
+	for idx, datum := range list.data {
+		keysMap[idx] = datum
+	}
+
+	for _, idx := range indexes {
+		delete(keysMap, idx)
+	}
+
+	for idx := range list.data {
+		if datum, ok := keysMap[idx]; ok {
+			newData[i] = datum
+			i++
 		}
 	}
 
