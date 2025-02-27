@@ -90,6 +90,16 @@ func GetKeysByValues[K comparable, V any](am *AnyMap[K, V], values ...V) []K {
 	am.mu.RLock()
 	defer am.mu.RUnlock()
 
+	ret = getKeysByValues(am, values...)
+	return ret
+}
+
+func getKeysByValues[K comparable, V any](am *AnyMap[K, V], values ...V) []K {
+	var ret = make([]K, 0)
+	if am == nil {
+		return ret
+	}
+
 	for idx, value := range am.values {
 		for _, val := range values {
 			if reflect.DeepEqual(value, val) {
@@ -175,6 +185,14 @@ func GetIndexByKey[K comparable, V any](am *AnyMap[K, V], k K) int {
 	am.mu.Lock()
 	defer am.mu.Unlock()
 
+	return getIndexByKey(am, k)
+}
+
+func getIndexByKey[K comparable, V any](am *AnyMap[K, V], k K) int {
+	if am == nil {
+		return -1
+	}
+
 	for idx, key := range am.keys {
 		if key == k {
 			return idx
@@ -187,7 +205,7 @@ func GetIndexByKey[K comparable, V any](am *AnyMap[K, V], k K) int {
 func GetIndexesByKeys[K comparable, V any](am *AnyMap[K, V], keys ...K) []int {
 	indices := make([]int, 0, len(keys))
 	for _, key := range keys {
-		idx := GetIndexByKey(am, key)
+		idx := getIndexByKey(am, key)
 		indices = append(indices, idx)
 	}
 	return indices
@@ -227,10 +245,27 @@ func IsEmpty[K comparable, V any](am *AnyMap[K, V]) bool {
 	am.mu.RLock()
 	defer am.mu.RUnlock()
 
+	return isEmpty(am)
+}
+
+func isEmpty[K comparable, V any](am *AnyMap[K, V]) bool {
+	if am == nil {
+		return true
+	}
+
 	return len(am.keys) == 0 || am.keys == nil
 }
 
-func IsNotEmpty[K comparable, V any](am *AnyMap[K, V]) bool { return !IsEmpty(am) }
+func IsNotEmpty[K comparable, V any](am *AnyMap[K, V]) bool {
+	if am == nil {
+		return false
+	}
+
+	am.mu.RLock()
+	defer am.mu.RUnlock()
+
+	return !isEmpty(am)
+}
 
 func Set[K comparable, V any](am *AnyMap[K, V], key K, value V) {
 	if am == nil {
@@ -272,7 +307,7 @@ func Len[K comparable, V any](am *AnyMap[K, V]) int {
 	return len(am.keys)
 }
 
-func All[K comparable, V any](am *AnyMap[K, V]) map[K]V {
+func ToMap[K comparable, V any](am *AnyMap[K, V]) map[K]V {
 	var data = make(map[K]V)
 
 	if am == nil {
@@ -281,6 +316,16 @@ func All[K comparable, V any](am *AnyMap[K, V]) map[K]V {
 
 	am.mu.RLock()
 	defer am.mu.RUnlock()
+
+	return toMap(am)
+}
+
+func toMap[K comparable, V any](am *AnyMap[K, V]) map[K]V {
+	var data = make(map[K]V)
+
+	if am == nil {
+		return data
+	}
 
 	for idx, key := range am.keys {
 		data[key] = am.values[idx]
@@ -329,6 +374,14 @@ func Filter[K comparable, V any](am *AnyMap[K, V], fn func(key K, value V) bool)
 	am.mu.Lock()
 	defer am.mu.Unlock()
 
+	return filter(am, fn)
+}
+
+func filter[K comparable, V any](am *AnyMap[K, V], fn func(key K, value V) bool) *AnyMap[K, V] {
+	if am == nil {
+		return nil
+	}
+
 	var data = make(map[K]V)
 
 	for idx, key := range am.keys {
@@ -348,7 +401,15 @@ func RemoveEmpty[K comparable, V any](am *AnyMap[K, V]) {
 	am.mu.Lock()
 	defer am.mu.Unlock()
 
-	var data = Filter(am, func(key K, value V) bool {
+	removeEmpty(am)
+}
+
+func removeEmpty[K comparable, V any](am *AnyMap[K, V]) {
+	if am == nil {
+		return
+	}
+
+	var data = filter(am, func(key K, value V) bool {
 		ref := reflect.ValueOf(value)
 
 		if ref.Kind() == reflect.Ptr {
@@ -378,6 +439,14 @@ func Join[K comparable, V any](am *AnyMap[K, V], sep string) string {
 	am.mu.Lock()
 	defer am.mu.Unlock()
 
+	return join(am, sep)
+}
+
+func join[K comparable, V any](am *AnyMap[K, V], sep string) string {
+	if am == nil {
+		return ""
+	}
+
 	values := make([]string, len(am.values))
 	for idx, value := range am.values {
 		values[idx] = fmt.Sprintf("%v", value)
@@ -391,24 +460,33 @@ func JoinWithoutEmpty[K comparable, V any](am *AnyMap[K, V], sep string) string 
 		return ""
 	}
 
-	RemoveEmpty(am)
-	return Join(am, sep)
+	am.mu.Lock()
+	defer am.mu.Unlock()
+
+	removeEmpty(am)
+	return join(am, sep)
 }
 
-func InByKeys[K comparable, V any](am *AnyMap[K, V], keys ...K) bool {
+func InByKeys[K comparable, V any](am *AnyMap[K, V], keys ...K) bool { return inByKeys(am, keys...) }
+
+func inByKeys[K comparable, V any](am *AnyMap[K, V], keys ...K) bool {
 	return len(GetIndexesByKeys(am, keys...)) > 0
 }
 
 func NotInByKeys[K comparable, V any](am *AnyMap[K, V], keys ...K) bool {
-	return !InByKeys(am, keys...)
+	return !inByKeys(am, keys...)
 }
 
 func InByValues[K comparable, V any](am *AnyMap[K, V], values ...V) bool {
+	return inByValues(am, values...)
+}
+
+func inByValues[K comparable, V any](am *AnyMap[K, V], values ...V) bool {
 	return len(GetIndexesByValues(am, values...)) > 0
 }
 
 func NotInByValues[K comparable, V any](am *AnyMap[K, V], values ...V) bool {
-	return !InByValues(am, values...)
+	return !inByValues(am, values...)
 }
 
 func RemoveByKeys[K comparable, V any](am *AnyMap[K, V], keys ...K) {
@@ -417,7 +495,7 @@ func RemoveByKeys[K comparable, V any](am *AnyMap[K, V], keys ...K) {
 	}
 
 	var (
-		data   = All(am)
+		data   = toMap(am)
 		newMap *AnyMap[K, V]
 	)
 
@@ -439,9 +517,9 @@ func RemoveByValues[K comparable, V any](am *AnyMap[K, V], values ...V) {
 	}
 
 	var (
-		data   = All(am)
+		data   = ToMap(am)
 		newMap *AnyMap[K, V]
-		keys   = GetKeysByValues(am, values...)
+		keys   = getKeysByValues(am, values...)
 	)
 
 	am.mu.Lock()
