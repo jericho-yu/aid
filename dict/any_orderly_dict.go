@@ -21,6 +21,46 @@ type (
 		mu   sync.RWMutex
 	}
 
+	IAnyOrderlyDict[K comparable, V any] interface {
+		SetByIndex(index int, key K, value V) *AnyOrderlyDict[K, V]
+		SetByKey(key K, value V) *AnyOrderlyDict[K, V]
+		Get(key K) (V, bool)
+		Has(key K) bool
+		First() *OrderlyDict[K, V]
+		FirstKey() K
+		FirstValue() V
+		Last() *OrderlyDict[K, V]
+		LastKey() K
+		LastValue() V
+		Keys() []K
+		ToMap() map[K]V
+		All() []*OrderlyDict[K, V]
+		Clean() *AnyOrderlyDict[K, V]
+		Len() int
+		Filter(fn func(dict *OrderlyDict[K, V]) bool) *AnyOrderlyDict[K, V]
+		Copy() *AnyOrderlyDict[K, V]
+		RemoveEmpty() *AnyOrderlyDict[K, V]
+		Join(sep string) string
+		JoinWithoutEmpty(sep string) string
+		ToAnyArray() *array.AnyArray[V]
+		ToAnyDict() *AnyDict[K, V]
+		InKey(k K) bool
+		InValue(v V) bool
+		NotInKey(k K) bool
+		NotInValue(v V) bool
+		AllEmpty() bool
+		AnyEmpty() bool
+		Chunk(chunkSize int) [][]V
+		Pluck(fn func(item V) V) *AnyOrderlyDict[K, V]
+		Unique() *AnyOrderlyDict[K, V]
+		RemoveByIndexes(indexes ...int) *AnyOrderlyDict[K, V]
+		RemoveByKeys(keys ...K) *AnyOrderlyDict[K, V]
+		RemoveByValues(values ...V) *AnyOrderlyDict[K, V]
+		Append(key K, value V) *AnyOrderlyDict[K, V]
+		Every(fn func(item V) V) *AnyOrderlyDict[K, V]
+		Each(fn func(idx int, key K, value V)) *AnyOrderlyDict[K, V]
+	}
+
 	seenStruct[K comparable, V any] struct {
 		key   K
 		value V
@@ -350,7 +390,7 @@ func (my *AnyOrderlyDict[K, V]) Pluck(fn func(item V) V) *AnyOrderlyDict[K, V] {
 
 	var ret = make(map[K]V)
 	for _, v := range my.data.All() {
-		ret[v.Key] = v.Value
+		ret[v.Key] = fn(v.Value)
 	}
 
 	return NewAnyOrderlyDict(ret)
@@ -384,6 +424,7 @@ func (my *AnyOrderlyDict[K, V]) Unique() *AnyOrderlyDict[K, V] {
 	return NewAnyOrderlyDict(result)
 }
 
+// RemoveByIndexes 根据索引移除
 func (my *AnyOrderlyDict[K, V]) RemoveByIndexes(indexes ...int) *AnyOrderlyDict[K, V] {
 	my.mu.Lock()
 	defer my.mu.Unlock()
@@ -415,7 +456,7 @@ func (my *AnyOrderlyDict[K, V]) RemoveByKeys(keys ...K) *AnyOrderlyDict[K, V] {
 	return my
 }
 
-// RemoveByKeys 通过value删除内容
+// RemoveByValues 通过value删除内容
 func (my *AnyOrderlyDict[K, V]) RemoveByValues(values ...V) *AnyOrderlyDict[K, V] {
 	my.mu.Lock()
 	defer my.mu.Unlock()
@@ -471,6 +512,7 @@ func (my *AnyOrderlyDict[K, V]) Each(fn func(idx int, key K, value V)) *AnyOrder
 	return my
 }
 
+// CastOrderlyDict 转换格式
 func CastOrderlyDict[K comparable, SRC, DST any](ad *AnyOrderlyDict[K, SRC], fn func(value SRC) DST) *AnyOrderlyDict[K, DST] {
 	ad.mu.RLock()
 	defer ad.mu.RUnlock()

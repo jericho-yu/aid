@@ -11,10 +11,46 @@ import (
 	"github.com/jericho-yu/aid/operation"
 )
 
-type AnyArray[T any] struct {
-	data []T
-	mu   sync.RWMutex
-}
+type (
+	AnyArray[T any] struct {
+		data []T
+		mu   sync.RWMutex
+	}
+
+	IAnyArray[T any] interface {
+		IsEmpty() bool
+		IsNotEmpty() bool
+		Has(k int) bool
+		Set(k int, v T) *AnyArray[T]
+		Get(idx int) T
+		GetByIndexes(indexes ...int) []T
+		Append(v ...T) *AnyArray[T]
+		First() T
+		Last() T
+		All() []T
+		GetIndexByValue(value T) int
+		Copy() *AnyArray[T]
+		Shuffle() *AnyArray[T]
+		Len() int
+		Filter(fn func(v T) bool) *AnyArray[T]
+		RemoveEmpty() *AnyArray[T]
+		Join(sep string) string
+		JoinWithoutEmpty(sep string) string
+		In(target T) bool
+		NotIn(target T) bool
+		AllEmpty() bool
+		AnyEmpty() bool
+		Chunk(chunkSize int) [][]T
+		Pluck(fn func(item T) any) *AnyArray[any]
+		Unique() *AnyArray[T]
+		RemoveByIndexes(indexes ...int) *AnyArray[T]
+		RemoveByValue(target T) *AnyArray[T]
+		RemoveByValues(targets ...T) *AnyArray[T]
+		Every(fn func(item T) T) *AnyArray[T]
+		Each(fn func(idx int, item T)) *AnyArray[T]
+		Clean() *AnyArray[T]
+	}
+)
 
 // NewAnyArray 实例化
 func NewAnyArray[T any](list []T) *AnyArray[T] { return &AnyArray[T]{data: list, mu: sync.RWMutex{}} }

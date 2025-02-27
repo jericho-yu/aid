@@ -9,10 +9,37 @@ import (
 	"github.com/jericho-yu/aid/array"
 )
 
-type AnyDict[K comparable, V any] struct {
-	data map[K]V
-	mu   sync.RWMutex
-}
+type (
+	AnyDict[K comparable, V any] struct {
+		data map[K]V
+		mu   sync.RWMutex
+	}
+
+	IAnyDict[K comparable, V any] interface {
+		Set(key K, value V) *AnyDict[K, V]
+		Get(key K) (V, bool)
+		GetByKeys(keys ...K) []V
+		Has(key K) bool
+		All() map[K]V
+		Len() int
+		Filter(fn func(V) bool) *AnyDict[K, V]
+		RemoveEmpty() *AnyDict[K, V]
+		JoinWithoutEmpty(sep string) string
+		ToAnyList() *array.AnyArray[V]
+		InKey(target K) bool
+		InVal(target V) bool
+		AllEmpty() bool
+		AnyEmpty() bool
+		GetKeysByValue(value ...V) *array.AnyArray[K]
+		RemoveByKey(key K) *AnyDict[K, V]
+		RemoveByKeys(keys ...K) *AnyDict[K, V]
+		RemoveByValue(value V) *AnyDict[K, V]
+		RemoveByValues(values ...V) *AnyDict[K, V]
+		Clean() *AnyDict[K, V]
+		Keys() []K
+		Values() []V
+	}
+)
 
 func NewAnyDict[K comparable, V any](dict map[K]V) *AnyDict[K, V] {
 	return &AnyDict[K, V]{data: dict, mu: sync.RWMutex{}}
@@ -92,7 +119,7 @@ func (my *AnyDict[K, V]) Filter(fn func(V) bool) *AnyDict[K, V] {
 }
 
 // RemoveEmpty 清除空值元素
-func (my *AnyDict[K, T]) RemoveEmpty() *AnyDict[K, T] {
+func (my *AnyDict[K, V]) RemoveEmpty() *AnyDict[K, V] {
 	my.mu.Lock()
 	defer my.mu.Unlock()
 
