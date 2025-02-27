@@ -13,5 +13,5 @@ func main() {
 		anyList.Set(al, 1, "def")
 	}
 
-	fmt.Printf("%#v\n", anyList.All(al))
+	fmt.Printf("%#v\n", anyList.ToSlice(al))
 }

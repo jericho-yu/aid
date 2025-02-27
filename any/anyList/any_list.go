@@ -32,6 +32,14 @@ func Has[T any](list *AnyList[T], k int) bool {
 	return k >= 0 && k < len(list.data)
 }
 
+func has[T any](list *AnyList[T], k int) bool {
+	if list == nil {
+		return false
+	}
+
+	return k >= 0 && k < len(list.data)
+}
+
 func Set[T any](list *AnyList[T], k int, v T) {
 	if list == nil {
 		return
@@ -53,14 +61,14 @@ func Get[T any](list *AnyList[T], k int) (T, bool) {
 	list.mu.RLock()
 	defer list.mu.RUnlock()
 
-	if !Has(list, k) {
+	if !has(list, k) {
 		return zero, false
 	}
 
 	return list.data[k], true
 }
 
-func All[T any](list *AnyList[T]) []T {
+func ToSlice[T any](list *AnyList[T]) []T {
 	if list == nil {
 		return []T{}
 	}
@@ -82,7 +90,7 @@ func GetByIndexes[T any](list *AnyList[T], keys ...int) []T {
 	var ret = make([]T, 0)
 
 	for _, key := range keys {
-		if Has(list, key) {
+		if has(list, key) {
 			ret = append(ret, list.data[key])
 		}
 	}
@@ -333,20 +341,20 @@ func Chunk[T any](list *AnyList[T], chunkSize int) [][]T {
 	return chunks
 }
 
-func Pluck[T any](list *AnyList[T], fn func(item T) T) {
+func Pluck[SRC, DST any](list *AnyList[SRC], fn func(item SRC) DST) []DST {
 	if list == nil {
-		return
+		return []DST{}
 	}
 
 	list.mu.RLock()
 	defer list.mu.RUnlock()
 
-	var ret = make([]T, 0)
+	var ret = make([]DST, 0)
 	for _, v := range list.data {
 		ret = append(ret, fn(v))
 	}
 
-	list.data = ret
+	return ret
 }
 
 func Unique[T any](list *AnyList[T]) {
@@ -379,12 +387,15 @@ func RemoveByIndexes[T any](list *AnyList[T], indexes ...int) {
 	list.mu.Lock()
 	defer list.mu.Unlock()
 
-	newData := make([]T, len(list.data)-len(indexes))
+	newData := make([]T, len(list.data)-len(indexes)+1)
 	idx := 0
-	for i, v := range list.data {
-		if !Has(list, i) {
-			newData[idx] = v
-			idx++
+
+	for key, val := range list.data {
+		for _, i := range indexes {
+			if key != i {
+				newData[idx] = val
+				idx++
+			}
 		}
 	}
 
