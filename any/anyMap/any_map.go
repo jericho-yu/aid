@@ -13,24 +13,6 @@ type AnyMap[K comparable, V any] struct {
 	values []V
 }
 
-func NewAnyMap[K comparable, V any](m map[K]V) *AnyMap[K, V] {
-	var (
-		keys   = make([]K, 0, len(m))
-		values = make([]V, 0, len(m))
-	)
-
-	for key, value := range m {
-		keys = append(keys, key)
-		values = append(values, value)
-	}
-
-	return &AnyMap[K, V]{
-		keys:   keys,
-		values: values,
-		mu:     sync.RWMutex{},
-	}
-}
-
 func MakeAnyMap[K comparable, V any]() *AnyMap[K, V] {
 	return &AnyMap[K, V]{keys: make([]K, 0), values: make([]V, 0), mu: sync.RWMutex{}}
 }
@@ -307,7 +289,9 @@ func IsNotEmpty[K comparable, V any](am *AnyMap[K, V]) bool {
 
 func Set[K comparable, V any](am *AnyMap[K, V], key K, value V) {
 	if am == nil {
-		am = NewAnyMap(map[K]V{key: value})
+		am = MakeAnyMap[K, V]()
+		am.keys = append(am.keys, key)
+		am.values = append(am.values, value)
 	}
 
 	am.mu.Lock()
@@ -325,13 +309,13 @@ func Copy[K comparable, V any](am *AnyMap[K, V]) *AnyMap[K, V] {
 	am.mu.Lock()
 	defer am.mu.Unlock()
 
-	var m = make(map[K]V)
+	var m = MakeAnyMap[K, V]()
 
 	for idx, key := range am.keys {
-		m[key] = am.values[idx]
+		Set(m, key, am.values[idx])
 	}
 
-	return NewAnyMap(m)
+	return m
 }
 
 func Len[K comparable, V any](am *AnyMap[K, V]) int {
@@ -420,15 +404,15 @@ func filter[K comparable, V any](am *AnyMap[K, V], fn func(key K, value V) bool)
 		return nil
 	}
 
-	var data = make(map[K]V)
+	var d = MakeAnyMap[K, V]()
 
 	for idx, key := range am.keys {
 		if fn(key, am.values[idx]) {
-			data[key] = am.values[idx]
+			Set(d, key, am.values[idx])
 		}
 	}
 
-	return NewAnyMap(data)
+	return d
 }
 
 func RemoveEmpty[K comparable, V any](am *AnyMap[K, V]) {
@@ -527,26 +511,61 @@ func NotInByValues[K comparable, V any](am *AnyMap[K, V], values ...V) bool {
 	return !inByValues(am, values...)
 }
 
+func removeByKey[K comparable, V any](am *AnyMap[K, V], key K) {
+	if am == nil {
+		return
+	}
+
+	idx := getIndexByKey(am, key)
+
+	am.keys = append(am.keys[:idx], am.keys[idx+1:]...)
+	am.values = append(am.values[:idx], am.values[idx+1:]...)
+}
+
+func RemoveByKey[K comparable, V any](am *AnyMap[K, V], key K) {
+	if am == nil {
+		return
+	}
+
+	am.mu.Lock()
+	defer am.mu.Unlock()
+
+	removeByKey(am, key)
+}
+
 func RemoveByKeys[K comparable, V any](am *AnyMap[K, V], keys ...K) {
 	if am == nil {
 		return
 	}
 
-	var (
-		data   = toMap(am)
-		newMap *AnyMap[K, V]
-	)
-
 	am.mu.Lock()
 	defer am.mu.Unlock()
 
 	for _, key := range keys {
-		delete(data, key)
+		removeByKey(am, key)
 	}
-	newMap = NewAnyMap(data)
+}
 
-	am.keys = newMap.keys
-	am.values = newMap.values
+func removeByValue[K comparable, V any](am *AnyMap[K, V], value V) {
+	if am == nil {
+		return
+	}
+
+	idx := getIndexByValue(am, value)
+
+	am.keys = append(am.keys[:idx], am.keys[idx+1:]...)
+	am.values = append(am.values[:idx], am.values[idx+1:]...)
+}
+
+func RemoveByValue[K comparable, V any](am *AnyMap[K, V], value V) {
+	if am == nil {
+		return
+	}
+
+	am.mu.Lock()
+	defer am.mu.Unlock()
+
+	removeByValue(am, value)
 }
 
 func RemoveByValues[K comparable, V any](am *AnyMap[K, V], values ...V) {
@@ -554,22 +573,12 @@ func RemoveByValues[K comparable, V any](am *AnyMap[K, V], values ...V) {
 		return
 	}
 
-	var (
-		data   = toMap(am)
-		newMap *AnyMap[K, V]
-		keys   = getKeysByValues(am, values...)
-	)
-
 	am.mu.Lock()
 	defer am.mu.Unlock()
 
-	for _, key := range keys {
-		delete(data, key)
+	for _, value := range values {
+		removeByValue(am, value)
 	}
-	newMap = NewAnyMap(data)
-
-	am.keys = newMap.keys
-	am.values = newMap.values
 }
 
 func Every[K comparable, V any](am *AnyMap[K, V], fn func(idx int, key K, value V) (K, V)) {
@@ -618,10 +627,10 @@ func Cast[K comparable, SRC any, DST any](am *AnyMap[K, SRC], fn func(value SRC)
 	am.mu.Lock()
 	defer am.mu.Unlock()
 
-	var data = make(map[K]DST)
+	var d = MakeAnyMap[K, DST]()
 	for idx, key := range am.keys {
-		data[key] = fn(am.values[idx])
+		Set(d, key, fn(am.values[idx]))
 	}
 
-	return NewAnyMap(data)
+	return d
 }

@@ -211,7 +211,7 @@ func (ServerPool) SendMsgByWsConn(ws *websocket.Conn, message []byte) error {
 // SendMsgByWsManyConn 通过链接切片发送消息
 func (ServerPool) SendMsgByWsManyConn(servers *array.AnyArray[*Server], message []byte) {
 	if servers.Len() > 0 {
-		for _, server := range servers.All() {
+		for _, server := range servers.ToSlice() {
 			if server != nil {
 				err := serverPoolIns.SendMsgByWsConn(server.Conn, message)
 				if err != nil {

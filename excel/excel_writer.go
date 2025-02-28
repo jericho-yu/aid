@@ -101,7 +101,7 @@ func (my *Writer) setStyleFont(cell *Cell) {
 
 	var borders = make([]excelize.Border, 0)
 	if cell.GetBorder().Len() > 0 {
-		for _, border := range cell.GetBorder().All() {
+		for _, border := range cell.GetBorder().ToSlice() {
 			borders = append(borders, excelize.Border{
 				Type:  border.Type,
 				Color: border.Rgb,
@@ -183,7 +183,7 @@ func (my *Writer) SetRows(excelRows []*Row) *Writer {
 
 // AddRow 增加一行行数据
 func (my *Writer) AddRow(excelRow *Row) *Writer {
-	for _, cell := range excelRow.GetCells().All() {
+	for _, cell := range excelRow.GetCells().ToSlice() {
 		my.Err = my.excel.SetCellValue(my.sheetName, cell.GetCoordinate(), cell.GetContent())
 		switch cell.GetContentType() {
 		case CellContentTypeFormula:

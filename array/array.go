@@ -68,8 +68,8 @@ func FilterDemo() {
 
 // Max 判断数组中最大值
 func Max[T int | int8 | int16 | int32 | int64 |
-	uint | uint8 | uint16 | uint32 | uint64 |
-	float32 | float64](values []T) (max T) {
+uint | uint8 | uint16 | uint32 | uint64 |
+float32 | float64](values []T) (max T) {
 	for _, value := range values {
 		if value > max {
 			max = value
@@ -81,8 +81,8 @@ func Max[T int | int8 | int16 | int32 | int64 |
 
 // Min 判断数组中最小值
 func Min[T int | int8 | int16 | int32 | int64 |
-	uint | uint8 | uint16 | uint32 | uint64 |
-	float32 | float64](values []T) (min T) {
+uint | uint8 | uint16 | uint32 | uint64 |
+float32 | float64](values []T) (min T) {
 	for _, value := range values {
 		if value < min {
 			min = value
@@ -94,8 +94,8 @@ func Min[T int | int8 | int16 | int32 | int64 |
 
 // Sum 获取总和
 func Sum[T int | int8 | int16 | int32 | int64 |
-	uint | uint8 | uint16 | uint32 | uint64 |
-	float32 | float64](numbers []T) (sum T) {
+uint | uint8 | uint16 | uint32 | uint64 |
+float32 | float64](numbers []T) (sum T) {
 	for _, num := range numbers {
 		sum += num
 	}
@@ -105,8 +105,8 @@ func Sum[T int | int8 | int16 | int32 | int64 |
 
 // Avg 计算平均值
 func Avg[T int | int8 | int16 | int32 | int64 |
-	uint | uint8 | uint16 | uint32 | uint64 |
-	float32 | float64](numbers []T) (avg float64) {
+uint | uint8 | uint16 | uint32 | uint64 |
+float32 | float64](numbers []T) (avg float64) {
 	return float64(Sum(numbers)) / float64(len(numbers))
 }
 
@@ -227,11 +227,11 @@ func RemoveTargets[T comparable](values []T, targets ...T) (ret []T) {
 func FromAnyArray[T any](anyArray *AnyArray[any]) []T {
 	l := MakeAnyArray[T](anyArray.Len())
 
-	for k, v := range anyArray.All() {
+	for k, v := range anyArray.ToSlice() {
 		l.Set(k, v.(T))
 	}
 
-	return l.All()
+	return l.ToSlice()
 }
 
 // ToAny converts any slice to []any

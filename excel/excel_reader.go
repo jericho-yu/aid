@@ -62,7 +62,7 @@ func (my *Reader) DataWithTitle() (*dict.AnyOrderlyDict[uint64, *dict.AnyDict[st
 	newDict := dict.MakeAnyOrderlyDict[uint64, *dict.AnyDict[string, string]](0)
 
 	for idx, value := range my.data.All() {
-		newMap, err := dict.Zip[string, string](my.titles.All(), value.Value.All())
+		newMap, err := dict.Zip[string, string](my.titles.ToSlice(), value.Value.All())
 		if err != nil {
 			return nil, err
 		}
@@ -203,7 +203,7 @@ func (my *Reader) Read() *Reader {
 // ToDataFrameDefaultType 获取DataFrame类型数据 通过Excel表头自定义数据类型
 func (my *Reader) ToDataFrameDefaultType() dataframe.DataFrame {
 	titleWithType := make(map[string]series.Type)
-	for _, title := range my.GetTitle().All() {
+	for _, title := range my.GetTitle().ToSlice() {
 		titleWithType[title] = series.String
 	}
 
