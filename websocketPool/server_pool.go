@@ -129,7 +129,7 @@ func (ServerPool) Handle(
 		ws                   *websocket.Conn
 		message              []byte
 		accountOpenId        string
-		cond, exist          bool
+		cond                 bool
 		serverInstance, rout any
 		wsc                  *ServerInstance
 		messageType          int
@@ -144,13 +144,13 @@ func (ServerPool) Handle(
 
 	accountOpenId, cond = condition()
 	if cond {
-		serverInstance, exist = serverPoolIns.serverInstances.Get(accountOpenId)
-		if !exist {
+		if serverPoolIns.serverInstances.GetIndexByKey(accountOpenId) > -1 {
+			serverInstance = serverPoolIns.serverInstances.GetValueByKey(accountOpenId)
+			serverInstance.(*ServerInstance).Connections.Append(&Server{Conn: ws})
+		} else {
 			wsc = SeverInstanceApp.New()
 			wsc.Connections.Append(&Server{Conn: ws})
 			serverPoolIns.serverInstances.Set(accountOpenId, wsc)
-		} else {
-			serverInstance.(*ServerInstance).Connections.Append(&Server{Conn: ws})
 		}
 
 		if serverPoolIns.onConnect != nil {
@@ -169,8 +169,9 @@ func (ServerPool) Handle(
 		case websocket.TextMessage:
 			routerKey := serverPoolIns.onReceiveMsg(ws, message)
 			if routerKey != "" {
-				if rout, exist = serverPoolIns.router.Get(routerKey); exist {
-					rout.(func(*websocket.Conn))(ws) // 执行路由中的函数
+				if serverPoolIns.router.GetIndexByKey(routerKey) > -1 {
+					rout = serverPoolIns.router.GetValueByKey(routerKey)
+					rout.(func(*websocket.Conn))(ws)
 				} else {
 					if serverPoolIns.onRouterErr != nil {
 						serverPoolIns.onRouterErr(ws, fmt.Errorf("没有找到路由：%s", routerKey))
@@ -226,8 +227,8 @@ func (ServerPool) SendMsgByWsManyConn(servers *array.AnyArray[*Server], message 
 
 // SendMsgByAccountOpenId 根据用户openId发送消息
 func (ServerPool) SendMsgByAccountOpenId(accountOpenId string, message []byte) error {
-	client, exist := serverPoolIns.serverInstances.Get(accountOpenId)
-	if exist {
+	if serverPoolIns.serverInstances.GetIndexByKey(accountOpenId) > -1 {
+		client := serverPoolIns.serverInstances.GetValueByKey(accountOpenId)
 		serverPoolIns.SendMsgByWsManyConn(client.Connections, message)
 	}
 
@@ -236,7 +237,7 @@ func (ServerPool) SendMsgByAccountOpenId(accountOpenId string, message []byte) e
 
 // RegisterRouter 注册路由
 func (ServerPool) RegisterRouter(routerKey string, fn func(ws *websocket.Conn)) *ServerPool {
-	if _, exist := serverPoolIns.router.Get(routerKey); exist {
+	if serverPoolIns.router.GetIndexByKey(routerKey) > -1 {
 		serverPoolIns.router.RemoveByKey(routerKey)
 	}
 	serverPoolIns.router.Set(routerKey, fn)
@@ -248,16 +249,16 @@ func (ServerPool) RegisterRouter(routerKey string, fn func(ws *websocket.Conn)) 
 func (ServerPool) Close() {
 	var err error
 
-	for _, value := range serverPoolIns.serverInstances.All() {
-		for _, server := range value.Connections.All() {
-			if err = server.Conn.Close(); err != nil {
+	serverPoolIns.serverInstances.Each(func(key string, value *ServerInstance) {
+		value.Connections.Each(func(idx int, item *Server) {
+			if err = item.Conn.Close(); err != nil {
 				if serverPoolIns.onCloseConnErr != nil {
-					serverPoolIns.onCloseConnErr(server.Conn, err)
+					serverPoolIns.onCloseConnErr(item.Conn, err)
 				}
 				return
 			}
-			server.done <- struct{}{}
-		}
+			item.done <- struct{}{}
+		})
 		value.Connections.Clean()
-	}
+	})
 }

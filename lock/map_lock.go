@@ -88,9 +88,9 @@ func (my *MapLock) Destroy(key string) {
 
 // DestroyAll 删除所有锁
 func (my *MapLock) DestroyAll() {
-	for key := range my.locks.All() {
+	my.locks.Each(func(key string, value *itemLock) {
 		my.Destroy(key)
-	}
+	})
 }
 
 // Lock 获取锁

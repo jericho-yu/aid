@@ -14,7 +14,7 @@ import (
 // Reader Excel读取器
 type Reader struct {
 	Err         error
-	data        *dict.AnyOrderlyDict[uint64, *array.AnyArray[string]]
+	data        *dict.AnyDict[uint64, *array.AnyArray[string]]
 	excel       *excelize.File
 	sheetName   string
 	originalRow int
@@ -29,7 +29,7 @@ func (*Reader) New() *Reader { return NewReader() }
 
 // NewReader 构造函数
 func NewReader() *Reader {
-	return &Reader{data: dict.MakeAnyOrderlyDict[uint64, *array.AnyArray[string]](0)}
+	return &Reader{data: dict.Make[uint64, *array.AnyArray[string]]()}
 }
 
 // AutoRead 自动读取（默认第一行是表头，从第二行开始，默认Sheet名称为：Sheet1）
@@ -55,18 +55,23 @@ func (my *Reader) AutoReadBySheetName(sheetName string, filename ...any) *Reader
 }
 
 // Data 获取数据：有序字典
-func (my *Reader) Data() *dict.AnyOrderlyDict[uint64, *array.AnyArray[string]] { return my.data }
+func (my *Reader) Data() *dict.AnyDict[uint64, *array.AnyArray[string]] { return my.data }
 
 // DataWithTitle 获取数据：带有title的有序字典
-func (my *Reader) DataWithTitle() (*dict.AnyOrderlyDict[uint64, *dict.AnyDict[string, string]], error) {
-	newDict := dict.MakeAnyOrderlyDict[uint64, *dict.AnyDict[string, string]](0)
+func (my *Reader) DataWithTitle() (*dict.AnyDict[uint64, *dict.AnyDict[string, string]], error) {
+	newDict := dict.Make[uint64, *dict.AnyDict[string, string]]()
 
-	for idx, value := range my.data.All() {
-		newMap, err := dict.Zip[string, string](my.titles.ToSlice(), value.Value.All())
+	for idx, value := range my.data.ToMap() {
+		newMap, err := dict.Zip[string, string](my.titles.ToSlice(), value.ToSlice())
 		if err != nil {
 			return nil, err
 		}
-		newDict.SetByKey(uint64(idx), dict.NewAnyDict[string, string](newMap))
+		dictTmp := dict.Make[string, string]()
+		for s, s2 := range newMap {
+			dictTmp.Set(s, s2)
+		}
+
+		newDict.Set(idx, dictTmp)
 	}
 
 	return newDict, nil
@@ -74,7 +79,7 @@ func (my *Reader) DataWithTitle() (*dict.AnyOrderlyDict[uint64, *dict.AnyDict[st
 
 // SetDataByRow 设置单行数据
 func (my *Reader) SetDataByRow(rowNumber uint64, data []string) *Reader {
-	my.data.SetByKey(rowNumber, array.New(data))
+	my.data.Set(rowNumber, array.New(data))
 
 	return my
 }
@@ -154,7 +159,7 @@ func (my *Reader) OpenFile(filename ...any) *Reader {
 
 	my.SetTitleRow(1)
 	my.SetOriginalRow(2)
-	my.data = dict.MakeAnyOrderlyDict[uint64, *array.AnyArray[string]](0)
+	my.data = dict.Make[uint64, *array.AnyArray[string]]()
 
 	return my
 }

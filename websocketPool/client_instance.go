@@ -114,9 +114,9 @@ func (my *ClientInstance) SendMsgByName(clientName string, msgType int, msg []by
 
 // Close 关闭客户端实例
 func (my *ClientInstance) Close() {
-	for _, conn := range my.Clients.All() {
-		_ = conn.Close()
-	}
+	my.Clients.Each(func(key string, value *Client) {
+		_ = value.Close()
+	})
 
 	my.Clients.Clean()
 	clientPoolIns.clientInstances.RemoveByKey(my.Name)

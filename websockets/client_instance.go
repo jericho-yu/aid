@@ -16,7 +16,7 @@ func NewClientInstance(name string) *ClientInstance {
 
 // Append 增加客户端
 func (my *ClientInstance) Append(client *Client) error {
-	if my.connections.Has(client.name) {
+	if my.connections.HasKey(client.name) {
 		return WebsocketClientExistErr
 	}
 
@@ -27,7 +27,7 @@ func (my *ClientInstance) Append(client *Client) error {
 
 // Remove 删除客户端
 func (my *ClientInstance) Remove(name string) error {
-	if !my.connections.Has(name) {
+	if !my.connections.HasKey(name) {
 		return WebsocketClientNotExistErr
 	}
 
@@ -38,7 +38,7 @@ func (my *ClientInstance) Remove(name string) error {
 
 // Get 获取客户端
 func (my *ClientInstance) Get(name string) (*Client, error) {
-	if !my.connections.Has(name) {
+	if !my.connections.HasKey(name) {
 		return nil, WebsocketClientNotExistErr
 	}
 
@@ -49,7 +49,7 @@ func (my *ClientInstance) Get(name string) (*Client, error) {
 
 // Has 检查客户端是否存在
 func (my *ClientInstance) Has(name string) bool {
-	return my.connections.Has(name)
+	return my.connections.HasKey(name)
 }
 
 // Close 关闭客户端
@@ -66,13 +66,13 @@ func (my *ClientInstance) Close(name string) error {
 // Clean 清空客户端
 func (my *ClientInstance) Clean() []error {
 	var errorList []error
-	for _, client := range my.connections.All() {
+	my.connections.Each(func(key string, client *Client) {
 		if err := client.Close().Error(); err != nil {
 			errorList = append(errorList, err)
 		} else {
 			my.connections.RemoveByKey(client.name)
 		}
-	}
+	})
 
 	return errorList
 }

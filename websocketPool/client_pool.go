@@ -153,9 +153,9 @@ func (ClientPool) SendMsgByName(instanceName, clientName string, msgType int, ms
 
 // Close 关闭客户端实例池
 func (ClientPool) Close() {
-	for _, clientInstance := range clientPoolIns.clientInstances.All() {
+	clientPoolIns.clientInstances.Each(func(key string, clientInstance *ClientInstance) {
 		clientInstance.Close()
-	}
+	})
 
 	clientPoolIns.clientInstances.Clean()
 }

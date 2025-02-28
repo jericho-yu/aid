@@ -113,7 +113,7 @@ func (my *RedisPool) Close(key string) error {
 
 // Clean 清理链接
 func (*RedisPool) Clean() {
-	for key, val := range redisPoolIns.connections.All() {
+	for key, val := range redisPoolIns.connections.ToMap() {
 		_ = val.conn.Close()
 		redisPoolIns.connections.RemoveByKey(key)
 	}

@@ -1,6 +1,7 @@
 package excel
 
 import (
+	"github.com/jericho-yu/aid/dict"
 	"time"
 
 	"github.com/jericho-yu/aid/str"
@@ -127,10 +128,11 @@ func ReadDemo(filename string) {
 		str.NewTerminalLog("err: %v").Error(err)
 	}
 
-	for _, value := range excelData.All() {
-		username, _ := value.Value.Get("username")
-		nickname, _ := value.Value.Get("nickname")
-		score, _ := value.Value.Get("score")
-		str.NewTerminalLog("%d行: 姓名[%s]，昵称[%s]，分数[%s]").Success(value.Key, username, nickname, score)
-	}
+	excelData.Each(func(key uint64, value *dict.AnyDict[string, string]) {
+		username := value.GetValueByKey("username")
+		nickname := value.GetValueByKey("nickname")
+		score := value.GetValueByKey("score")
+
+		str.NewTerminalLog("%d行: 姓名[%s]，昵称[%s]，分数[%s]").Success(key, username, nickname, score)
+	})
 }

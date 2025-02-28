@@ -91,11 +91,11 @@ func (my *AnyArray[T]) getByIndexes(indexes ...int) []T {
 }
 
 // GetByIndexes 通过多索引获取内容
-func (my *AnyArray[T]) GetByIndexes(indexes ...int) []T {
+func (my *AnyArray[T]) GetByIndexes(indexes ...int) *AnyArray[T] {
 	my.mu.RLock()
 	defer my.mu.RUnlock()
 
-	return my.getByIndexes(indexes...)
+	return New(my.getByIndexes(indexes...))
 }
 
 func (my *AnyArray[T]) append(v ...T) *AnyArray[T] {
@@ -183,11 +183,11 @@ func (my *AnyArray[T]) getIndexesByValues(values ...T) []int {
 }
 
 // GetIndexesByValues 通过值获取索引下标
-func (my *AnyArray[T]) GetIndexesByValues(values ...T) []int {
+func (my *AnyArray[T]) GetIndexesByValues(values ...T) *AnyArray[int] {
 	my.mu.RLock()
 	defer my.mu.RUnlock()
 
-	return my.getIndexesByValues(values...)
+	return New(my.getIndexesByValues(values...))
 }
 
 func (my *AnyArray[T]) copy() *AnyArray[T] {

@@ -23,7 +23,7 @@ func OnceClientInstancePool() *ClientInstancePool {
 
 // Append 增加客户端
 func (*ClientInstancePool) Append(clientInstance *ClientInstance) error {
-	if clientInstance.connections.Has(clientInstance.name) {
+	if clientInstance.connections.HasKey(clientInstance.name) {
 		return WebsocketClientExistErr
 	}
 
@@ -34,7 +34,7 @@ func (*ClientInstancePool) Append(clientInstance *ClientInstance) error {
 
 // Remove 删除客户端
 func (*ClientInstancePool) Remove(name string) error {
-	if !clientInstancePool.pool.Has(name) {
+	if !clientInstancePool.pool.HasKey(name) {
 		return WebsocketClientNotExistErr
 	}
 
@@ -45,7 +45,7 @@ func (*ClientInstancePool) Remove(name string) error {
 
 // Get 获取客户端
 func (*ClientInstancePool) Get(name string) (*ClientInstance, error) {
-	if !clientInstancePool.pool.Has(name) {
+	if !clientInstancePool.pool.HasKey(name) {
 		return nil, WebsocketClientNotExistErr
 	}
 
@@ -56,7 +56,7 @@ func (*ClientInstancePool) Get(name string) (*ClientInstance, error) {
 
 // Has 检查客户端是否存在
 func (*ClientInstancePool) Has(name string) bool {
-	return clientInstancePool.pool.Has(name)
+	return clientInstancePool.pool.HasKey(name)
 }
 
 // Close 关闭客户端
@@ -73,14 +73,14 @@ func (*ClientInstancePool) Close(name string) error {
 // Clean 清空客户端实例
 func (*ClientInstancePool) Clean() []error {
 	var errorList []error
-	for _, clientInstance := range clientInstancePool.pool.All() {
-		errTmp := clientInstance.Clean()
-		if len(errTmp) > 0 {
-			errorList = append(errorList, errTmp...)
+	clientInstancePool.pool.Each(func(key string, clientInstance *ClientInstance) {
+		err := clientInstance.Clean()
+		if len(err) > 0 {
+			errorList = append(errorList, err...)
 		} else {
 			clientInstance.connections.RemoveByKey(clientInstance.name)
 		}
-	}
+	})
 
 	return errorList
 }

@@ -215,6 +215,48 @@ func (my *AnyDict[K, V]) GetIndexesByValues(values ...V) *array.AnyArray[int] {
 	return my.getIndexesByValues(values...)
 }
 
+func (my *AnyDict[K, V]) HasKey(key K) bool {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
+
+	return my.getIndexByKey(key) > -1
+}
+
+func (my *AnyDict[K, V]) HasKeys(keys ...K) bool {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
+
+	return my.getIndexesByKeys(keys...).Len() == len(keys)
+}
+
+func (my *AnyDict[K, V]) HasValue(value V) bool {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
+
+	return my.getIndexByValue(value) > -1
+}
+
+func (my *AnyDict[K, V]) HasValues(values ...V) bool {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
+
+	return my.getIndexesByValues(values...).Len() == len(values)
+}
+
+func (my *AnyDict[K, V]) HasIndex(index int) bool {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
+
+	return my.getKeyByIndex(index) != nil
+}
+
+func (my *AnyDict[K, V]) HasIndexes(indexes ...int) bool {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
+
+	return my.getKeysByIndexes(indexes...).Len() == len(indexes)
+}
+
 func (my *AnyDict[K, V]) len() int { return len(my.keys) }
 
 func (my *AnyDict[K, V]) Len() int {
@@ -245,6 +287,18 @@ func (my *AnyDict[K, V]) Set(key K, value V) *AnyDict[K, V] {
 	defer my.mu.Unlock()
 
 	return my.set(key, value)
+}
+
+func (my *AnyDict[K, V]) get(key K) (V, bool) {
+	v, e := my.data[key]
+	return v, e
+}
+
+func (my *AnyDict[K, V]) Get(key K) (V, bool) {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
+
+	return my.get(key)
 }
 
 func (my *AnyDict[K, V]) copy() *AnyDict[K, V] {

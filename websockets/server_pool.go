@@ -76,9 +76,9 @@ func (*ServerPool) SendMessageByAddr(addr *string, prototypeMessage []byte) {
 
 // SendMessageByAuthId 发送消息：通过认证ID
 func (*ServerPool) SendMessageByAuthId(authId *string, prototypeMessage []byte) {
-	for _, server := range serverPool.connections.GetByKeys(serverPool.addrToAuth.GetKeysByValue(*authId).All()...) {
+	serverPool.connections.GetValuesByKeys(serverPool.addrToAuth.GetKeysByValues(*authId).ToSlice()...).Each(func(idx int, server *Server) {
 		server.AsyncMessage(prototypeMessage, serverPool.onSendMessageSuccess, serverPool.onSendMessageFail)
-	}
+	})
 }
 
 // SetOnConnectionSuccess 设置回调：当连接成功
