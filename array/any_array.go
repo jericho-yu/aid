@@ -59,6 +59,7 @@ func (my *AnyArray[T]) Has(k int) bool {
 
 func (my *AnyArray[T]) set(k int, v T) *AnyArray[T] {
 	my.data[k] = v
+
 	return my
 }
 
@@ -91,11 +92,12 @@ func (my *AnyArray[T]) getByIndexes(indexes ...int) []T {
 }
 
 // GetByIndexes 通过多索引获取内容
-func (my *AnyArray[T]) GetByIndexes(indexes ...int) []T {
+func (my *AnyArray[T]) GetByIndexes(indexes ...int) *AnyArray[T] {
 	my.mu.RLock()
 	defer my.mu.RUnlock()
 
-	return my.getByIndexes(indexes...)
+	my.data = my.getByIndexes(indexes...)
+	return my
 }
 
 func (my *AnyArray[T]) append(v ...T) *AnyArray[T] {
@@ -183,11 +185,11 @@ func (my *AnyArray[T]) getIndexesByValues(values ...T) []int {
 }
 
 // GetIndexesByValues 通过值获取索引下标
-func (my *AnyArray[T]) GetIndexesByValues(values ...T) []int {
+func (my *AnyArray[T]) GetIndexesByValues(values ...T) *AnyArray[int] {
 	my.mu.RLock()
 	defer my.mu.RUnlock()
 
-	return my.getIndexesByValues(values...)
+	return NewAnyArray(my.getIndexesByValues(values...))
 }
 
 func (my *AnyArray[T]) copy() *AnyArray[T] {
@@ -277,7 +279,8 @@ func (my *AnyArray[T]) removeEmpty() *AnyArray[T] {
 		data = append(data, item)
 	}
 
-	return NewAnyArray(data)
+	my.data = data
+	return my
 }
 
 // RemoveEmpty 清除空值元素
@@ -285,7 +288,8 @@ func (my *AnyArray[T]) RemoveEmpty() *AnyArray[T] {
 	my.mu.Lock()
 	defer my.mu.Unlock()
 
-	return my.removeEmpty()
+	my.removeEmpty()
+	return my
 }
 
 func (my *AnyArray[T]) join(sep string) string {
@@ -422,7 +426,6 @@ func (my *AnyArray[T]) unique() *AnyArray[T] {
 	}
 
 	my.data = result
-
 	return my
 }
 
