@@ -14,7 +14,7 @@ type ClientInstance struct {
 
 // NewClientInstance 实例化：websocket 客户端实例
 func NewClientInstance(instanceName string) *ClientInstance {
-	return &ClientInstance{Name: instanceName, Clients: dict.MakeAnyDict[string, *Client]()}
+	return &ClientInstance{Name: instanceName, Clients: dict.Make[string, *Client]()}
 }
 
 // GetClient 获取websocket客户端链接

@@ -16,7 +16,7 @@ var (
 )
 
 func OnceClientInstancePool() *ClientInstancePool {
-	clientInstancePoolOnce.Do(func() { clientInstancePool = &ClientInstancePool{pool: dict.MakeAnyDict[string, *ClientInstance]()} })
+	clientInstancePoolOnce.Do(func() { clientInstancePool = &ClientInstancePool{pool: dict.Make[string, *ClientInstance]()} })
 
 	return clientInstancePool
 }

@@ -33,8 +33,8 @@ var (
 func OnceServer(serverCallbackConfig ServerCallbackConfig) *ServerPool {
 	serverPoolOnce.Do(func() {
 		serverPool = &ServerPool{
-			connections:             dict.MakeAnyDict[string, *Server](),
-			addrToAuth:              dict.MakeAnyDict[string, string](),
+			connections:             dict.Make[string, *Server](),
+			addrToAuth:              dict.Make[string, string](),
 			onConnectionFail:        serverCallbackConfig.OnConnectionFail,
 			onConnectionSuccess:     serverCallbackConfig.OnConnectionSuccess,
 			onSendMessageSuccess:    serverCallbackConfig.OnSendMessageSuccess,

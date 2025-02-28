@@ -50,7 +50,7 @@ func NewClient(
 		status:                          Offline,
 		closeChan:                       make(chan struct{}, 1),
 		receiveMessageChan:              make(chan []byte, 1),
-		asyncReceiveCallbackDict:        dict.MakeAnyDict[string, clientCallbackFn](),
+		asyncReceiveCallbackDict:        dict.Make[string, clientCallbackFn](),
 		syncMessageTimeout:              5 * time.Second,
 		onConnSuccessCallback:           clientCallbackConfig.OnConnSuccessCallback,
 		onConnFailCallback:              clientCallbackConfig.OnConnFailCallback,

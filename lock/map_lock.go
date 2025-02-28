@@ -35,11 +35,11 @@ func (*MapLock) New() *MapLock { return NewMapLock() }
 func (*MapLock) Once() *MapLock { return OnceMapLock() }
 
 // NewMapLock 实例化：字典锁
-func NewMapLock() *MapLock { return &MapLock{locks: dict.MakeAnyDict[string, *itemLock]()} }
+func NewMapLock() *MapLock { return &MapLock{locks: dict.Make[string, *itemLock]()} }
 
 // OnceMapLock 单例化：字典锁
 func OnceMapLock() *MapLock {
-	onceMapLock.Do(func() { mapLockIns = &MapLock{locks: dict.MakeAnyDict[string, *itemLock]()} })
+	onceMapLock.Do(func() { mapLockIns = &MapLock{locks: dict.Make[string, *itemLock]()} })
 
 	return mapLockIns
 }

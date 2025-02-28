@@ -196,7 +196,7 @@ func Test6FindMany(t *testing.T) {
 			Where(Map{
 				"_id": Map{
 					"$in": array.FromAnyArray[OID](
-						array.NewAnyArray[*Student](students).
+						array.New[*Student](students).
 							Pluck(func(item *Student) any { return item.ClassId }),
 					),
 				},

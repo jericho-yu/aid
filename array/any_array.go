@@ -19,11 +19,11 @@ type (
 	}
 )
 
-// NewAnyArray 实例化
-func NewAnyArray[T any](list []T) *AnyArray[T] { return &AnyArray[T]{data: list, mu: sync.RWMutex{}} }
+// New 实例化
+func New[T any](list []T) *AnyArray[T] { return &AnyArray[T]{data: list, mu: sync.RWMutex{}} }
 
-// MakeAnyArray 初始化
-func MakeAnyArray[T any](size int) *AnyArray[T] {
+// Make 初始化
+func Make[T any](size int) *AnyArray[T] {
 	return &AnyArray[T]{data: make([]T, size), mu: sync.RWMutex{}}
 }
 
@@ -191,7 +191,7 @@ func (my *AnyArray[T]) GetIndexesByValues(values ...T) []int {
 }
 
 func (my *AnyArray[T]) copy() *AnyArray[T] {
-	return NewAnyArray(my.data)
+	return New(my.data)
 }
 
 // Copy 复制自己
@@ -277,7 +277,7 @@ func (my *AnyArray[T]) removeEmpty() *AnyArray[T] {
 		data = append(data, item)
 	}
 
-	return NewAnyArray(data)
+	return New(data)
 }
 
 // RemoveEmpty 清除空值元素
@@ -398,7 +398,7 @@ func (my *AnyArray[T]) pluck(fn func(item T) any) *AnyArray[any] {
 		ret = append(ret, fn(v))
 	}
 
-	return NewAnyArray(ret)
+	return New(ret)
 }
 
 // Pluck 获取数组中指定字段的值
@@ -444,7 +444,7 @@ func (my *AnyArray[T]) removeByIndexes(indexes ...int) *AnyArray[T] {
 		}
 	}
 
-	return NewAnyArray(newData)
+	return New(newData)
 }
 
 // RemoveByIndexes 根据索引删除元素
@@ -587,5 +587,5 @@ func Cast[SRC, DST any](aa *AnyArray[SRC], fn func(value SRC) DST) *AnyArray[DST
 		data[i] = fn(v)
 	}
 
-	return NewAnyArray(data)
+	return New(data)
 }

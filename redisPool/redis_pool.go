@@ -34,7 +34,7 @@ func (*RedisPool) Once(redisSetting *RedisSetting) *RedisPool { return OnceRedis
 func OnceRedisPool(redisSetting *RedisSetting) *RedisPool {
 	redisPoolOnce.Do(func() {
 		redisPoolIns = &RedisPool{}
-		redisPoolIns.connections = dict.MakeAnyDict[string, *redisConn]()
+		redisPoolIns.connections = dict.Make[string, *redisConn]()
 
 		if len(redisSetting.Pool) > 0 {
 			for _, pool := range redisSetting.Pool {

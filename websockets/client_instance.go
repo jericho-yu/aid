@@ -11,7 +11,7 @@ type ClientInstance struct {
 
 // NewClientInstance 实例化：websocket客户端实例
 func NewClientInstance(name string) *ClientInstance {
-	return &ClientInstance{name: name, connections: dict.MakeAnyDict[string, *Client]()}
+	return &ClientInstance{name: name, connections: dict.Make[string, *Client]()}
 }
 
 // Append 增加客户端

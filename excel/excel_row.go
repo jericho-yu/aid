@@ -40,7 +40,7 @@ func (my *Row) SetCells(cells []*Cell) *Row {
 			cell.SetCoordinate(fmt.Sprintf("%s%d", colText, my.GetRowNumber()))
 		}
 	}
-	my.cells = array.NewAnyArray[*Cell](cells)
+	my.cells = array.New[*Cell](cells)
 
 	return my
 }

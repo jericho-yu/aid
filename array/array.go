@@ -225,7 +225,7 @@ func RemoveTargets[T comparable](values []T, targets ...T) (ret []T) {
 
 // FromAnyArray 从anyArray转入
 func FromAnyArray[T any](anyArray *AnyArray[any]) []T {
-	l := MakeAnyArray[T](anyArray.Len())
+	l := Make[T](anyArray.Len())
 
 	for k, v := range anyArray.ToSlice() {
 		l.Set(k, v.(T))
@@ -251,7 +251,7 @@ func ToAny(slice interface{}) []any {
 
 // CopyFromAnyArray 从AnyArray复制并处理转换内容
 func CopyFromAnyArray[S any, D any](src *AnyArray[S], processFn func(idx int, item S) D) *AnyArray[D] {
-	var dst *AnyArray[D] = MakeAnyArray[D](src.Len())
+	var dst *AnyArray[D] = Make[D](src.Len())
 
 	if src.IsEmpty() {
 		return dst

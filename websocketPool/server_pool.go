@@ -49,8 +49,8 @@ var (
 func (ServerPool) Once() *ServerPool {
 	serverPoolOnce.Do(func() {
 		serverPoolIns = &ServerPool{}
-		serverPoolIns.serverInstances = dict.MakeAnyDict[string, *ServerInstance]()
-		serverPoolIns.router = dict.MakeAnyDict[string, func(*websocket.Conn)]()
+		serverPoolIns.serverInstances = dict.Make[string, *ServerInstance]()
+		serverPoolIns.router = dict.Make[string, func(*websocket.Conn)]()
 	})
 
 	return serverPoolIns
@@ -58,7 +58,7 @@ func (ServerPool) Once() *ServerPool {
 
 // New 实例化：链接切片
 func (ServerInstance) New() *ServerInstance {
-	return &ServerInstance{Connections: array.MakeAnyArray[*Server](0)}
+	return &ServerInstance{Connections: array.Make[*Server](0)}
 }
 
 // SetOnConnect 设置回调：链接成功后

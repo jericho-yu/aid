@@ -22,7 +22,7 @@ func (*MongoClientPool) Once() *MongoClientPool { return OnceMongoPool() }
 // OnceMongoPool 单例化：mongodb连接池
 func OnceMongoPool() *MongoClientPool {
 	mongoPoolOnce.Do(func() {
-		mongoClientPool = &MongoClientPool{clients: dict.MakeAnyDict[string, *MongoClient]()}
+		mongoClientPool = &MongoClientPool{clients: dict.Make[string, *MongoClient]()}
 	})
 
 	return mongoClientPool

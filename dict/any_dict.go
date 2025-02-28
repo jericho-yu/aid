@@ -16,7 +16,7 @@ type AnyDict[K comparable, V any] struct {
 	mu     sync.RWMutex
 }
 
-func MakeAnyDict[K comparable, V any]() *AnyDict[K, V] {
+func Make[K comparable, V any]() *AnyDict[K, V] {
 	return &AnyDict[K, V]{
 		data:   make(map[K]V),
 		keys:   make([]K, 0),
@@ -41,7 +41,7 @@ func (my *AnyDict[K, V]) getKeysByIndexes(indexes ...int) *array.AnyArray[K] {
 		keys = append(keys, my.getKeyByIndex(idx))
 	}
 
-	return array.NewAnyArray(keys)
+	return array.New(keys)
 }
 
 func (my *AnyDict[K, V]) GetKeysByIndexes(indexes ...int) *array.AnyArray[K] {
@@ -77,7 +77,7 @@ func (my *AnyDict[K, V]) getKeysByValues(values ...V) *array.AnyArray[K] {
 		ret = append(ret, my.getKeyByValue(value))
 	}
 
-	return array.NewAnyArray(ret)
+	return array.New(ret)
 }
 
 func (my *AnyDict[K, V]) GetKeysByValues(values ...V) *array.AnyArray[K] {
@@ -103,7 +103,7 @@ func (my *AnyDict[K, V]) getValuesByIndexes(indexes ...int) *array.AnyArray[V] {
 		values = append(values, my.values[idx])
 	}
 
-	return array.NewAnyArray(values)
+	return array.New(values)
 }
 
 func (my *AnyDict[K, V]) GetValuesByIndexes(indexes ...int) *array.AnyArray[V] {
@@ -129,7 +129,7 @@ func (my *AnyDict[K, V]) getValuesByKeys(keys ...K) *array.AnyArray[V] {
 		values = append(values, my.data[key])
 	}
 
-	return array.NewAnyArray(values)
+	return array.New(values)
 }
 
 func (my *AnyDict[K, V]) GetValuesByKeys(keys ...K) *array.AnyArray[V] {
@@ -167,7 +167,7 @@ func (my *AnyDict[K, V]) getIndexesByKeys(keys ...K) *array.AnyArray[int] {
 		}
 	}
 
-	return array.NewAnyArray(ret)
+	return array.New(ret)
 }
 
 func (my *AnyDict[K, V]) GetIndexesByKeys(keys ...K) *array.AnyArray[int] {
@@ -205,7 +205,7 @@ func (my *AnyDict[K, V]) getIndexesByValues(values ...V) *array.AnyArray[int] {
 		}
 	}
 
-	return array.NewAnyArray(ret)
+	return array.New(ret)
 }
 
 func (my *AnyDict[K, V]) GetIndexesByValues(values ...V) *array.AnyArray[int] {
@@ -248,7 +248,7 @@ func (my *AnyDict[K, V]) Set(key K, value V) *AnyDict[K, V] {
 }
 
 func (my *AnyDict[K, V]) copy() *AnyDict[K, V] {
-	var d = MakeAnyDict[K, V]()
+	var d = Make[K, V]()
 
 	for idx, key := range my.keys {
 		d.set(key, my.values[idx])
@@ -282,7 +282,7 @@ func (my *AnyDict[K, V]) ToString() string {
 	return my.toString()
 }
 
-func (my *AnyDict[K, V]) getKeys() *array.AnyArray[K] { return array.NewAnyArray(my.keys) }
+func (my *AnyDict[K, V]) getKeys() *array.AnyArray[K] { return array.New(my.keys) }
 
 func (my *AnyDict[K, V]) GetKeys() *array.AnyArray[K] {
 	my.mu.RLock()
@@ -291,7 +291,7 @@ func (my *AnyDict[K, V]) GetKeys() *array.AnyArray[K] {
 	return my.getKeys()
 }
 
-func (my *AnyDict[K, V]) getValues() *array.AnyArray[V] { return array.NewAnyArray(my.values) }
+func (my *AnyDict[K, V]) getValues() *array.AnyArray[V] { return array.New(my.values) }
 
 func (my *AnyDict[K, V]) GetValues() *array.AnyArray[V] {
 	my.mu.RLock()
@@ -307,7 +307,7 @@ func (my *AnyDict[K, V]) getIndexes() *array.AnyArray[int] {
 		ret = append(ret, i)
 	}
 
-	return array.NewAnyArray(ret)
+	return array.New(ret)
 }
 
 func (my *AnyDict[K, V]) GetIndexes() *array.AnyArray[int] {
@@ -358,7 +358,7 @@ func (my *AnyDict[K, V]) LastValue() V {
 }
 
 func (my *AnyDict[K, V]) filter(fn func(key K, value V) bool) *AnyDict[K, V] {
-	var d = MakeAnyDict[K, V]()
+	var d = Make[K, V]()
 
 	for key, value := range my.data {
 		if fn(key, value) {
@@ -381,7 +381,7 @@ func (my *AnyDict[K, V]) Filter(fn func(key K, value V) bool) *AnyDict[K, V] {
 }
 
 func (my *AnyDict[K, V]) removeByKey(key K) *AnyDict[K, V] {
-	var d = MakeAnyDict[K, V]()
+	var d = Make[K, V]()
 
 	for idx, k := range my.keys {
 		if k == key {
@@ -406,7 +406,7 @@ func (my *AnyDict[K, V]) RemoveByKey(key K) *AnyDict[K, V] {
 }
 
 func (my *AnyDict[K, V]) removeByValue(value V) *AnyDict[K, V] {
-	var d = MakeAnyDict[K, V]()
+	var d = Make[K, V]()
 
 	for idx, val := range my.values {
 		if reflect.DeepEqual(val, value) {
@@ -431,7 +431,7 @@ func (my *AnyDict[K, V]) RemoveByValue(value V) *AnyDict[K, V] {
 }
 
 func (my *AnyDict[K, V]) removeEmpty() *AnyDict[K, V] {
-	d := MakeAnyDict[K, V]()
+	d := Make[K, V]()
 
 	for idx, value := range my.values {
 		ref := reflect.ValueOf(value)
@@ -531,7 +531,7 @@ func (my *AnyDict[K, V]) NotInValues(values ...V) bool {
 }
 
 func (my *AnyDict[K, V]) every(fn func(key K, value V) (K, V)) *AnyDict[K, V] {
-	var d = MakeAnyDict[K, V]()
+	var d = Make[K, V]()
 
 	for key, value := range my.data {
 		k, v := fn(key, value)
@@ -610,7 +610,7 @@ func (my *AnyDict[K, V]) UnmarshalJSON(data []byte) error {
 }
 
 func Cast[K comparable, SRC, DST any](src *AnyDict[K, SRC], fn func(key K, value SRC) DST) *AnyDict[K, DST] {
-	var d = MakeAnyDict[K, DST]()
+	var d = Make[K, DST]()
 
 	for key, value := range src.data {
 		d.set(key, fn(key, value))

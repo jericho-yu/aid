@@ -74,7 +74,7 @@ func (my *Reader) DataWithTitle() (*dict.AnyOrderlyDict[uint64, *dict.AnyDict[st
 
 // SetDataByRow 设置单行数据
 func (my *Reader) SetDataByRow(rowNumber uint64, data []string) *Reader {
-	my.data.SetByKey(rowNumber, array.NewAnyArray(data))
+	my.data.SetByKey(rowNumber, array.New(data))
 
 	return my
 }
@@ -128,7 +128,7 @@ func (my *Reader) SetTitle(titles []string) *Reader {
 		my.Err = errors.New("表头不能为空")
 		return my
 	}
-	my.titles = array.NewAnyArray[string](titles)
+	my.titles = array.New[string](titles)
 
 	return my
 }

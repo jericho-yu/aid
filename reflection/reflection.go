@@ -306,9 +306,9 @@ func compareTagAndTarget(
 	}
 
 	if tagField != "" {
-		return array.NewAnyArray[string](strings.Split(tagValue, ";")).
+		return array.New[string](strings.Split(tagValue, ";")).
 			Every(func(s string) string {
-				t := array.NewAnyArray[string](strings.Split(s, ":"))
+				t := array.New[string](strings.Split(s, ":"))
 				return operation.Ternary[string](t.First() == tagField, t.Last(), "")
 			}).
 			In(target)

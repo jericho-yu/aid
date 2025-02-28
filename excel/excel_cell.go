@@ -84,7 +84,7 @@ func NewCellFormula(content string) *Cell {
 
 // GetBorder 获取边框
 func (my *Cell) GetBorder() *array.AnyArray[border] {
-	borders := array.MakeAnyArray[border](0)
+	borders := array.Make[border](0)
 
 	if my.borderTopRgb != "" {
 		borders.Append(border{

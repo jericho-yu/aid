@@ -24,7 +24,7 @@ type (
 func OnceClientPool() *ClientPool {
 	clientPoolOnce.Do(func() {
 		clientPoolIns = &ClientPool{}
-		clientPoolIns.clientInstances = dict.MakeAnyDict[string, *ClientInstance]()
+		clientPoolIns.clientInstances = dict.Make[string, *ClientInstance]()
 	})
 
 	return clientPoolIns
