@@ -355,14 +355,16 @@ func Test35(t *testing.T) {
 
 func Test36(t *testing.T) {
 	t.Run("test36 json反序列化", func(t *testing.T) {
-		j := []byte(`{"分数":18,"年龄":100,"税务":0}`)
-		d := MakeAnyDict[string, int]()
+		j := []byte(`[{"分数":18,"年龄":100,"税务":0}]`)
+		var d []*AnyDict[string, int]
 
 		e := json.Unmarshal(j, &d)
 		if e != nil {
 			t.Fatalf("反序列化错误：%v", e)
 		}
 
-		t.Logf("%#v", d)
+		for _, a := range d {
+			t.Logf("%+v\n", a)
+		}
 	})
 }
