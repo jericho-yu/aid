@@ -2,7 +2,7 @@ git add --all && \
 git commit -m"$1"
 
 if [ -n "$2" ]; then 
-    git push origin $2 && \
+  git push origin $2 && \
 	git checkout master && \
 	git merge $2 && \
 	git push origin master && \
