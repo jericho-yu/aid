@@ -25,9 +25,7 @@ func MakeAnyDict[K comparable, V any]() *AnyDict[K, V] {
 	}
 }
 
-func (my *AnyDict[K, V]) getKeyByIndex(idx int) K {
-	return my.keys[idx]
-}
+func (my *AnyDict[K, V]) getKeyByIndex(idx int) K { return my.keys[idx] }
 
 func (my *AnyDict[K, V]) GetKeyByIndex(idx int) K {
 	my.mu.RLock()
@@ -89,9 +87,7 @@ func (my *AnyDict[K, V]) GetKeysByValues(values ...V) *array.AnyArray[K] {
 	return my.getKeysByValues(values...)
 }
 
-func (my *AnyDict[K, V]) getValueByIndex(index int) V {
-	return my.values[index]
-}
+func (my *AnyDict[K, V]) getValueByIndex(index int) V { return my.values[index] }
 
 func (my *AnyDict[K, V]) GetValueByIndex(index int) V {
 	my.mu.RLock()
@@ -117,9 +113,7 @@ func (my *AnyDict[K, V]) GetValuesByIndexes(indexes ...int) *array.AnyArray[V] {
 	return my.getValuesByIndexes(indexes...)
 }
 
-func (my *AnyDict[K, V]) getValueByKey(key K) V {
-	return my.data[key]
-}
+func (my *AnyDict[K, V]) getValueByKey(key K) V { return my.data[key] }
 
 func (my *AnyDict[K, V]) GetValueByKey(key K) V {
 	my.mu.RLock()
@@ -221,9 +215,7 @@ func (my *AnyDict[K, V]) GetIndexesByValues(values ...V) *array.AnyArray[int] {
 	return my.getIndexesByValues(values...)
 }
 
-func (my *AnyDict[K, V]) len() int {
-	return len(my.keys)
-}
+func (my *AnyDict[K, V]) len() int { return len(my.keys) }
 
 func (my *AnyDict[K, V]) Len() int {
 	my.mu.RLock()
@@ -232,9 +224,7 @@ func (my *AnyDict[K, V]) Len() int {
 	return my.len()
 }
 
-func (my *AnyDict[K, V]) isEmpty() bool {
-	return my.len() == 0
-}
+func (my *AnyDict[K, V]) isEmpty() bool { return my.len() == 0 }
 
 func (my *AnyDict[K, V]) IsEmpty() bool {
 	my.mu.RLock()
@@ -259,9 +249,11 @@ func (my *AnyDict[K, V]) Set(key K, value V) *AnyDict[K, V] {
 
 func (my *AnyDict[K, V]) copy() *AnyDict[K, V] {
 	var d = MakeAnyDict[K, V]()
+
 	for idx, key := range my.keys {
 		d.set(key, my.values[idx])
 	}
+
 	return d
 }
 
@@ -272,9 +264,7 @@ func (my *AnyDict[K, V]) Copy() *AnyDict[K, V] {
 	return my.copy()
 }
 
-func (my *AnyDict[K, V]) toMap() map[K]V {
-	return my.data
-}
+func (my *AnyDict[K, V]) toMap() map[K]V { return my.data }
 
 func (my *AnyDict[K, V]) ToMap() map[K]V {
 	my.mu.RLock()
@@ -283,9 +273,7 @@ func (my *AnyDict[K, V]) ToMap() map[K]V {
 	return my.toMap()
 }
 
-func (my *AnyDict[K, V]) toString() string {
-	return fmt.Sprintf("%v", my.data)
-}
+func (my *AnyDict[K, V]) toString() string { return fmt.Sprintf("%v", my.data) }
 
 func (my *AnyDict[K, V]) ToString() string {
 	my.mu.RLock()
@@ -294,9 +282,7 @@ func (my *AnyDict[K, V]) ToString() string {
 	return my.toString()
 }
 
-func (my *AnyDict[K, V]) getKeys() *array.AnyArray[K] {
-	return array.NewAnyArray(my.keys)
-}
+func (my *AnyDict[K, V]) getKeys() *array.AnyArray[K] { return array.NewAnyArray(my.keys) }
 
 func (my *AnyDict[K, V]) GetKeys() *array.AnyArray[K] {
 	my.mu.RLock()
@@ -305,9 +291,7 @@ func (my *AnyDict[K, V]) GetKeys() *array.AnyArray[K] {
 	return my.getKeys()
 }
 
-func (my *AnyDict[K, V]) getValues() *array.AnyArray[V] {
-	return array.NewAnyArray(my.values)
-}
+func (my *AnyDict[K, V]) getValues() *array.AnyArray[V] { return array.NewAnyArray(my.values) }
 
 func (my *AnyDict[K, V]) GetValues() *array.AnyArray[V] {
 	my.mu.RLock()
@@ -333,9 +317,7 @@ func (my *AnyDict[K, V]) GetIndexes() *array.AnyArray[int] {
 	return my.getIndexes()
 }
 
-func (my *AnyDict[K, V]) firstKey() K {
-	return my.keys[0]
-}
+func (my *AnyDict[K, V]) firstKey() K { return my.keys[0] }
 
 func (my *AnyDict[K, V]) FirstKey() K {
 	my.mu.RLock()
@@ -344,9 +326,7 @@ func (my *AnyDict[K, V]) FirstKey() K {
 	return my.firstKey()
 }
 
-func (my *AnyDict[K, V]) firstValue() V {
-	return my.values[0]
-}
+func (my *AnyDict[K, V]) firstValue() V { return my.values[0] }
 
 func (my *AnyDict[K, V]) FirstValue() V {
 	my.mu.RLock()
@@ -600,9 +580,7 @@ func (my *AnyDict[K, V]) Clean() *AnyDict[K, V] {
 	return my.clean()
 }
 
-func (my *AnyDict[K, V]) marshalJson() ([]byte, error) {
-	return json.Marshal(&my.data)
-}
+func (my *AnyDict[K, V]) marshalJson() ([]byte, error) { return json.Marshal(&my.data) }
 
 func (my *AnyDict[K, V]) MarshalJSON() ([]byte, error) {
 	my.mu.Lock()
@@ -611,9 +589,7 @@ func (my *AnyDict[K, V]) MarshalJSON() ([]byte, error) {
 	return my.marshalJson()
 }
 
-func (my *AnyDict[K, V]) unmarshalJson(data []byte) error {
-	return json.Unmarshal(data, &my.data)
-}
+func (my *AnyDict[K, V]) unmarshalJson(data []byte) error { return json.Unmarshal(data, &my.data) }
 
 func (my *AnyDict[K, V]) UnmarshalJSON(data []byte) error {
 	my.mu.Lock()

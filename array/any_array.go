@@ -17,75 +17,6 @@ type (
 		data []T
 		mu   sync.RWMutex
 	}
-
-	IAnyArray[T any] interface {
-		isEmpty() bool
-		IsEmpty() bool
-		isNotEmpty() bool
-		IsNotEmpty() bool
-		has(k int) bool
-		Has(k int) bool
-		set(k int, v T) *AnyArray[T]
-		Set(k int, v T) *AnyArray[T]
-		get(idx int) T
-		Get(idx int) T
-		getByIndexes(indexes ...int) []T
-		GetByIndexes(indexes ...int) []T
-		append(v ...T) *AnyArray[T]
-		Append(v ...T) *AnyArray[T]
-		first() T
-		First() T
-		last() T
-		Last() T
-		toSlice() []T
-		ToSlice() []T
-		getIndexByValue(value T) int
-		GetIndexByValue(value T) int
-		copy() *AnyArray[T]
-		Copy() *AnyArray[T]
-		shuffle() *AnyArray[T]
-		Shuffle() *AnyArray[T]
-		len() int
-		Len() int
-		filter(fn func(v T) bool) *AnyArray[T]
-		Filter(fn func(v T) bool) *AnyArray[T]
-		removeEmpty() *AnyArray[T]
-		RemoveEmpty() *AnyArray[T]
-		join(sep string) string
-		Join(sep string) string
-		joinWithoutEmpty(sep string) string
-		JoinWithoutEmpty(sep string) string
-		in(target T) bool
-		In(target T) bool
-		notIn(target T) bool
-		NotIn(target T) bool
-		allEmpty() bool
-		AllEmpty() bool
-		anyEmpty() bool
-		AnyEmpty() bool
-		chunk(chunkSize int) [][]T
-		Chunk(chunkSize int) [][]T
-		pluck(fn func(item T) any) *AnyArray[any]
-		Pluck(fn func(item T) any) *AnyArray[any]
-		unique() *AnyArray[T]
-		Unique() *AnyArray[T]
-		removeByIndexes(indexes ...int) *AnyArray[T]
-		RemoveByIndexes(indexes ...int) *AnyArray[T]
-		removeByValue(target T) *AnyArray[T]
-		RemoveByValue(target T) *AnyArray[T]
-		removeByValues(targets ...T) *AnyArray[T]
-		RemoveByValues(targets ...T) *AnyArray[T]
-		every(fn func(item T) T) *AnyArray[T]
-		Every(fn func(item T) T) *AnyArray[T]
-		each(fn func(idx int, item T)) *AnyArray[T]
-		Each(fn func(idx int, item T)) *AnyArray[T]
-		clean() *AnyArray[T]
-		Clean() *AnyArray[T]
-		marshalJSON() ([]byte, error)
-		MarshalJSON() ([]byte, error)
-		unmarshalJSON(data []byte) error
-		UnmarshalJSON(data []byte) error
-	}
 )
 
 // NewAnyArray 实例化
@@ -116,9 +47,7 @@ func (my *AnyArray[T]) IsNotEmpty() bool {
 }
 
 // has 检查key是否存在
-func (my *AnyArray[T]) has(k int) bool {
-	return k >= 0 && k < len(my.data)
-}
+func (my *AnyArray[T]) has(k int) bool { return k >= 0 && k < len(my.data) }
 
 // Has 检查是否存在
 func (my *AnyArray[T]) Has(k int) bool {
@@ -141,9 +70,7 @@ func (my *AnyArray[T]) Set(k int, v T) *AnyArray[T] {
 	return my.set(k, v)
 }
 
-func (my *AnyArray[T]) get(idx int) T {
-	return my.data[idx]
-}
+func (my *AnyArray[T]) get(idx int) T { return my.data[idx] }
 
 // Get 获取值
 func (my *AnyArray[T]) Get(idx int) T {
@@ -173,6 +100,7 @@ func (my *AnyArray[T]) GetByIndexes(indexes ...int) []T {
 
 func (my *AnyArray[T]) append(v ...T) *AnyArray[T] {
 	my.data = append(my.data, v...)
+
 	return my
 }
 
@@ -184,9 +112,7 @@ func (my *AnyArray[T]) Append(v ...T) *AnyArray[T] {
 	return my.append(v...)
 }
 
-func (my *AnyArray[T]) first() T {
-	return my.data[0]
-}
+func (my *AnyArray[T]) first() T { return my.data[0] }
 
 // First 获取第一个值
 func (my *AnyArray[T]) First() T {
@@ -198,6 +124,7 @@ func (my *AnyArray[T]) First() T {
 
 func (my *AnyArray[T]) last() T {
 	var t T
+
 	return operation.Ternary[T](my.Len() > 1, my.data[len(my.data)-1], operation.Ternary[T](my.Len() == 0, t, my.data[0]))
 }
 
@@ -424,9 +351,7 @@ func (my *AnyArray[T]) NotIn(target T) bool {
 	return my.notIn(target)
 }
 
-func (my *AnyArray[T]) allEmpty() bool {
-	return my.copy().removeEmpty().len() == 0
-}
+func (my *AnyArray[T]) allEmpty() bool { return my.copy().removeEmpty().len() == 0 }
 
 // AllEmpty 判断当前数组是否全空
 func (my *AnyArray[T]) AllEmpty() bool {
@@ -436,9 +361,7 @@ func (my *AnyArray[T]) AllEmpty() bool {
 	return my.allEmpty()
 }
 
-func (my *AnyArray[T]) anyEmpty() bool {
-	return my.copy().removeEmpty().len() != len(my.data)
-}
+func (my *AnyArray[T]) anyEmpty() bool { return my.copy().removeEmpty().len() != len(my.data) }
 
 // AnyEmpty 判断当前数组中是否存在空值
 func (my *AnyArray[T]) AnyEmpty() bool {
