@@ -16,9 +16,9 @@ var (
 	MyErr2 MyError2
 )
 
-func (my *MyError1) New(msg string) *MyError1 { return &MyError1{MyError{msg: msg}} }
+func (my *MyError1) New(msg string) IMyError { return &MyError1{MyError{msg: msg}} }
 
-func (my *MyError2) New(msg string) *MyError2 { return &MyError2{MyError{msg: msg}} }
+func (my *MyError2) New(msg string) IMyError { return &MyError2{MyError{msg: msg}} }
 
 func (my *MyError1) Error() string { return my.msg }
 
