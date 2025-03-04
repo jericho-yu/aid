@@ -26,6 +26,16 @@ type (
 	}
 )
 
+func New[K comparable, V any](m map[K]V) *AnyDict[K, V] {
+	d := Make[K, V]()
+
+	for key, value := range m {
+		d.Set(key, value)
+	}
+
+	return d
+}
+
 func Make[K comparable, V any]() *AnyDict[K, V] {
 	return &AnyDict[K, V]{
 		data:   make(map[K]V),
