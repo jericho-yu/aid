@@ -2,6 +2,7 @@ package myError
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 	"testing"
 )
@@ -18,14 +19,21 @@ var (
 
 func (my *MyError1) New(msg string) IMyError { return &MyError1{MyError{Msg: msg}} }
 
-func (my *MyError2) New(msg string) IMyError { return &MyError2{MyError{Msg: msg}} }
+func (my *MyError1) Warp(err error) IMyError {
+	return &MyError1{MyError{Msg: fmt.Errorf("%w", err).Error()}}
+}
 
 func (my *MyError1) Error() string { return my.Msg }
 
-func (my *MyError2) Error() string { return my.Msg }
-
-// Is 实现 Is 方法
 func (my *MyError1) Is(target error) bool { return reflect.DeepEqual(target, &MyError1{}) }
+
+func (my *MyError2) New(msg string) IMyError { return &MyError2{MyError{Msg: msg}} }
+
+func (my *MyError2) Warp(err error) IMyError {
+	return &MyError2{MyError{Msg: fmt.Errorf("%w", err).Error()}}
+}
+
+func (my *MyError2) Error() string { return my.Msg }
 
 func (my *MyError2) Is(target error) bool { return reflect.DeepEqual(target, &MyError2{}) }
 
