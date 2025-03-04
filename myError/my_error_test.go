@@ -16,13 +16,13 @@ var (
 	MyErr2 MyError2
 )
 
-func (my *MyError1) New(msg string) IMyError { return &MyError1{MyError{msg: msg}} }
+func (my *MyError1) New(msg string) IMyError { return &MyError1{MyError{Msg: msg}} }
 
-func (my *MyError2) New(msg string) IMyError { return &MyError2{MyError{msg: msg}} }
+func (my *MyError2) New(msg string) IMyError { return &MyError2{MyError{Msg: msg}} }
 
-func (my *MyError1) Error() string { return my.msg }
+func (my *MyError1) Error() string { return my.Msg }
 
-func (my *MyError2) Error() string { return my.msg }
+func (my *MyError2) Error() string { return my.Msg }
 
 // Is 实现 Is 方法
 func (my *MyError1) Is(target error) bool { return reflect.DeepEqual(target, &MyError1{}) }
