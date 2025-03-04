@@ -71,6 +71,11 @@ func (*ServerPool) removeConn(addr *string) {
 	serverPool.connections.RemoveByKey(*addr)
 }
 
+// SendMsgByAddr 发送消息：通过地址
+func (my *ServerPool) SendMsgByAddr(addr *string, propMsg []byte) {
+	serverPool.SendMessageByAddr(addr, propMsg)
+}
+
 // SendMessageByAddr 发送消息：通过地址
 func (*ServerPool) SendMessageByAddr(addr *string, prototypeMessage []byte) {
 	if server, ok := serverPool.connections.Get(*addr); ok {
@@ -82,11 +87,20 @@ func (*ServerPool) SendMessageByAddr(addr *string, prototypeMessage []byte) {
 	}
 }
 
+// SendMsgByAuthId 发送消息：通过认证ID
+func (my *ServerPool) SendMsgByAuthId(authId *string, propMsg []byte) {
+	my.SendMsgByAddr(authId, propMsg)
+}
+
 // SendMessageByAuthId 发送消息：通过认证ID
 func (*ServerPool) SendMessageByAuthId(authId *string, prototypeMessage []byte) {
 	serverPool.connections.GetValuesByKeys(serverPool.addrToAuth.GetKeysByValues(*authId).ToSlice()...).Each(func(idx int, server *Server) {
 		server.AsyncMessage(prototypeMessage, serverPool.onSendMessageSuccess, serverPool.onSendMessageFail)
 	})
+}
+
+func (my *ServerPool) SetOnConnSuc(fn serverConnectionSuccessFn) *ServerPool {
+	return my.SetOnConnectionSuccess(fn)
 }
 
 // SetOnConnectionSuccess 设置回调：当连接成功
@@ -95,10 +109,20 @@ func (*ServerPool) SetOnConnectionSuccess(onConnectionSuccess serverConnectionSu
 	return serverPool
 }
 
+// SetOnConnFail 设置回调：当连接失败
+func (my *ServerPool) SetOnConnFail(fn serverConnectionFailFn) *ServerPool {
+	return my.SetOnConnectionFail(fn)
+}
+
 // SetOnConnectionFail 设置回调：当连接失败
 func (*ServerPool) SetOnConnectionFail(onConnectionFail serverConnectionFailFn) *ServerPool {
 	serverPool.onConnectionFail = onConnectionFail
 	return serverPool
+}
+
+// SetOnSendMsgSuc 设置回调：当发送消息成功
+func (my *ServerPool) SetOnSendMsgSuc(fn serverSendMessageSuccessFn) *ServerPool {
+	return my.SetOnSendMessageSuccess(fn)
 }
 
 // SetOnSendMessageSuccess 设置回调：当发送消息成功
@@ -107,10 +131,20 @@ func (*ServerPool) SetOnSendMessageSuccess(onSendMessageSuccess serverSendMessag
 	return serverPool
 }
 
+// SetOnSendMsgFail 设置回调：当发送消息失败
+func (my *ServerPool) SetOnSendMsgFail(fn serverSendMessageFailFn) *ServerPool {
+	return my.SetOnSendMessageFail(fn)
+}
+
 // SetOnSendMessageFail 设置回调：当发送消息失败
 func (*ServerPool) SetOnSendMessageFail(onSendMessageFail serverSendMessageFailFn) *ServerPool {
 	serverPool.onSendMessageFail = onSendMessageFail
 	return serverPool
+}
+
+// SetOnRecMsgSuc 设置回调：当接收消息成功
+func (my *ServerPool) SetOnRecMsgSuc(fn serverReceiveMessageSuccessFn) *ServerPool {
+	return my.SetOnReceiveMessageSuccess(fn)
 }
 
 // SetOnReceiveMessageSuccess 设置回调：当接收消息成功
@@ -119,10 +153,20 @@ func (*ServerPool) SetOnReceiveMessageSuccess(onReceiveMessageSuccess serverRece
 	return serverPool
 }
 
+// SetOnRecMsgFail 设置回调：当接收消息失败
+func (my *ServerPool) SetOnRecMsgFail(fn serverReceiveMessageFailFn) *ServerPool {
+	return my.SetOnReceiveMessageFail(fn)
+}
+
 // SetOnReceiveMessageFail 设置回调：当接收消息失败
 func (*ServerPool) SetOnReceiveMessageFail(onReceiveMessageFail serverReceiveMessageFailFn) *ServerPool {
 	serverPool.onReceiveMessageFail = onReceiveMessageFail
 	return serverPool
+}
+
+// SetOnClsCb 设置回调：关闭时回调
+func (my *ServerPool) SetOnClsCb(fn serverCloseCallbackFn) *ServerPool {
+	return my.SetOnCloseCallback(fn)
 }
 
 // SetOnCloseCallback 设置回调：关闭时回调

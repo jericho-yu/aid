@@ -91,17 +91,32 @@ func (my *Client) GetName() string { return my.name }
 // GetAddr 获取链接地址
 func (my *Client) GetAddr() string { return my.addr }
 
+// GetAddress 获取链接地址
+func (my *Client) GetAddress() string { return my.addr }
+
 // GetConn 获取链接本体
 func (my *Client) GetConn() *websocket.Conn { return my.conn }
 
+// GetConnection 获取链接本体
+func (my *Client) GetConnection() *websocket.Conn { return my.conn }
+
+// GetReqHdr 获取请求头
+func (my *Client) GetReqHdr() http.Header { return my.requestHeader }
+
 // GetRequestHeaders 获取请求头
 func (my *Client) GetRequestHeaders() http.Header { return my.requestHeader }
+
+// SetReqHdr 设置请求头
+func (my *Client) SetReqHdr(hdr http.Header) *Client { return my.SetRequestHeaders(hdr) }
 
 // SetRequestHeaders 设置请求头
 func (my *Client) SetRequestHeaders(header http.Header) *Client {
 	my.requestHeader = header
 	return my
 }
+
+// AppendReqHdr 新增请求头
+func (my *Client) AppendReqHdr(hdr http.Header) *Client { return my.AppendRequestHeader(hdr) }
 
 // AppendRequestHeader 新增请求头
 func (my *Client) AppendRequestHeader(header http.Header) *Client {
@@ -169,6 +184,11 @@ func (my *Client) Boot() *Client {
 	return my
 }
 
+// AsyncMsg 发送消息：异步
+func (my *Client) AsyncMsg(msg []byte, fn clientCallbackFn, to time.Duration) *Client {
+	return my.AsyncMessage(msg, fn, to)
+}
+
 // AsyncMessage 发送消息：异步
 func (my *Client) AsyncMessage(message []byte, fn clientCallbackFn, timeout time.Duration) *Client {
 	msg := NewMessage(true, message)
@@ -201,6 +221,11 @@ func (my *Client) AsyncMessage(message []byte, fn clientCallbackFn, timeout time
 	}(msg.GetMessageId())
 
 	return my
+}
+
+// SyncMsg 发送消息：同步
+func (my *Client) SyncMsg(msg []byte, options ...any) ([]byte, error) {
+	return my.SyncMessage(msg, options...)
 }
 
 // SyncMessage 发送消息：同步
@@ -246,6 +271,9 @@ func (my *Client) SyncMessage(message []byte, options ...any) ([]byte, error) {
 	}
 }
 
+// Cls 关闭链接
+func (my *Client) Cls() *Client { return my.Close() }
+
 // Close 关闭链接
 func (my *Client) Close() *Client {
 	if my.conn != nil && my.status == Online {
@@ -282,6 +310,9 @@ func (my *Client) Close() *Client {
 
 	return my
 }
+
+// Err 获取错误
+func (my *Client) Err() error { return my.Error() }
 
 // Error 获取错误
 func (my *Client) Error() error {
