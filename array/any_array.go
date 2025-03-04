@@ -151,6 +151,23 @@ func (my *AnyArray[T]) ToSlice() []T {
 	return my.toSlice()
 }
 
+func (my *AnyArray[T]) getIndexes() []int {
+	var indexes = make([]int, len(my.data))
+	for i := range my.data {
+		indexes[i] = i
+	}
+
+	return indexes
+}
+
+// GetIndexes 获取所有索引
+func (my *AnyArray[T]) GetIndexes() []int {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
+
+	return my.getIndexes()
+}
+
 func (my *AnyArray[T]) getIndexByValue(value T) int {
 	for idx, val := range my.data {
 		if reflect.DeepEqual(val, value) {
@@ -444,17 +461,29 @@ func (my *AnyArray[T]) Unique() *AnyArray[T] {
 	return my.unique()
 }
 
-func (my *AnyArray[T]) removeByIndexes(indexes ...int) *AnyArray[T] {
-	newData := make([]T, len(my.data)-len(indexes))
-	idx := 0
-	for i, v := range my.data {
-		if !In(i, indexes) {
-			newData[idx] = v
-			idx++
-		}
+func (my *AnyArray[T]) removeByIndex(index int) *AnyArray[T] {
+	if index < 0 || index >= len(my.data) {
+		return my
 	}
 
-	return New(newData)
+	my.data = append(my.data[:index], my.data[index+1:]...)
+	return my
+}
+
+// RemoveByIndex 根据索引删除元素
+func (my *AnyArray[T]) RemoveByIndex(index int) *AnyArray[T] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
+
+	return my.removeByIndex(index)
+}
+
+func (my *AnyArray[T]) removeByIndexes(indexes ...int) *AnyArray[T] {
+	for _, index := range indexes {
+		my.removeByIndex(index)
+	}
+
+	return my
 }
 
 // RemoveByIndexes 根据索引删除元素
