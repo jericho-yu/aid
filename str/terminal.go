@@ -39,6 +39,9 @@ const (
 
 func (*Str) New(original string) *Str { return &Str{original: original} }
 
+// NewStr 实例化：字符串
+//
+//go:fix 推荐使用：New方法
 func NewStr(original string) *Str { return &Str{original: original} }
 
 // PadLeftZeros 前置补零

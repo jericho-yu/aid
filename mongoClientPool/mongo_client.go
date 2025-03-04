@@ -30,6 +30,8 @@ var MongoClientApp MongoClient
 func (*MongoClient) New(url string) (*MongoClient, error) { return NewMongoClient(url) }
 
 // NewMongoClient 实例化：mongo客户端
+//
+//go:fix 推荐使用：New方法
 func NewMongoClient(url string) (*MongoClient, error) {
 	var (
 		err           error

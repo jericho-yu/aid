@@ -15,7 +15,14 @@ type Message struct {
 	prototypeMessage []byte
 }
 
+var MessageApp Message
+
+func (*Message) New(async bool, message []byte) Message { return NewMessage(async, message) }
+func (*Message) Parse(prototypeMessage []byte) Message  { return ParseMessage(prototypeMessage) }
+
 // NewMessage 新建消息
+//
+//go:fix 推荐使用：New方法
 func NewMessage(async bool, message []byte) Message {
 	u := uuid.Must(uuid.NewV6()).String()
 	b := bytes.Buffer{}
@@ -31,6 +38,8 @@ func NewMessage(async bool, message []byte) Message {
 }
 
 // ParseMessage 解析消息
+//
+//go:fix 推荐使用：推荐使用Parse方法
 func ParseMessage(prototypeMessage []byte) Message {
 	var (
 		messages = strings.Split(string(prototypeMessage), ":")

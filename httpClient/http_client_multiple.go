@@ -13,6 +13,8 @@ var HttpClientMultipleApp HttpClientMultiple
 func (*HttpClientMultiple) New() *HttpClientMultiple { return &HttpClientMultiple{} }
 
 // NewHttpClientMultiple 实例化：批量请求对象
+//
+//go:fix 推荐使用New方法
 func NewHttpClientMultiple() *HttpClientMultiple { return &HttpClientMultiple{} }
 
 // Add 添加httpClient对象

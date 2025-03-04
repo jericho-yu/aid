@@ -42,9 +42,15 @@ type (
 
 var HttpClientApp HttpClient
 
-func (*HttpClient) New(url string) *HttpClient { return NewHttpClient(url) }
+func (*HttpClient) New(url string) *HttpClient       { return NewHttpClient(url) }
+func (*HttpClient) NewGet(url string) *HttpClient    { return NewHttpClientGet(url) }
+func (*HttpClient) NewPost(url string) *HttpClient   { return NewHttpClientPost(url) }
+func (*HttpClient) NewPut(url string) *HttpClient    { return NewHttpClientPut(url) }
+func (*HttpClient) NewDelete(url string) *HttpClient { return NewHttpClientDelete(url) }
 
 // NewHttpClient 实例化：http客户端
+//
+//go:fix 推荐使用New方法
 func NewHttpClient(url string) *HttpClient {
 	return &HttpClient{
 		requestUrl:     url,
@@ -59,21 +65,29 @@ func NewHttpClient(url string) *HttpClient {
 }
 
 // NewHttpClientGet 实例化：http客户端get请求
+//
+//go:fix 推荐使用NewGet方法
 func NewHttpClientGet(url string) *HttpClient {
 	return NewHttpClient(url).SetMethod(http.MethodGet)
 }
 
 // NewHttpClientPost 实例化：http客户端post请求
+//
+//go:fix 推荐使用NewPost方法
 func NewHttpClientPost(url string) *HttpClient {
 	return NewHttpClient(url).SetMethod(http.MethodPost)
 }
 
 // NewHttpClientPut 实例化：http客户端put请求
+//
+//go:fix 推荐使用NewPut方法
 func NewHttpClientPut(url string) *HttpClient {
 	return NewHttpClient(url).SetMethod(http.MethodPut)
 }
 
 // NewHttpClientDelete 实例化：http客户端delete请求
+//
+//go:fix 推荐使用NewDelete方法
 func NewHttpClientDelete(url string) *HttpClient {
 	return NewHttpClient(url).SetMethod(http.MethodDelete)
 }
@@ -277,7 +291,7 @@ func (my *HttpClient) SetSteamBody(filename string) *HttpClient {
 		}
 	}
 
-	//my.request.Header.Set("Content-Length", fmt.Sprintf("%d", size))
+	// my.request.Header.Set("Content-Length", fmt.Sprintf("%d", size))
 
 	return my
 }

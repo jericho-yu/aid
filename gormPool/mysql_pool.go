@@ -34,6 +34,8 @@ var (
 func (*MySqlPool) Once(dbSetting *DbSetting) GormPool { return OnceMySqlPool(dbSetting) }
 
 // OnceMySqlPool 单例化：mysql链接池
+//
+//go:fix 推荐使用：Once方法
 func OnceMySqlPool(dbSetting *DbSetting) GormPool {
 	mysqlPoolOnce.Do(func() {
 		mysqlPoolIns = &MySqlPool{

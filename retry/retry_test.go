@@ -15,7 +15,7 @@ func operation() error {
 
 func Test1(t *testing.T) {
 	t.Run("test1 指数退避重试", func(t *testing.T) {
-		err := Do(3, time.Second, operation)
+		err := RetryApp.New().SetSleep(time.Second).SetFn(operation).Do(3)
 		if err != nil {
 			t.Logf("Operation failed after retries: %v", err)
 		}
@@ -27,7 +27,7 @@ func Test2(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		defer cancel()
 
-		err := WithContext(ctx, 5, time.Second, operation)
+		err := RetryApp.New().SetSleep(time.Second).SetFn(operation).SetCtx(ctx).WithContext(3)
 		if err != nil {
 			t.Logf("Operation failed after retries: %v", err)
 		}
@@ -39,7 +39,7 @@ func Test3(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		defer cancel()
 
-		err := WithContextAndJitter(ctx, 5, time.Second, operation)
+		err := RetryApp.New().SetSleep(time.Second).SetFn(operation).SetCtx(ctx).WithContextAndJitter(5)
 		if err != nil {
 			t.Logf("Operation failed after retries: %v", err)
 		}

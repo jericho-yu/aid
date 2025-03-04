@@ -21,6 +21,8 @@ var RowApp Row
 func (*Row) New() *Row { return NewRow() }
 
 // NewRow 构造函数
+//
+//go:fix 推荐使用New方法
 func NewRow() *Row { return &Row{} }
 
 // GetCells 获取单元格组

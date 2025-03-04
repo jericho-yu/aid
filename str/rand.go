@@ -37,6 +37,9 @@ func (*Rand) New() *Rand {
 	return ins
 }
 
+// NewRand 实例化：随机字符串
+//
+//go:fix 推荐使用：New方法
 func NewRand() *Rand {
 	ins := &Rand{}
 	ins.bufferChan = make(chan []byte, bufferChanSize)

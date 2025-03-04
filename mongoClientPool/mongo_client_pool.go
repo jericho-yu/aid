@@ -20,6 +20,8 @@ var (
 func (*MongoClientPool) Once() *MongoClientPool { return OnceMongoPool() }
 
 // OnceMongoPool 单例化：mongodb连接池
+//
+//go:fix 推荐使用：Once方法
 func OnceMongoPool() *MongoClientPool {
 	mongoPoolOnce.Do(func() {
 		mongoClientPool = &MongoClientPool{clients: dict.Make[string, *MongoClient]()}

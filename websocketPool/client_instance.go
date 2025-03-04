@@ -12,7 +12,16 @@ type ClientInstance struct {
 	Clients *dict.AnyDict[string, *Client]
 }
 
+var ClientInstanceApp ClientInstance
+
+// New 实例化：websocket客户端实例
+func (*ClientInstance) New(instanceName string) *ClientInstance {
+	return NewClientInstance(instanceName)
+}
+
 // NewClientInstance 实例化：websocket 客户端实例
+//
+//go:fix 推荐使用：推荐使用New方法
 func NewClientInstance(instanceName string) *ClientInstance {
 	return &ClientInstance{Name: instanceName, Clients: dict.Make[string, *Client]()}
 }

@@ -32,7 +32,17 @@ type (
 	}
 )
 
+var ClientApp Client
+
+func (*Client) New(groupName, name, addr string,
+	clientCallbackConfig ClientCallbackConfig,
+	options ...any) (*Client, error) {
+	return NewClient(groupName, name, addr, clientCallbackConfig, options...)
+}
+
 // NewClient 实例化：链接
+//
+//go:fix 推荐使用：New方法
 func NewClient(
 	groupName, name, addr string,
 	clientCallbackConfig ClientCallbackConfig,

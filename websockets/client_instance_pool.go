@@ -11,10 +11,16 @@ type ClientInstancePool struct {
 }
 
 var (
+	ClientInstancePoolApp  ClientInstancePool
 	clientInstancePoolOnce sync.Once
 	clientInstancePool     *ClientInstancePool
 )
 
+func (*Client) Once() *ClientInstancePool { return OnceClientInstancePool() }
+
+// OnceClientInstancePool 单例化：websocket客户端实例池
+//
+//go:fix 推荐使用：Once方法
 func OnceClientInstancePool() *ClientInstancePool {
 	clientInstancePoolOnce.Do(func() { clientInstancePool = &ClientInstancePool{pool: dict.Make[string, *ClientInstance]()} })
 

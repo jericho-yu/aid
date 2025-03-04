@@ -60,7 +60,12 @@ const (
 	UnKnowType        ReflectionType = "UKT"
 )
 
+func (*Reflection) New(object any) *Reflection                    { return New(object) }
+func (*Reflection) NewByValue(refValue reflect.Value) *Reflection { return NewByReflectValue(refValue) }
+
 // New 实例化：反射帮助
+//
+//go:fix 推荐使用：ReflectionApp.New方法
 func New(object any) *Reflection {
 	var (
 		ins      *Reflection = &Reflection{original: object}
@@ -113,6 +118,8 @@ func New(object any) *Reflection {
 }
 
 // NewByReflectValue 实例化：通过reflect.Value
+//
+//go:fix 推荐使用：ReflectionApp.NewByValue方法
 func NewByReflectValue(refValue reflect.Value) *Reflection { return New(refValue.Interface()) }
 
 // GetValue 获取reflect.Value

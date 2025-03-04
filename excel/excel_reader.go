@@ -28,6 +28,8 @@ var ReaderApp Reader
 func (*Reader) New() *Reader { return NewReader() }
 
 // NewReader 构造函数
+//
+//go:fix 推荐使用New方法
 func NewReader() *Reader {
 	return &Reader{data: dict.Make[uint64, *array.AnyArray[string]]()}
 }
@@ -62,16 +64,7 @@ func (my *Reader) DataWithTitle() (*dict.AnyDict[uint64, *dict.AnyDict[string, s
 	newDict := dict.Make[uint64, *dict.AnyDict[string, string]]()
 
 	for idx, value := range my.data.ToMap() {
-		newMap, err := dict.Zip[string, string](my.titles.ToSlice(), value.ToSlice())
-		if err != nil {
-			return nil, err
-		}
-		dictTmp := dict.Make[string, string]()
-		for s, s2 := range newMap {
-			dictTmp.Set(s, s2)
-		}
-
-		newDict.Set(idx, dictTmp)
+		newDict.Set(idx, dict.Zip[string, string](my.titles.ToSlice(), value.ToSlice()))
 	}
 
 	return newDict, nil

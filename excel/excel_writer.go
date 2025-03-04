@@ -23,6 +23,8 @@ var WriterApp Writer
 func (*Writer) New(filename ...any) *Writer { return NewWriter(filename...) }
 
 // NewWriter 初始化
+//
+//go:fix 推荐使用：New方法
 func NewWriter(filename ...any) *Writer {
 	ins := &Writer{}
 	if filename[0].(string) == "" {

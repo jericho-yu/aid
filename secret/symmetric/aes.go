@@ -41,6 +41,8 @@ var AesApp Aes
 func (*Aes) New(sail string) *Aes { return &Aes{sailStr: sail} }
 
 // NewAes 实例化：Aes密钥
+//
+//go:fix 推荐使用：New方法
 func NewAes(sail string) *Aes { return &Aes{sailStr: sail} }
 
 // NewEncrypt 实例化：Aes加密密钥对象

@@ -27,6 +27,12 @@ type (
 var FileManagerApp FileManager
 
 func (*FileManager) New(config *FileManagerConfig) *FileManager { return NewFileManager(config) }
+func (*FileManager) NewByLocalFile(srcDir, dstDir string, config *FileManagerConfig) (*FileManager, error) {
+	return NewFileManagerByLocalFile(srcDir, dstDir, config)
+}
+func (*FileManager) NewByBytes(srcFileBytes []byte, dstDir string, config *FileManagerConfig) *FileManager {
+	return NewFileManagerByBytes(srcFileBytes, dstDir, config)
+}
 
 const (
 	FileManagerConfigDriverLocal FileManagerConfigDriver = "LOCAL"
@@ -35,9 +41,13 @@ const (
 )
 
 // NewFileManager 初始化：文件管理
+//
+//go:fix 推荐使用 New方法
 func NewFileManager(config *FileManagerConfig) *FileManager { return &FileManager{config: config} }
 
 // NewFileManagerByLocalFile 初始化：文件管理器（通过本地文件）
+//
+//go:fix 推荐使用NewByLocalFile方法
 func NewFileManagerByLocalFile(srcDir, dstDir string, config *FileManagerConfig) (*FileManager, error) {
 	fs := NewFileSystemByAbsolute(srcDir)
 	if !fs.IsExist {
@@ -53,6 +63,8 @@ func NewFileManagerByLocalFile(srcDir, dstDir string, config *FileManagerConfig)
 }
 
 // NewFileManagerByBytes 实例化：文件管理器（通过字节）
+//
+//go:fix 推荐使用NewByBytes方法
 func NewFileManagerByBytes(srcFileBytes []byte, dstDir string, config *FileManagerConfig) *FileManager {
 	return &FileManager{dstDir: dstDir, fileBytes: srcFileBytes, fileSize: int64(len(srcFileBytes)), config: config}
 }

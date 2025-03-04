@@ -33,7 +33,11 @@ var (
 	PostgresPoolApp   PostgresPool
 )
 
+func (*PostgresPool) Once(dbSetting *DbSetting) GormPool { return OncePostgresPool(dbSetting) }
+
 // OncePostgresPool 单例化：postgres链接池
+//
+//go:fix 推荐使用Once方法
 func OncePostgresPool(dbSetting *DbSetting) GormPool {
 	postgresPoolOnce.Do(func() {
 		postgresPoolIns = &PostgresPool{

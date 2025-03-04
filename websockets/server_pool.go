@@ -25,11 +25,19 @@ type (
 )
 
 var (
+	ServerPoolApp  ServerPool
 	serverPoolOnce sync.Once
 	serverPool     *ServerPool
 )
 
+// Once 单例化：websocket服务端
+func (*ServerPool) Once(serverCallbackConfig ServerCallbackConfig) *ServerPool {
+	return OnceServer(serverCallbackConfig)
+}
+
 // OnceServer 单例化：websocket服务端
+//
+//go:fix 推荐使用：Once方法
 func OnceServer(serverCallbackConfig ServerCallbackConfig) *ServerPool {
 	serverPoolOnce.Do(func() {
 		serverPool = &ServerPool{

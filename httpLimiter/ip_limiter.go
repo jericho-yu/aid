@@ -25,6 +25,8 @@ var (
 func (*IpLimiter) New() *IpLimiter { return NewIpLimiter() }
 
 // NewIpLimiter 实例化：Ip 限流
+//
+//go:fix 推荐使用New方法
 func NewIpLimiter() *IpLimiter { return &IpLimiter{visitMap: make(map[string]*Visit)} }
 
 // Affirm 检查限流

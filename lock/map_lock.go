@@ -35,9 +35,13 @@ func (*MapLock) New() *MapLock { return NewMapLock() }
 func (*MapLock) Once() *MapLock { return OnceMapLock() }
 
 // NewMapLock 实例化：字典锁
+//
+//go:fix 推荐使用：New方法
 func NewMapLock() *MapLock { return &MapLock{locks: dict.Make[string, *itemLock]()} }
 
 // OnceMapLock 单例化：字典锁
+//
+//go:fix 推荐使用：Once方法
 func OnceMapLock() *MapLock {
 	onceMapLock.Do(func() { mapLockIns = &MapLock{locks: dict.Make[string, *itemLock]()} })
 

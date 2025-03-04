@@ -31,31 +31,31 @@ type (
 var FileSystemApp FileSystem
 
 // NewByRelative 实例化：文件系统（相对路径）
-//
-//go:fix 建议使用NewFileSystemByRelative
-func (FileSystem) NewByRelative(dir string) *FileSystem {
-	ins := &FileSystem{dir: filepath.Clean(filepath.Join(FileSystem{}.GetRootPath(), dir))}
+func (*FileSystem) NewByRelative(dir string) *FileSystem {
+	ins := &FileSystem{dir: filepath.Clean(filepath.Join(getRootPath(), dir))}
 
 	return ins.init()
 }
 
 // NewByAbsolute 实例化：文件系统（绝对路径）
-//
-//go:fix 建议使用NewFileSystemByAbsolute
-func (FileSystem) NewByAbsolute(dir string) *FileSystem {
+func (*FileSystem) NewByAbsolute(dir string) *FileSystem {
 	ins := &FileSystem{dir: dir}
 
 	return ins.init()
 }
 
-// 实例化：文件系统（相对路径）
+// NewFileSystemByRelative 实例化：文件系统（相对路径）
+//
+//go:fix 推荐使用NewByRelative方法
 func NewFileSystemByRelative(dir string) *FileSystem {
-	ins := &FileSystem{dir: filepath.Clean(filepath.Join(FileSystem{}.GetRootPath(), dir))}
+	ins := &FileSystem{dir: filepath.Clean(filepath.Join(getRootPath(), dir))}
 
 	return ins.init()
 }
 
-// 实例化：文件系统（绝对路径）
+// NewFileSystemByAbsolute 实例化：文件系统（绝对路径）
+//
+//go:fix 推荐使用NewByAbsolute方法
 func NewFileSystemByAbsolute(dir string) *FileSystem {
 	ins := &FileSystem{dir: dir}
 
@@ -71,7 +71,7 @@ func (my *FileSystem) Copy() *FileSystem {
 
 // SetDirByRelative 设置路径：相对路径
 func (my *FileSystem) SetDirByRelative(dir string) *FileSystem {
-	my.dir = filepath.Clean(filepath.Join(FileSystem{}.GetRootPath(), dir))
+	my.dir = filepath.Clean(filepath.Join(getRootPath(), dir))
 	my.init()
 
 	return my
@@ -103,14 +103,14 @@ func (my *FileSystem) Joins(dir ...string) *FileSystem {
 	return my
 }
 
-func (FileSystem) GetRootPath() string {
+func getRootPath() string {
 	rootPath, _ := filepath.Abs(".")
 
 	return rootPath
 }
 
-// GetCurrentPath 最终方案-全兼容
-func (FileSystem) GetCurrentPath(paths ...string) string {
+// getCurrentPath 最终方案-全兼容
+func getCurrentPath(paths ...string) string {
 	dir := getGoBuildPath()
 
 	if strings.Contains(dir, getTmpDir()) {
@@ -367,7 +367,7 @@ func (my *FileSystem) CopyFile(dstDir, dstFilename string, abs bool) (string, er
 }
 
 // CopyFiles 拷贝多个文件
-func (FileSystem) CopyFiles(srcFiles []*FileSystemCopyFilesTarget, dstDir string, abs bool) error {
+func copyFiles(srcFiles []*FileSystemCopyFilesTarget, dstDir string, abs bool) error {
 	var (
 		err error
 		dst *FileSystem

@@ -29,6 +29,8 @@ var RsaApp Rsa
 func (*Rsa) New() *Rsa { return &Rsa{} }
 
 // NewRsa 实例化：Rsa加密
+//
+//go:fix 推荐使用：New方法
 func NewRsa() *Rsa { return &Rsa{} }
 
 // EncryptByBase64 通过base64公钥加密

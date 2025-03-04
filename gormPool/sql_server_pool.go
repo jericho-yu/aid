@@ -33,7 +33,11 @@ var (
 	SqlServerPoolApp   SqlServerPool
 )
 
+func (*SqlServerPool) Once(dbSetting *DbSetting) GormPool { return OnceSqlServerPool(dbSetting) }
+
 // OnceSqlServerPool 单例化：sql server连接池
+//
+//go:fix 推荐使用Once方法
 func OnceSqlServerPool(dbSetting *DbSetting) GormPool {
 	sqlServerPoolOnce.Do(func() {
 		sqlServerPoolIns = &SqlServerPool{

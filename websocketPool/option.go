@@ -13,7 +13,13 @@ type (
 	MessageTimeout struct{ interval time.Duration }
 )
 
+var HeartApp Heart
+
+func (*Heart) New() *Heart { return &Heart{} }
+
 // NewHeart 实例化：链接心跳
+//
+//go:fix 推荐使用：New方法
 func NewHeart() *Heart { return &Heart{} }
 
 // SetInterval 设置定时器

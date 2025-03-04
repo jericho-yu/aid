@@ -780,3 +780,13 @@ func Cast[K comparable, SRC, DST any](src *AnyDict[K, SRC], fn func(key K, value
 
 	return d
 }
+
+// Zip 组合键值对为一个新的有序map
+func Zip[K comparable, V any](keys []K, values []V) *AnyDict[K, V] {
+	var d = Make[K, V]()
+	for idx, key := range keys {
+		d.Set(key, values[idx])
+	}
+
+	return d
+}

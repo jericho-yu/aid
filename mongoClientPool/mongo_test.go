@@ -195,10 +195,7 @@ func Test6FindMany(t *testing.T) {
 		if mc.SetCollection("classes").
 			Where(Map{
 				"_id": Map{
-					"$in": array.FromAnyArray[OID](
-						array.New[*Student](students).
-							Pluck(func(item *Student) any { return item.ClassId }),
-					),
+					"$in": array.Cast[*Student, OID](array.New(students), func(value *Student) OID { return value.ClassId }),
 				},
 			}).
 			FindMany(&classes2, nil).Err != nil {

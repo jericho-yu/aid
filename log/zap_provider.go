@@ -124,6 +124,8 @@ func (*ZapProvider) New(
 }
 
 // NewZapProvider 实例化：Zap日志服务提供者
+//
+//go:fix 推荐使用：New方法
 func NewZapProvider(
 	path string,
 	inConsole bool,

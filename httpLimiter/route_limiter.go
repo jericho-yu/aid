@@ -26,6 +26,8 @@ var (
 func (*RouteLimiter) Once() *RouteLimiter { return OnceRouteLimiter() }
 
 // OnceRouteLimiter 单例化：路由限流
+//
+//go:fix 推荐使用Once方法
 func OnceRouteLimiter() *RouteLimiter {
 	routerLimiterOnce.Do(func() { routerLimiterIns = &RouteLimiter{RouteSetMap: &sync.Map{}} })
 

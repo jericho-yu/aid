@@ -12,6 +12,9 @@ var TransferApp Transfer
 
 func (*Transfer) New(original string) *Transfer { return &Transfer{original: original} }
 
+// NewTransfer 实例化：字符串转换
+//
+//go:fix 推荐使用：New方法
 func NewTransfer(original string) *Transfer { return &Transfer{original: original} }
 
 // PascalToCamel 大驼峰 -> 小驼峰

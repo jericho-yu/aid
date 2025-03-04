@@ -53,31 +53,43 @@ const (
 )
 
 // NewCellAny 实例化：任意值
+//
+//go:fix 推荐使用：NewByAny方法
 func NewCellAny(content any) *Cell {
 	return &Cell{content: content, contentType: CellContentTypeAny}
 }
 
 // NewCellInt 实例化：整数
+//
+//go:fix 推荐使用：NewByInt方法
 func NewCellInt(content any) *Cell {
 	return &Cell{content: content, contentType: CellContentTypeInt}
 }
 
 // NewCellFloat64 实例化：浮点
+//
+//go:fix 推荐使用：NewByFloat64方法
 func NewCellFloat64(content any) *Cell {
 	return &Cell{content: content, contentType: CellContentTypeFloat64}
 }
 
 // NewCellBool 实例化：布尔
+//
+//go:fix 推荐使用：NewByBool方法
 func NewCellBool(content any) *Cell {
 	return &Cell{content: content, contentType: CellContentTypeBool}
 }
 
 // NewCellTime 实例化：时间
+//
+//go:fix 推荐使用：NewByTime方法
 func NewCellTime(content time.Time) *Cell {
 	return &Cell{content: content, contentType: CellContentTypeTime}
 }
 
 // NewCellFormula 实例化：公式
+//
+//go:fix 推荐使用：NewByFormula方法
 func NewCellFormula(content string) *Cell {
 	return &Cell{content: content, contentType: CellContentTypeFormula}
 }

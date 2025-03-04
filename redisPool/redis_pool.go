@@ -31,6 +31,8 @@ var (
 func (*RedisPool) Once(redisSetting *RedisSetting) *RedisPool { return OnceRedisPool(redisSetting) }
 
 // OnceRedisPool 单例化：redis 链接
+//
+//go:fix 推荐使用：Once方法
 func OnceRedisPool(redisSetting *RedisSetting) *RedisPool {
 	redisPoolOnce.Do(func() {
 		redisPoolIns = &RedisPool{}
