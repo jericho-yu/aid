@@ -309,6 +309,16 @@ func (my *AnyDict[K, V]) Len() int {
 	return my.len()
 }
 
+func (my *AnyDict[K, V]) lenWithoutEmpty() int { return my.copy().removeEmpty().len() }
+
+// LenWithoutEmpty 判断非0值的长度
+func (my *AnyDict[K, V]) LenWithoutEmpty() int {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
+
+	return my.lenWithoutEmpty()
+}
+
 func (my *AnyDict[K, V]) isEmpty() bool { return my.len() == 0 }
 
 // IsEmpty 判断是否为空map

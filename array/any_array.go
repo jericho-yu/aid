@@ -233,6 +233,16 @@ func (my *AnyArray[T]) Len() int {
 	return my.len()
 }
 
+func (my *AnyArray[T]) lenWithoutEmpty() int { return my.copy().removeEmpty().len() }
+
+// LenWithoutEmpty 获取非0值长度
+func (my *AnyArray[T]) LenWithoutEmpty() int {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
+
+	return my.lenWithoutEmpty()
+}
+
 func (my *AnyArray[T]) filter(fn func(v T) bool) *AnyArray[T] {
 	j := 0
 	ret := make([]T, len(my.data))
