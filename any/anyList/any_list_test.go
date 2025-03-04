@@ -277,7 +277,7 @@ func Test27(t *testing.T) {
 			{Name: "赵六", Age: 21},
 		})
 
-		ages := Pluck[S, int](al, func(item S) int { return item.Age })
+		ages := Pluck(al, func(item S) int { return item.Age })
 
 		if fmt.Sprintf("%#v", ages) != "[]int{18, 19, 20, 21}" {
 			t.Fatal("错误")
@@ -324,7 +324,7 @@ func Test31(t *testing.T) {
 		al := NewAnyList([]int{1, 2, 3, 4, 5})
 		RemoveByIndexes(al, 1, 3)
 
-		t.Log(fmt.Sprintf("%#v", ToSlice(al)))
+		t.Logf("%#v", ToSlice(al))
 		if fmt.Sprintf("%#v", ToSlice(al)) != "[]int{1, 3, 5}" {
 			t.Fatal("错误")
 		}
@@ -370,7 +370,7 @@ func Test34(t *testing.T) {
 func Test35(t *testing.T) {
 	t.Run("test35 Cast功能", func(t *testing.T) {
 		al := NewAnyList([]int{1, 2, 3, 4, 5})
-		al2 := Cast[int, string](al, func(value int) string { return fmt.Sprintf("%v", value) })
+		al2 := Cast(al, func(value int) string { return fmt.Sprintf("%v", value) })
 
 		if fmt.Sprintf("%#v", ToSlice(al2)) != `[]string{"1", "2", "3", "4", "5"}` {
 			t.Fatal("错误")

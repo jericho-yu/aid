@@ -3,18 +3,28 @@ package dict
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/jericho-yu/aid/array"
 	"reflect"
 	"strings"
 	"sync"
+
+	"github.com/jericho-yu/aid/array"
 )
 
-type AnyDict[K comparable, V any] struct {
-	data   map[K]V
-	keys   []K
-	values []V
-	mu     sync.RWMutex
-}
+type (
+	// 任意类型字典
+	AnyDict[K comparable, V any] struct {
+		data   map[K]V
+		keys   []K
+		values []V
+		mu     sync.RWMutex
+	}
+
+	// 可排序的任意类型字典
+	AnyOrderlyItem[K comparable, V any] struct {
+		Key   K
+		Value V
+	}
+)
 
 func Make[K comparable, V any]() *AnyDict[K, V] {
 	return &AnyDict[K, V]{
@@ -247,7 +257,9 @@ func (my *AnyDict[K, V]) HasIndex(index int) bool {
 	my.mu.RLock()
 	defer my.mu.RUnlock()
 
-	return my.getKeyByIndex(index) != nil
+	var zero K
+
+	return !reflect.DeepEqual(my.getKeyByIndex(index), zero)
 }
 
 func (my *AnyDict[K, V]) HasIndexes(indexes ...int) bool {
@@ -316,6 +328,23 @@ func (my *AnyDict[K, V]) Copy() *AnyDict[K, V] {
 	defer my.mu.RUnlock()
 
 	return my.copy()
+}
+
+func (my *AnyDict[K, V]) toOrderlyMap() []AnyOrderlyItem[K, V] {
+	var items = make([]AnyOrderlyItem[K, V], 0, len(my.keys))
+
+	for idx, key := range my.keys {
+		items = append(items, AnyOrderlyItem[K, V]{Key: key, Value: my.values[idx]})
+	}
+
+	return items
+}
+
+func (my *AnyDict[K, V]) ToOrderlyMap() []AnyOrderlyItem[K, V] {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
+
+	return my.toOrderlyMap()
 }
 
 func (my *AnyDict[K, V]) toMap() map[K]V { return my.data }
