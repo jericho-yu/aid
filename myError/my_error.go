@@ -3,7 +3,7 @@ package myError
 type (
 	IMyError interface {
 		New(msg string) IMyError
-		Warp(err error) IMyError
+		Wrap(err error) IMyError
 		Error() string
 		Is(target error) bool
 	}

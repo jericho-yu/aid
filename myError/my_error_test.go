@@ -19,7 +19,7 @@ var (
 
 func (my *MyError1) New(msg string) IMyError { return &MyError1{MyError{Msg: msg}} }
 
-func (my *MyError1) Warp(err error) IMyError {
+func (my *MyError1) Wrap(err error) IMyError {
 	return &MyError1{MyError{Msg: fmt.Errorf("%w", err).Error()}}
 }
 
@@ -29,7 +29,7 @@ func (my *MyError1) Is(target error) bool { return reflect.DeepEqual(target, &My
 
 func (my *MyError2) New(msg string) IMyError { return &MyError2{MyError{Msg: msg}} }
 
-func (my *MyError2) Warp(err error) IMyError {
+func (my *MyError2) Wrap(err error) IMyError {
 	return &MyError2{MyError{Msg: fmt.Errorf("%w", err).Error()}}
 }
 
