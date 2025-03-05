@@ -11,13 +11,14 @@ import (
 
 	"github.com/jericho-yu/aid/filesystem"
 	"github.com/jericho-yu/aid/operation"
+	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
 // ZapProvider Zap日志服务提供者
 type (
-	ZapProvider struct{}
+	ZapProvider struct{ zapConfig zapConfig }
 	Cutter      struct {
 		level    string        // 日志级别(debug, info, warn, error, dpanic, panic, fatal)
 		format   string        // 时间格式(2006-01-02)
@@ -26,17 +27,33 @@ type (
 		mutex    *sync.RWMutex // 读写锁
 	}
 
+	zapConfig struct {
+		Path         string
+		PathAbs      bool
+		MaxSize      int
+		MaxBackup    int
+		MaxDay       int
+		NeedCompress bool
+		InConsole    bool
+		Extension    string
+		Level        zapcore.Level
+		EncoderType  EncoderType
+	}
+
 	EncoderType string
 )
 
-var ZapProviderApp ZapProvider
+var (
+	ZapProviderApp    ZapProvider
+	ZapProviderConfig zapConfig
+)
 
 const (
 	EncoderTypeConsole EncoderType = "CONSOLE"
 	EncoderTypeJson    EncoderType = "JSON"
 )
 
-func NewCutter(director string, level string, options ...func(*Cutter)) *Cutter {
+func newCutter(director string, level string, options ...func(*Cutter)) *Cutter {
 	rotate := &Cutter{
 		level:    level,
 		Director: director,
@@ -108,30 +125,70 @@ func (c *Cutter) Write(bytes []byte) (n int, err error) {
 }
 
 // GetWriteSync 获取 zapcore.WriteSync
-func GetWriteSync(path string, level zapcore.Level, inConsole bool) zapcore.WriteSyncer {
-	fileWriter := NewCutter(path, level.String(), func(c *Cutter) { c.format = time.DateOnly })
+func GetWriteSync(config *zapConfig, path string) zapcore.WriteSyncer {
+	// fileWriter := newCutter(path, level.String(), func(c *Cutter) { c.format = time.DateOnly })
 
-	return operation.Ternary[zapcore.WriteSyncer](inConsole, zapcore.NewMultiWriteSyncer(zapcore.AddSync(fileWriter), zapcore.AddSync(os.Stdout)), zapcore.AddSync(fileWriter))
+	fileWriter := &lumberjack.Logger{
+		Filename:   path,                // 日志文件名称
+		MaxSize:    config.MaxSize,      // 文件大小限制,单位MB
+		MaxBackups: config.MaxBackup,    // 最大保留日志文件数量
+		MaxAge:     config.MaxDay,       // 日志文件保留天数
+		Compress:   config.NeedCompress, // 是否压缩处理,压缩以后文件为xxxxx.gz
+	}
+
+	return operation.Ternary[zapcore.WriteSyncer](config.InConsole, zapcore.NewMultiWriteSyncer(zapcore.AddSync(fileWriter), zapcore.AddSync(os.Stdout)), zapcore.AddSync(fileWriter))
 }
 
-func (*ZapProvider) New(
-	path string,
-	inConsole bool,
-	encoderType EncoderType,
-	level zapcore.Level,
-) *zap.Logger {
-	return NewZapProvider(path, inConsole, encoderType, level)
+// New 实例化：日志配置
+func (*zapConfig) New(path string, pathAbs bool, encoderType EncoderType, level zapcore.Level, inConsole bool) *zapConfig {
+	return &zapConfig{
+		Path:         path,
+		PathAbs:      pathAbs,
+		EncoderType:  encoderType,
+		Level:        level,
+		MaxSize:      1,
+		MaxBackup:    5,
+		MaxDay:       30,
+		NeedCompress: false,
+		InConsole:    inConsole,
+		Extension:    ".log",
+	}
 }
+
+// SetMaxSize 设置单文件最大存储容量
+func (my *zapConfig) SetMaxSize(maxSize int) *zapConfig {
+	my.MaxSize = maxSize
+
+	return my
+}
+
+// SetMaxBackup 设置最大备份数量
+func (my *zapConfig) SetMaxBackup(maxBackup int) *zapConfig {
+	my.MaxBackup = maxBackup
+
+	return my
+}
+
+// SetMaxDay 设置日志文件最大保存天数
+func (my *zapConfig) SetMaxDay(maxDay int) *zapConfig {
+	my.MaxDay = maxDay
+
+	return my
+}
+
+// SetNeedCompress 设置是否需要压缩
+func (my *zapConfig) SetNeedCompress(needCompress bool) *zapConfig {
+	my.NeedCompress = needCompress
+
+	return my
+}
+
+func (*ZapProvider) New(config *zapConfig) *zap.Logger { return NewZapProvider(config) }
 
 // NewZapProvider 实例化：Zap日志服务提供者
 //
 //go:fix 推荐使用：New方法
-func NewZapProvider(
-	path string,
-	inConsole bool,
-	encoderType EncoderType,
-	level zapcore.Level,
-) *zap.Logger {
+func NewZapProvider(config *zapConfig) *zap.Logger {
 	var (
 		e               error
 		fs              *filesystem.FileSystem
@@ -158,7 +215,12 @@ func NewZapProvider(
 		}
 	)
 
-	fs = filesystem.FileSystemApp.NewByRelative(path)
+	if config.PathAbs {
+		fs = filesystem.FileSystemApp.NewByAbs(config.Path)
+	} else {
+		fs = filesystem.FileSystemApp.NewByRel(config.Path)
+	}
+	fs = filesystem.FileSystemApp.NewByRelative(config.Path)
 	if !fs.IsExist {
 		e = fs.MkDir()
 		if e != nil {
@@ -166,34 +228,25 @@ func NewZapProvider(
 		}
 	}
 
-	if level < zapcore.DebugLevel {
-		level = zapcore.DebugLevel
+	if config.Level < zapcore.DebugLevel {
+		config.Level = zapcore.DebugLevel
 	}
 
-	if level > zapcore.FatalLevel {
-		level = zapcore.FatalLevel
+	if config.Level > zapcore.FatalLevel {
+		config.Level = zapcore.FatalLevel
 	}
 
-	for _, logLevel := range []zapcore.Level{
-		zapcore.DebugLevel,
-		zapcore.InfoLevel,
-		zapcore.WarnLevel,
-		zapcore.ErrorLevel,
-		zapcore.DPanicLevel,
-		zapcore.PanicLevel,
-		zapcore.FatalLevel,
-	} {
-		if level >= logLevel {
-			writer := GetWriteSync(path, logLevel, inConsole)
-			// zapCores[idx] = zapcore.NewCore(encoderTypes[encoderType](zapLoggerConfig), writer, logLevel)
-			zapCores = append(zapCores, zapcore.NewCore(encoderTypes[encoderType](zapLoggerConfig), writer, logLevel))
+	for _, logLevel := range []zapcore.Level{zapcore.DebugLevel, zapcore.InfoLevel, zapcore.WarnLevel, zapcore.ErrorLevel, zapcore.DPanicLevel, zapcore.PanicLevel, zapcore.FatalLevel} {
+		if config.Level >= logLevel {
+			writer := GetWriteSync(config, fs.Copy().Join(fmt.Sprintf("%s%s", logLevel.String(), config.Extension)).GetDir())
+			zapCores = append(zapCores, zapcore.NewCore(encoderTypes[config.EncoderType](zapLoggerConfig), writer, logLevel))
 		}
 	}
 
 	zapLogger = zap.New(zapcore.NewTee(zapCores...))
 
 	defer func() {
-		if inConsole {
+		if config.InConsole {
 			return
 		}
 		if e = zapLogger.Sync(); e != nil {
