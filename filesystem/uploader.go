@@ -136,7 +136,7 @@ func (my *FileManager) uploadToNexus() (int64, error) {
 	client := httpClient.
 		NewHttpClientPut(my.dstDir).
 		SetAuthorization(my.config.Username, my.config.Password, my.config.AuthTitle).
-		AddHeaders(map[string][]string{"Content-Length": {fmt.Sprintf("%d", my.fileSize)}}).
+		SetHeaders(map[string][]string{"Content-Length": {fmt.Sprintf("%d", my.fileSize)}}).
 		SetBody(my.fileBytes).
 		Send()
 

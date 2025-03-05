@@ -294,7 +294,9 @@ func (my *FileSystem) RenameFile(newFilename string, deleteRepetition bool) (*Fi
 
 	if deleteRepetition {
 		if dst.IsExist {
-			dst.DelFile()
+			if err := dst.DelFile(); err != nil {
+				return nil, err
+			}
 		}
 	}
 
@@ -322,7 +324,9 @@ func (my *FileSystem) CopyFile(dstDir, dstFilename string, abs bool) (string, er
 	}
 	// 创建目标文件夹
 	if !dst.IsDir {
-		dst.MkDir()
+		if err = dst.MkDir(); err != nil {
+			return "", err
+		}
 	}
 
 	// 判断源是否是文件
@@ -380,7 +384,9 @@ func copyFiles(srcFiles []*FileSystemCopyFilesTarget, dstDir string, abs bool) e
 	}
 
 	if !dst.IsDir {
-		dst.MkDir()
+		if err = dst.MkDir(); err != nil {
+			return err
+		}
 	}
 
 	for _, srcFile := range srcFiles {
@@ -423,7 +429,9 @@ func (my *FileSystem) CopyDir(dstDir string, abs bool) error {
 		}
 
 		if !dst.IsDir {
-			dst.MkDir()
+			if err = dst.MkDir(); err != nil {
+				return err
+			}
 		}
 
 		if err != nil {
@@ -437,7 +445,6 @@ func (my *FileSystem) CopyDir(dstDir string, abs bool) error {
 			if _, err = src.CopyFile(dst.GetDir(), srcFilename, true); err != nil {
 				return err
 			}
-
 		}
 
 		return nil
@@ -456,7 +463,7 @@ func (my *FileSystem) WriteBytes(content []byte) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-	defer file.Close()
+	defer func(file *os.File) { _ = file.Close() }(file)
 
 	// 写入内容
 	written, err = file.Write(content)
@@ -478,7 +485,7 @@ func (my *FileSystem) WriteIoReader(content io.Reader) (written int64, err error
 	if err != nil {
 		return 0, err
 	}
-	defer dst.Close()
+	defer func(dst *os.File) { _ = dst.Close() }(dst)
 
 	return io.Copy(dst, content)
 }
@@ -491,7 +498,7 @@ func (my *FileSystem) WriteBytesAppend(content []byte) (int64, error) {
 	if e != nil {
 		return 0, e
 	}
-	defer file.Close()
+	defer func(file *os.File) { _ = file.Close() }(file)
 
 	// 追加写入内容
 	written, e = file.Write(content)
@@ -514,7 +521,7 @@ func (my *FileSystem) WriteIoReaderAppend(content io.Reader) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-	defer dst.Close()
+	defer func(dst *os.File) { _ = dst.Close() }(dst)
 
 	c, err := io.ReadAll(content)
 	if err != nil {

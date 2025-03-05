@@ -115,9 +115,18 @@ func (my *HttpClient) SetMethod(method string) *HttpClient {
 	return my
 }
 
-// AddHeaders 设置请求头
-func (my *HttpClient) AddHeaders(headers map[string][]string) *HttpClient {
+// SetHeaders 设置请求头
+func (my *HttpClient) SetHeaders(headers map[string][]string) *HttpClient {
 	my.requestHeaders = headers
+	return my
+}
+
+// AddHeaders 追加请求头
+func (my *HttpClient) AddHeaders(headers map[string][]string) *HttpClient {
+	for k, v := range headers {
+		my.requestHeaders[k] = append(my.requestHeaders[k], v...)
+	}
+
 	return my
 }
 
