@@ -14,8 +14,10 @@ type (
 		fileBytes      []byte
 		fileSize       int64
 		config         *FileManagerConfig
+		uploadMethods  map[FileManagerConfigDriver]func() (int64, error)
+		deleteMethods  map[FileManagerConfigDriver]func() error
 	}
-	FileManagerConfigDriver = string
+	FileManagerConfigDriver string
 	FileManagerConfig       struct {
 		Username  string
 		Password  string
@@ -43,7 +45,27 @@ const (
 // NewFileManager 初始化：文件管理
 //
 //go:fix 推荐使用 New方法
-func NewFileManager(config *FileManagerConfig) *FileManager { return &FileManager{config: config} }
+func NewFileManager(config *FileManagerConfig) *FileManager {
+	fm := &FileManager{
+		config:        config,
+		uploadMethods: make(map[FileManagerConfigDriver]func() (int64, error)),
+		deleteMethods: make(map[FileManagerConfigDriver]func() error),
+	}
+
+	fm.uploadMethods = map[FileManagerConfigDriver]func() (int64, error){
+		FileManagerConfigDriverLocal: fm.uploadToLocal,
+		FileManagerConfigDriverNexus: fm.uploadToNexus,
+		FileManagerConfigDriverOss:   fm.uploadToOss,
+	}
+
+	fm.deleteMethods = map[FileManagerConfigDriver]func() error{
+		FileManagerConfigDriverLocal: fm.deleteFromLocal,
+		FileManagerConfigDriverNexus: fm.deleteFromNexus,
+		FileManagerConfigDriverOss:   fm.deleteFromOss,
+	}
+
+	return fm
+}
 
 // NewFileManagerByLocalFile 初始化：文件管理器（通过本地文件）
 //
@@ -99,34 +121,26 @@ func (my *FileManager) SetDstDir(dstDir string) *FileManager {
 // Upload 上传文件
 func (my *FileManager) Upload() (int64, error) {
 	switch my.config.Driver {
-	case FileManagerConfigDriverLocal:
-		return my.uploadToLocal()
-	case FileManagerConfigDriverNexus:
-		return my.uploadToNexus()
-	case FileManagerConfigDriverOss:
-		return my.uploadToOss()
+	case FileManagerConfigDriverLocal, FileManagerConfigDriverNexus, FileManagerConfigDriverOss:
+		return my.uploadMethods[my.config.Driver]()
+	default:
+		return 0, fmt.Errorf("不支持的驱动类型：%s", my.config.Driver)
 	}
-
-	return 0, fmt.Errorf("不支持的驱动类型：%s", my.config.Driver)
 }
 
 // Delete 删除文件
 func (my *FileManager) Delete() error {
 	switch my.config.Driver {
-	case FileManagerConfigDriverLocal:
-		return my.deleteFromLocal()
-	case FileManagerConfigDriverNexus:
-		return my.deleteFromNexus()
-	case FileManagerConfigDriverOss:
-		return my.deleteFromOss()
+	case FileManagerConfigDriverLocal, FileManagerConfigDriverNexus, FileManagerConfigDriverOss:
+		return my.deleteMethods[my.config.Driver]()
+	default:
+		return fmt.Errorf("不支持的驱动类型：%s", my.config.Driver)
 	}
-
-	return fmt.Errorf("不支持的驱动类型：%s", my.config.Driver)
 }
 
 // 上传到本地
 func (my *FileManager) uploadToLocal() (int64, error) {
-	dst := FileSystemApp.NewByAbsolute(my.dstDir)
+	dst := FileSystemApp.NewByAbs(my.dstDir)
 
 	return dst.WriteBytes(my.fileBytes)
 }

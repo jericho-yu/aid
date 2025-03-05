@@ -30,6 +30,9 @@ type (
 
 var FileSystemApp FileSystem
 
+func (*FileSystem) NewByRel(dir string) *FileSystem { return FileSystemApp.NewByRelative(dir) }
+func (*FileSystem) NewByAbs(dir string) *FileSystem { return FileSystemApp.NewByAbsolute(dir) }
+
 // NewByRelative 实例化：文件系统（相对路径）
 func (*FileSystem) NewByRelative(dir string) *FileSystem {
 	ins := &FileSystem{dir: filepath.Clean(filepath.Join(getRootPath(), dir))}
