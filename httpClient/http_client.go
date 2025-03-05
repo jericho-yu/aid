@@ -100,24 +100,28 @@ func (my *HttpClient) SetCert(filename string) *HttpClient {
 	if my.cert, e = os.ReadFile(filename); e != nil {
 		my.Err = e
 	}
+
 	return my
 }
 
 // SetUrl 设置请求地址
 func (my *HttpClient) SetUrl(url string) *HttpClient {
 	my.requestUrl = url
+
 	return my
 }
 
 // SetMethod 设置请求方法
 func (my *HttpClient) SetMethod(method string) *HttpClient {
 	my.requestMethod = method
+
 	return my
 }
 
 // SetHeaders 设置请求头
 func (my *HttpClient) SetHeaders(headers map[string][]string) *HttpClient {
 	my.requestHeaders = headers
+
 	return my
 }
 
@@ -133,6 +137,7 @@ func (my *HttpClient) AddHeaders(headers map[string][]string) *HttpClient {
 // SetQueries 设置请求参数
 func (my *HttpClient) SetQueries(queries map[string]string) *HttpClient {
 	my.requestQueries = queries
+
 	return my
 }
 
@@ -152,16 +157,15 @@ func (my *HttpClient) SetBody(body []byte) *HttpClient {
 
 // SetJsonBody 设置json请求体
 func (my *HttpClient) SetJsonBody(body any) *HttpClient {
-	my.SetHeaderContentType("json")
-
+	my.SetHeaderContentType(ContentTypeJson)
 	my.requestBody, my.Err = json.Marshal(body)
+
 	return my
 }
 
 // SetXmlBody 设置xml请求体
 func (my *HttpClient) SetXmlBody(body any) *HttpClient {
-	my.SetHeaderContentType("xml")
-
+	my.SetHeaderContentType(ContentTypeXml)
 	my.requestBody, my.Err = xml.Marshal(body)
 
 	return my
@@ -169,8 +173,7 @@ func (my *HttpClient) SetXmlBody(body any) *HttpClient {
 
 // SetFormBody 设置表单请求体
 func (my *HttpClient) SetFormBody(body map[string]string) *HttpClient {
-	my.SetHeaderContentType("form")
-
+	my.SetHeaderContentType(ContentTypeForm)
 	params := url.Values{}
 	for k, v := range body {
 		params.Add(k, v)
@@ -188,9 +191,7 @@ func (my *HttpClient) SetFormDataBody(texts map[string]string, files map[string]
 	)
 
 	my.SetHeaderContentType("form-data")
-
 	writer := multipart.NewWriter(&buffer)
-
 	if len(texts) > 0 {
 		for k, v := range texts {
 			e = writer.WriteField(k, v)
@@ -229,8 +230,7 @@ func (my *HttpClient) SetFormDataBody(texts map[string]string, files map[string]
 
 // SetPlainBody 设置纯文本请求体
 func (my *HttpClient) SetPlainBody(text string) *HttpClient {
-	my.SetHeaderContentType("plain")
-
+	my.SetHeaderContentType(ContentTypePlain)
 	my.requestBody = []byte(text)
 
 	return my
@@ -238,8 +238,7 @@ func (my *HttpClient) SetPlainBody(text string) *HttpClient {
 
 // SetHtmlBody 设置html请求体
 func (my *HttpClient) SetHtmlBody(text string) *HttpClient {
-	my.SetHeaderContentType("html")
-
+	my.SetHeaderContentType(ContentTypeHtml)
 	my.requestBody = []byte(text)
 
 	return my
@@ -247,7 +246,7 @@ func (my *HttpClient) SetHtmlBody(text string) *HttpClient {
 
 // SetCssBody 设置Css请求体
 func (my *HttpClient) SetCssBody(text string) *HttpClient {
-	my.SetHeaderContentType("css")
+	my.SetHeaderContentType(ContentTypeCss)
 
 	my.requestBody = []byte(text)
 
@@ -256,7 +255,7 @@ func (my *HttpClient) SetCssBody(text string) *HttpClient {
 
 // SetJavascriptBody 设置Javascript请求体
 func (my *HttpClient) SetJavascriptBody(text string) *HttpClient {
-	my.SetHeaderContentType("javascript")
+	my.SetHeaderContentType(ContentTypeJavascript)
 
 	my.requestBody = []byte(text)
 
@@ -269,6 +268,8 @@ func (my *HttpClient) SetSteamBody(filename string) *HttpClient {
 		err  error
 		file *os.File
 	)
+
+	my.SetHeaderContentType(ContentTypeSteam)
 
 	file, err = os.Open(filename)
 	if err != nil {
