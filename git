@@ -17,7 +17,7 @@ if [ "$operator" = "publish" ]; then
 	fi
 
 	if [ -n "$tag" ]; then
-		source ./git push-tag "$tag"
+		git tag "$tag" && git push origin "$tag"
 	fi
 fi
 

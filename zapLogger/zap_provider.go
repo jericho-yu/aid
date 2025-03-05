@@ -1,4 +1,4 @@
-package log
+package logger
 
 import (
 	"fmt"
@@ -18,7 +18,7 @@ import (
 
 // ZapProvider Zap日志服务提供者
 type (
-	ZapProvider struct{ zapConfig zapConfig }
+	ZapProvider struct{}
 	Cutter      struct {
 		level    string        // 日志级别(debug, info, warn, error, dpanic, panic, fatal)
 		format   string        // 时间格式(2006-01-02)
