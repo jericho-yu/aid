@@ -702,3 +702,18 @@ func Cast[SRC, DST any](aa *AnyArray[SRC], fn func(value SRC) DST) *AnyArray[DST
 
 	return New(data)
 }
+
+// ToAny converts any slice to []any
+func ToAny(slice any) []any {
+	v := reflect.ValueOf(slice)
+	if v.Kind() != reflect.Slice {
+		return nil
+	}
+
+	result := make([]any, v.Len())
+	for i := 0; i < v.Len(); i++ {
+		result[i] = v.Index(i).Interface()
+	}
+
+	return result
+}
