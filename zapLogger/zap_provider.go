@@ -40,6 +40,16 @@ type (
 		EncoderType  EncoderType
 	}
 
+	zapConfigPath         struct{ Value string }
+	zapConfigPathAbs      struct{ Value bool }
+	zapConfigMaxSize      struct{ Value int }
+	zapConfigMaxBackup    struct{ Value int }
+	zapConfigMaxDay       struct{ Value int }
+	zapConfigNeedCompress struct{ Value bool }
+	zapConfigInConsole    struct{ Value bool }
+	zapConfigExtension    struct{ Value string }
+
+	ConfigType  string
 	EncoderType string
 )
 
@@ -139,9 +149,33 @@ func GetWriteSync(config *zapConfig, path string) zapcore.WriteSyncer {
 	return operation.Ternary[zapcore.WriteSyncer](config.InConsole, zapcore.NewMultiWriteSyncer(zapcore.AddSync(fileWriter), zapcore.AddSync(os.Stdout)), zapcore.AddSync(fileWriter))
 }
 
+func NewZapConfigMaxSize(value int) *zapConfigMaxSize {
+	return &zapConfigMaxSize{Value: value}
+}
+
+func NewZapConfigMaxBackup(value int) *zapConfigMaxBackup {
+	return &zapConfigMaxBackup{Value: value}
+}
+
+func NewZapConfigMaxDay(value int) *zapConfigMaxDay {
+	return &zapConfigMaxDay{Value: value}
+}
+
+func NewZapConfigNeedCompress(value bool) *zapConfigNeedCompress {
+	return &zapConfigNeedCompress{Value: value}
+}
+
+func NewZapConfigInConsole(value bool) *zapConfigInConsole {
+	return &zapConfigInConsole{Value: value}
+}
+
+func NewZapConfigExtension(value string) *zapConfigExtension {
+	return &zapConfigExtension{Value: value}
+}
+
 // New 实例化：日志配置
-func (*zapConfig) New(path string, pathAbs bool, encoderType EncoderType, level zapcore.Level, inConsole bool) *zapConfig {
-	return &zapConfig{
+func (*zapConfig) New(path string, pathAbs bool, encoderType EncoderType, level zapcore.Level, zapConfigItems ...any) *zapConfig {
+	ins := &zapConfig{
 		Path:         path,
 		PathAbs:      pathAbs,
 		EncoderType:  encoderType,
@@ -150,9 +184,30 @@ func (*zapConfig) New(path string, pathAbs bool, encoderType EncoderType, level 
 		MaxBackup:    5,
 		MaxDay:       30,
 		NeedCompress: false,
-		InConsole:    inConsole,
+		InConsole:    false,
 		Extension:    ".log",
 	}
+
+	if len(zapConfigItems) > 0 {
+		for _, item := range zapConfigItems {
+			switch i := item.(type) {
+			case *zapConfigMaxSize:
+				ins.MaxSize = i.Value
+			case *zapConfigMaxBackup:
+				ins.MaxBackup = i.Value
+			case *zapConfigMaxDay:
+				ins.MaxDay = i.Value
+			case *zapConfigExtension:
+				ins.Extension = i.Value
+			case *zapConfigNeedCompress:
+				ins.NeedCompress = i.Value
+			case *zapConfigInConsole:
+				ins.InConsole = i.Value
+			}
+		}
+	}
+
+	return ins
 }
 
 // SetMaxSize 设置单文件最大存储容量
