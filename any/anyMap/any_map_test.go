@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
+
+	"github.com/jericho-yu/aid/any/anyList"
 )
 
 func Test1(t *testing.T) {
@@ -504,9 +506,23 @@ func Test35(t *testing.T) {
 			Set(am, "税务", 0)
 		}
 
-		am2 := Cast[string, int, string](am, func(value int) string { return fmt.Sprintf("%v", value) })
+		am2 := Cast(am, func(value int) string { return fmt.Sprintf("%v", value) })
 		if fmt.Sprintf("%#v", ToMap(am2)) != `map[string]string{"分数":"100", "年龄":"18", "税务":"0"}` {
 			t.Fatal("错误")
+		}
+	})
+}
+
+func Test36(t *testing.T) {
+	t.Run("test36 Zip功能", func(t *testing.T) {
+		var (
+			al1 = anyList.NewAnyList([]string{"firstName", "lastName"})
+			al2 = anyList.NewAnyList([]string{"张", "三"})
+		)
+
+		am := Zip(anyList.ToSlice(al1), anyList.ToSlice(al2))
+		if ToString(am) != `map[firstName:张 lastName:三]` {
+			t.Fatalf("错误：%s\n", ToString(am))
 		}
 	})
 }

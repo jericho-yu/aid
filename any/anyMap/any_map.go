@@ -13,6 +13,16 @@ type AnyMap[K comparable, V any] struct {
 	values []V
 }
 
+func NewAnyMap[K comparable, V any](m map[K]V) *AnyMap[K, V] {
+	d := MakeAnyMap[K, V]()
+
+	for key, val := range m {
+		Set(d, key, val)
+	}
+
+	return d
+}
+
 func MakeAnyMap[K comparable, V any]() *AnyMap[K, V] {
 	return &AnyMap[K, V]{keys: make([]K, 0), values: make([]V, 0), mu: sync.RWMutex{}}
 }
@@ -343,12 +353,11 @@ func ToMap[K comparable, V any](am *AnyMap[K, V]) map[K]V {
 }
 
 func toMap[K comparable, V any](am *AnyMap[K, V]) map[K]V {
-	var data = make(map[K]V)
-
 	if am == nil {
-		return data
+		return nil
 	}
 
+	var data = make(map[K]V, len(am.keys))
 	for idx, key := range am.keys {
 		data[key] = am.values[idx]
 	}
@@ -633,4 +642,25 @@ func Cast[K comparable, SRC any, DST any](am *AnyMap[K, SRC], fn func(value SRC)
 	}
 
 	return d
+}
+
+// Zip 组合键值对为一个新的有序map
+func Zip[K comparable, V any](keys []K, values []V) *AnyMap[K, V] {
+	var d = MakeAnyMap[K, V]()
+	for idx, key := range keys {
+		Set(d, key, values[idx])
+	}
+
+	return d
+}
+
+func ToString[K comparable, V any](am *AnyMap[K, V]) string {
+	if am == nil {
+		return ""
+	}
+
+	am.mu.RLock()
+	defer am.mu.RUnlock()
+
+	return fmt.Sprintf("%v", toMap(am))
 }

@@ -462,3 +462,14 @@ func Cast[SRC any, DST any](list *AnyList[SRC], fn func(value SRC) DST) *AnyList
 
 	return NewAnyList(ret)
 }
+
+func ToString[T any](al *AnyList[T]) string {
+	if al == nil {
+		return ""
+	}
+
+	al.mu.RLock()
+	defer al.mu.RUnlock()
+
+	return fmt.Sprintf("%v", ToSlice(al))
+}
