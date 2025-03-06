@@ -270,12 +270,7 @@ func NewZapProvider(config *zapConfig) *zap.Logger {
 		}
 	)
 
-	if config.PathAbs {
-		fs = filesystem.FileSystemApp.NewByAbs(config.Path)
-	} else {
-		fs = filesystem.FileSystemApp.NewByRel(config.Path)
-	}
-	fs = filesystem.FileSystemApp.NewByRelative(config.Path)
+	fs = operation.TernaryFuncAll(func() bool { return config.PathAbs }, func() *filesystem.FileSystem { return filesystem.FileSystemApp.NewByAbs(config.Path) }, func() *filesystem.FileSystem { return filesystem.FileSystemApp.NewByRel(config.Path) })
 	if !fs.IsExist {
 		e = fs.MkDir()
 		if e != nil {
