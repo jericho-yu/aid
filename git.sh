@@ -6,13 +6,13 @@ if [ "$operator" = "push-tag" ]; then
 elif [ "$operator" = "last-tag" ]; then
 	git describe --tags $(git rev-list --tags --max-count=1)
 elif [ "$operator" = "help" ]; then
-	echo "\t1、基本用法：source git.sh 执行子程序名称 [参数1, 参数2...]"
-	echo "\t2、子程序名称为push-tag：创建并推送当前分支内容到tag（参数1表示tag名称）"
-	echo "\t3、子程序名称为last-tag：获取当前最后一个tag名称"
-	echo "\t4、其他子程序名称：分为三种情况"
-	echo "\t\t4.1、「source git.sh . 提交说明」：代表当前分支内容只提交不推送"
-	echo "\t\t4.2、「source git.sh dev 提交说明」：代表当前内容推送到dev分支"
-	echo "\t\t4.3、「source git.sh dev>master 提交说明」：代表先推送到dev分支然后合并到master再推送到master"
+	echo "    1、基本用法：source git.sh 执行子程序名称 [参数1, 参数2...]"
+	echo "    2、子程序名称为push-tag  ：创建并推送当前分支内容到tag（参数1表示tag名称）"
+	echo "    3、子程序名称为last-tag  ：获取当前最后一个tag名称"
+	echo "    4、其他子程序名称        ：分为三种情况"
+	echo "        4.1、source git.sh . 提交说明          ：代表当前分支内容只提交不推送"
+	echo "        4.2、source git.sh dev 提交说明        ：代表当前内容推送到dev分支"
+	echo "        4.3、source git.sh dev>master 提交说明 ：代表先推送到dev分支然后合并到master再推送到master"
 else
 	IFS='>' read -r src_branch dst_branch <<<"$operator"
 	commit="$2"
