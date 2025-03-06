@@ -6,7 +6,7 @@ if [ "$operator" = "push-tag" ]; then
 elif [ "$operator" = "last-tag" ]; then
 	git describe --tags $(git rev-list --tags --max-count=1)
 else
-	IFS='->' read -r branch target <<< "$operator"
+	IFS=':' read -r branch target <<< "$operator"
 	commit="$2"
 	tag="$3"
 
