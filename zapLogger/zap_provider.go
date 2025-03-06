@@ -63,17 +63,17 @@ const (
 	EncoderTypeJson    EncoderType = "JSON"
 )
 
-func newCutter(director string, level string, options ...func(*Cutter)) *Cutter {
-	rotate := &Cutter{
-		level:    level,
-		Director: director,
-		mutex:    new(sync.RWMutex),
-	}
-	for i := 0; i < len(options); i++ {
-		options[i](rotate)
-	}
-	return rotate
-}
+// func newCutter(director string, level string, options ...func(*Cutter)) *Cutter {
+// 	rotate := &Cutter{
+// 		level:    level,
+// 		Director: director,
+// 		mutex:    new(sync.RWMutex),
+// 	}
+// 	for i := 0; i < len(options); i++ {
+// 		options[i](rotate)
+// 	}
+// 	return rotate
+// }
 
 // Write satisfies the io.Writer interface. It writes to the
 // appropriate file handle that is currently being used.
