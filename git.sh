@@ -6,8 +6,8 @@ if [ "$operator" = "push-tag" ]; then
 elif [ "$operator" = "last-tag" ]; then
 	git describe --tags $(git rev-list --tags --max-count=1)
 else
-	commit="$2"
-	branch="$3"
+	branch="$2"
+	commit="$3"
 	tag="$4"
 
 	git add --all &&
