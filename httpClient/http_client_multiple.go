@@ -10,22 +10,24 @@ type HttpClientMultiple struct {
 
 var HttpClientMultipleApp HttpClientMultiple
 
-func (*HttpClientMultiple) New() *HttpClientMultiple { return &HttpClientMultiple{} }
+func (*HttpClientMultiple) New() *HttpClientMultiple { return NewHttpClientMultiple() }
 
 // NewHttpClientMultiple 实例化：批量请求对象
 //
 //go:fix 推荐使用New方法
-func NewHttpClientMultiple() *HttpClientMultiple { return &HttpClientMultiple{} }
+func NewHttpClientMultiple() *HttpClientMultiple { return &HttpClientMultipleApp }
 
 // Add 添加httpClient对象
 func (my *HttpClientMultiple) Add(hc *HttpClient) *HttpClientMultiple {
 	my.clients = append(my.clients, hc)
+
 	return my
 }
 
 // SetClients 设置httpClient对象
 func (my *HttpClientMultiple) SetClients(clients []*HttpClient) *HttpClientMultiple {
 	my.clients = clients
+
 	return my
 }
 
