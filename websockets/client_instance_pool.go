@@ -51,19 +51,15 @@ func (*ClientInstancePool) Remove(name string) error {
 
 // Get 获取客户端
 func (*ClientInstancePool) Get(name string) (*ClientInstance, error) {
-	if !clientInstancePool.pool.HasKey(name) {
+	if clientInstance, exists := clientInstancePool.pool.Get(name); !exists {
 		return nil, WebsocketClientNotExistErr
+	} else {
+		return clientInstance, nil
 	}
-
-	clientInstance, _ := clientInstancePool.pool.Get(name)
-
-	return clientInstance, nil
 }
 
 // Has 检查客户端是否存在
-func (*ClientInstancePool) Has(name string) bool {
-	return clientInstancePool.pool.HasKey(name)
-}
+func (*ClientInstancePool) Has(name string) bool { return clientInstancePool.pool.HasKey(name) }
 
 // Close 关闭客户端
 func (*ClientInstancePool) Close(name string) error {
