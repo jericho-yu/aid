@@ -148,7 +148,7 @@ func (my *FileManager) uploadToLocal() (int64, error) {
 // 上传到nexus
 func (my *FileManager) uploadToNexus() (int64, error) {
 	client := httpClient.
-		NewHttpClientPut(my.dstDir).
+		NewPut(my.dstDir).
 		SetAuthorization(my.config.Username, my.config.Password, my.config.AuthTitle).
 		SetHeaders(map[string][]string{"Content-Length": {fmt.Sprintf("%d", my.fileSize)}}).
 		SetBody(my.fileBytes).
@@ -170,7 +170,7 @@ func (my *FileManager) deleteFromLocal() error { return NewFileSystemByAbsolute(
 // 从nexus删除文件
 func (my *FileManager) deleteFromNexus() error {
 	return httpClient.
-		NewHttpClientDelete(my.dstDir).
+		NewDelete(my.dstDir).
 		SetAuthorization(my.config.Username, my.config.Password, my.config.AuthTitle).
 		Send().Err
 }
