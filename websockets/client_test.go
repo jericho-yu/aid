@@ -138,7 +138,7 @@ func Test2Sync(t *testing.T) {
 
 	_, err = client.Boot().SyncMessage([]byte("hello"), time.Second) // 1秒超时
 	if err != nil {
-		if !errors.Is(err, SyncMessageTimeoutErr) {
+		if !errors.Is(err, SyncMessageTimeoutErr.New("")) {
 			t.Errorf("发送消息失败：%v", err)
 		}
 	}

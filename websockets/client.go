@@ -49,7 +49,7 @@ func NewClient(
 	options ...any,
 ) (client *Client, err error) {
 	if name == "" || addr == "" {
-		return nil, WebsocketConnOptionErr
+		return nil, WebsocketConnOptionErr.New("名称或地址不能为空")
 	}
 
 	client = &Client{
@@ -194,12 +194,12 @@ func (my *Client) AsyncMessage(message []byte, fn clientCallbackFn, timeout time
 	msg := NewMessage(true, message)
 
 	if fn == nil {
-		my.err = AsyncMessageCallbackEmptyErr
+		my.err = AsyncMessageCallbackEmptyErr.New("")
 		return my
 	}
 
 	if timeout <= 0 {
-		my.err = AsyncMessageCallbackEmptyErr
+		my.err = AsyncMessageCallbackEmptyErr.New("")
 		return my
 	}
 
@@ -217,7 +217,7 @@ func (my *Client) AsyncMessage(message []byte, fn clientCallbackFn, timeout time
 	go func(messageId string) {
 		<-timer // 超时删除异步回调方法
 		my.asyncReceiveCallbackDict.RemoveByKey(messageId)
-		my.onSendMessageFailCallback(my.groupName, my.name, my.conn, AsyncMessageTimeoutErr) // 执行发送消息回调
+		my.onSendMessageFailCallback(my.groupName, my.name, my.conn, AsyncMessageTimeoutErr.New("")) // 执行发送消息回调
 	}(msg.GetMessageId())
 
 	return my
@@ -238,9 +238,9 @@ func (my *Client) SyncMessage(message []byte, options ...any) ([]byte, error) {
 
 	if my.conn == nil || my.status == Offline {
 		if my.onSendMessageFailCallback != nil {
-			my.onSendMessageFailCallback(my.groupName, my.name, my.conn, WebsocketOfflineErr)
+			my.onSendMessageFailCallback(my.groupName, my.name, my.conn, WebsocketOfflineErr.New(""))
 		}
-		return nil, WebsocketOfflineErr
+		return nil, WebsocketOfflineErr.New("")
 	}
 
 	err = my.conn.WriteMessage(websocket.TextMessage, msg.GetMessage()) // 发送消息
@@ -264,10 +264,10 @@ func (my *Client) SyncMessage(message []byte, options ...any) ([]byte, error) {
 		return receiveMessage, nil
 	case <-timeoutTimer:
 		if my.onSendMessageFailCallback != nil {
-			my.onSendMessageFailCallback(my.groupName, my.name, my.conn, SyncMessageTimeoutErr)
+			my.onSendMessageFailCallback(my.groupName, my.name, my.conn, SyncMessageTimeoutErr.New(""))
 		}
 
-		return nil, SyncMessageTimeoutErr
+		return nil, SyncMessageTimeoutErr.New("")
 	}
 }
 

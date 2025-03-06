@@ -23,7 +23,7 @@ func NewClientInstance(name string) *ClientInstance {
 // Append 增加客户端
 func (my *ClientInstance) Append(client *Client) error {
 	if my.connections.HasKey(client.name) {
-		return WebsocketClientExistErr
+		return WebsocketClientExistErr.New(client.name)
 	}
 
 	my.connections.Set(client.name, client)
@@ -34,7 +34,7 @@ func (my *ClientInstance) Append(client *Client) error {
 // Remove 删除客户端
 func (my *ClientInstance) Remove(name string) error {
 	if !my.connections.HasKey(name) {
-		return WebsocketClientNotExistErr
+		return WebsocketClientNotExistErr.New(name)
 	}
 
 	my.connections.RemoveByKey(name)
@@ -45,7 +45,7 @@ func (my *ClientInstance) Remove(name string) error {
 // Get 获取客户端
 func (my *ClientInstance) Get(name string) (*Client, error) {
 	if !my.connections.HasKey(name) {
-		return nil, WebsocketClientNotExistErr
+		return nil, WebsocketClientNotExistErr.New(name)
 	}
 
 	client, _ := my.connections.Get(name)
