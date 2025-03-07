@@ -8,7 +8,7 @@ type TestStruct struct {
 	Name     string  `v-rule:"required;min>3;max<10" v-name:"名称"`
 	Email    string  `v-rule:"required;email" v-name:"邮箱"`
 	Date     string  `v-rule:"required;date" v-name:"日期"`
-	Time     string  `v-rule:"required;date" v-name:"时间"`
+	Time     string  `v-rule:"required;time" v-name:"时间"`
 	Datetime *string `v-rule:"required;datetime" v-name:"日期时间"`
 	Ptr      *string `v-rule:"required" v-name:"指针"`
 	EmptyPtr *string `v-rule:"" v-name:"空指针"`

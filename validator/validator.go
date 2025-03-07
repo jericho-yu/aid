@@ -45,21 +45,7 @@ func NewValidator[T any](data T, prefixNames ...string) *Validator[T] {
 		checkFunctions: make(checkFunctionMap, 0),
 	}
 
-	ins.checkFunctions = checkFunctionMap{
-		reflect.String:  ins.checkString,
-		reflect.Int:     ins.checkInt,
-		reflect.Int8:    ins.checkInt8,
-		reflect.Int16:   ins.checkInt16,
-		reflect.Int32:   ins.checkInt32,
-		reflect.Int64:   ins.checkInt64,
-		reflect.Uint:    ins.checkUint,
-		reflect.Uint8:   ins.checkUint8,
-		reflect.Uint16:  ins.checkUint16,
-		reflect.Uint32:  ins.checkUint32,
-		reflect.Uint64:  ins.checkUint64,
-		reflect.Float32: ins.checkFloat32,
-		reflect.Float64: ins.checkFloat64,
-	}
+	ins.checkFunctions = checkFunctionMap{reflect.String: ins.checkString, reflect.Int: ins.checkInt, reflect.Int8: ins.checkInt8, reflect.Int16: ins.checkInt16, reflect.Int32: ins.checkInt32, reflect.Int64: ins.checkInt64, reflect.Uint: ins.checkUint, reflect.Uint8: ins.checkUint8, reflect.Uint16: ins.checkUint16, reflect.Uint32: ins.checkUint32, reflect.Uint64: ins.checkUint64, reflect.Float32: ins.checkFloat32, reflect.Float64: ins.checkFloat64}
 
 	return ins
 }
