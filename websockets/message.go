@@ -17,8 +17,11 @@ type Message struct {
 
 var MessageApp Message
 
+// New 新建消息
 func (*Message) New(async bool, message []byte) Message { return NewMessage(async, message) }
-func (*Message) Parse(prototypeMessage []byte) Message  { return ParseMessage(prototypeMessage) }
+
+// Parse 解析消息
+func (*Message) Parse(prototypeMessage []byte) Message { return ParseMessage(prototypeMessage) }
 
 // NewMessage 新建消息
 //

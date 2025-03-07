@@ -1,0 +1,110 @@
+package validator
+
+import (
+	"fmt"
+	"reflect"
+
+	"github.com/jericho-yu/aid/myError"
+)
+
+type (
+	ValidateError struct{ myError.MyError }
+	RequiredError struct{ myError.MyError }
+	EmailError    struct{ myError.MyError }
+	TimeError     struct{ myError.MyError }
+	LengthError   struct{ myError.MyError }
+	RuleError     struct{ myError.MyError }
+)
+
+var (
+	ValidateErr ValidateError
+	RequiredErr RequiredError
+	EmailErr    EmailError
+	TimeErr     TimeError
+	LengthErr   LengthError
+	RuleErr     RuleError
+)
+
+func (*ValidateError) New(msg string) myError.IMyError {
+	return &ValidateError{myError.MyError{Msg: msg}}
+}
+
+func (*ValidateError) Wrap(err error) myError.IMyError {
+	return &ValidateError{myError.MyError{Msg: err.Error()}}
+}
+
+func (my *ValidateError) Error() string { return my.MyError.Msg }
+
+func (my *ValidateError) Is(target error) bool { return reflect.DeepEqual(target, &ValidateErr) }
+
+func (*RequiredError) New(msg string) myError.IMyError {
+	return &RequiredError{myError.MyError{Msg: fmt.Sprintf("[%s]必填", msg)}}
+}
+
+func (*RequiredError) Wrap(err error) myError.IMyError {
+	return &RequiredError{myError.MyError{Msg: fmt.Errorf("[%w]必填", err).Error()}}
+}
+
+func (my *RequiredError) Error() string { return my.MyError.Msg }
+
+func (my *RequiredError) Is(target error) bool { return reflect.DeepEqual(target, &RequiredErr) }
+
+func (*EmailError) New(msg string) myError.IMyError {
+	return &EmailError{myError.MyError{Msg: fmt.Sprintf("[%s]不是有效的邮箱格式", msg)}}
+}
+
+func (*EmailError) Wrap(err error) myError.IMyError {
+	return &EmailError{myError.MyError{Msg: fmt.Errorf("[%w]不是有效的邮箱格式", err).Error()}}
+}
+
+func (my *EmailError) Error() string { return my.MyError.Msg }
+
+func (my *EmailError) Is(target error) bool { return reflect.DeepEqual(target, &EmailErr) }
+
+func (*TimeError) New(msg string) myError.IMyError {
+	return &TimeError{myError.MyError{Msg: fmt.Sprintf("[%s]不是有效的邮箱格式", msg)}}
+}
+
+func (*TimeError) Wrap(err error) myError.IMyError {
+	return &TimeError{myError.MyError{Msg: fmt.Errorf("[%w]不是有效的邮箱格式", err).Error()}}
+}
+
+func (my *TimeError) Error() string { return my.MyError.Msg }
+
+func (my *TimeError) Is(target error) bool { return reflect.DeepEqual(target, &TimeErr) }
+
+func (my *TimeError) NewFormat(format string, msgs ...any) myError.IMyError {
+	return &TimeError{myError.MyError{Msg: fmt.Sprintf(format, msgs...)}}
+}
+
+func (*LengthError) New(msg string) myError.IMyError {
+	return &LengthError{myError.MyError{Msg: fmt.Sprintf("[%s]长度错误", msg)}}
+}
+
+func (*LengthError) Wrap(err error) myError.IMyError {
+	return &LengthError{myError.MyError{Msg: fmt.Errorf("[%w]长度错误", err).Error()}}
+}
+
+func (my *LengthError) Error() string { return my.MyError.Msg }
+
+func (my *LengthError) Is(target error) bool { return reflect.DeepEqual(target, &LengthErr) }
+
+func (my *LengthError) NewFormat(format string, msgs ...any) myError.IMyError {
+	return &LengthError{myError.MyError{Msg: fmt.Sprintf(format, msgs...)}}
+}
+
+func (*RuleError) New(msg string) myError.IMyError {
+	return &RuleError{myError.MyError{Msg: fmt.Sprintf("[%s]规则错误", msg)}}
+}
+
+func (*RuleError) Wrap(err error) myError.IMyError {
+	return &RuleError{myError.MyError{Msg: fmt.Errorf("[%w]规则错误", err).Error()}}
+}
+
+func (my *RuleError) Error() string { return my.MyError.Msg }
+
+func (my *RuleError) Is(target error) bool { return reflect.DeepEqual(target, &LengthErr) }
+
+func (my *RuleError) NewFormat(format string, msgs ...any) myError.IMyError {
+	return &RuleError{myError.MyError{Msg: fmt.Sprintf(format, msgs...)}}
+}
