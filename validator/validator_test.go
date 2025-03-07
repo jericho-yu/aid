@@ -31,5 +31,4 @@ func TestValidator(t *testing.T) {
 	if err := validator.Validate(); err != nil {
 		t.Errorf("expected no error, got %v", err)
 	}
-
 }
