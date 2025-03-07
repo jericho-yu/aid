@@ -226,9 +226,7 @@ func (*Rsa) DemoEncryptRsa(unEncrypt []byte) string {
 		generatePemPublicKeyErr, encryptErr error
 	)
 
-	pemBase64, generatePemPublicKeyErr = PemBase64App.New().
-		SetBase64PublicKey(base64PublicKey).
-		GeneratePemPublicKey()
+	pemBase64, generatePemPublicKeyErr = PemBase64App.New().SetBase64PublicKey(base64PublicKey).GeneratePemPublicKey()
 	if generatePemPublicKeyErr != nil {
 		str.TerminalLogApp.New("[RSA] generate public key: %v").Error(generatePemPublicKeyErr)
 	}
@@ -254,9 +252,7 @@ func (*Rsa) DemoDecryptRsa(base64Encrypted string) string {
 		decrypted                                            []byte
 	)
 
-	pemBase64, generatePemPublicKeyErr = PemBase64App.New().
-		SetBase64PrivateKye(base64PrivateKey).
-		GeneratePemPrivateKey()
+	pemBase64, generatePemPublicKeyErr = PemBase64App.New().SetBase64PrivateKye(base64PrivateKey).GeneratePemPrivateKey()
 	if generatePemPublicKeyErr != nil {
 		str.TerminalLogApp.New("[RSA] generate private key: %v").Info(generatePemPublicKeyErr)
 	}
@@ -296,7 +292,7 @@ func (my *Rsa) Demo() {
 	}
 
 	// zip压缩
-	zipByte, zipErr = compression.NewZlib().Compress(jsonByte)
+	zipByte, zipErr = compression.ZlibApp.New().Compress(jsonByte)
 	if zipErr != nil {
 		str.TerminalLogApp.New("[RSA] zip failed: %v").Error(zipErr)
 	}
