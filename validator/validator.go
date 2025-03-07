@@ -8,6 +8,7 @@ import (
 
 	"github.com/jericho-yu/aid/common"
 	"github.com/jericho-yu/aid/operation"
+	"github.com/jericho-yu/aid/str"
 )
 
 type (
@@ -20,8 +21,11 @@ type (
 		dateFormat     string
 		timeFormat     string
 		datetimeFormat string
-		checkFunctions map[reflect.Kind]func(string, string, any) error
+		checkFunctions checkFunctionMap
 	}
+
+	checkFunction    func(rule string, fieldName string, value any) error
+	checkFunctionMap map[reflect.Kind]checkFunction
 )
 
 // NewValidator 实例化：验证器
@@ -38,10 +42,10 @@ func NewValidator[T any](data T, prefixNames ...string) *Validator[T] {
 		dateFormat:     `^\d{4}-\d{2}-\d{2}$`,
 		timeFormat:     `^\d{2}:\d{2}:\d{2}\.{0,1}\d+$`,
 		datetimeFormat: `^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$`,
-		checkFunctions: make(map[reflect.Kind]func(string, string, any) error, 0),
+		checkFunctions: make(checkFunctionMap, 0),
 	}
 
-	ins.checkFunctions = map[reflect.Kind]func(string, string, any) error{
+	ins.checkFunctions = checkFunctionMap{
 		reflect.String:  ins.checkString,
 		reflect.Int:     ins.checkInt,
 		reflect.Int8:    ins.checkInt8,
@@ -140,14 +144,10 @@ func (my *Validator[T]) validate(v any) error {
 			continue
 		}
 
-		fieldName := field.Tag.Get("v-name")
-
-		value := val.Field(i).Interface()
-		rules := strings.Split(tag, ";")
-
-		for _, rule := range rules {
-			if fn, exist := my.checkFunctions[reflect.TypeOf(value).Kind()]; exist {
-				if err := fn(rule, my.concatFieldName(operation.Ternary[string](fieldName != "", fieldName, val.Type().Name())), value); err != nil {
+		fieldName := my.concatFieldName(operation.Ternary(field.Tag.Get("v-name") != "", field.Tag.Get("v-name"), str.NewTransfer(val.Type().Name()).PascalToCamel()))
+		for _, rule := range strings.Split(tag, ";") {
+			if fn, exist := my.checkFunctions[reflect.TypeOf(val.Field(i).Interface()).Kind()]; exist {
+				if err := fn(rule, fieldName, val.Field(i).Interface()); err != nil {
 					return err
 				}
 			}
