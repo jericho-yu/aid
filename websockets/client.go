@@ -142,6 +142,7 @@ func (my *Client) Boot() *Client {
 		if my.onConnFailCallback != nil {
 			my.onConnFailCallback(my.groupName, my.name, my.conn, my.err)
 		}
+
 		return my
 	}
 
@@ -157,6 +158,7 @@ func (my *Client) Boot() *Client {
 				if client.onReceiveMessageFailCallback != nil {
 					client.onReceiveMessageFailCallback(client.groupName, client.name, client.conn, client.err)
 				}
+
 				return
 			}
 
@@ -198,11 +200,13 @@ func (my *Client) AsyncMessage(message []byte, fn clientCallbackFn, timeout time
 
 	if fn == nil {
 		my.err = AsyncMessageCallbackEmptyErr.New("")
+
 		return my
 	}
 
 	if timeout <= 0 {
 		my.err = AsyncMessageCallbackEmptyErr.New("")
+
 		return my
 	}
 
@@ -210,6 +214,7 @@ func (my *Client) AsyncMessage(message []byte, fn clientCallbackFn, timeout time
 	if my.err != nil {
 		if my.onSendMessageFailCallback != nil {
 			my.onSendMessageFailCallback(my.groupName, my.name, my.conn, my.err) // 执行发送失败回调
+
 			return my
 		}
 	}
@@ -243,6 +248,7 @@ func (my *Client) SyncMessage(message []byte, options ...any) ([]byte, error) {
 		if my.onSendMessageFailCallback != nil {
 			my.onSendMessageFailCallback(my.groupName, my.name, my.conn, WebsocketOfflineErr.New(""))
 		}
+
 		return nil, WebsocketOfflineErr.New("")
 	}
 
@@ -251,10 +257,11 @@ func (my *Client) SyncMessage(message []byte, options ...any) ([]byte, error) {
 		if my.onSendMessageFailCallback != nil {
 			my.onSendMessageFailCallback(my.groupName, my.name, my.conn, err)
 		}
+
 		return nil, err
 	}
 
-	for i := 0; i < len(options); i++ {
+	for i := range options {
 		if v, ok := options[i].(time.Duration); ok && v > 0 {
 			timeout = v
 		}
@@ -280,13 +287,6 @@ func (my *Client) Cls() *Client { return my.Close() }
 // Close 关闭链接
 func (my *Client) Close() *Client {
 	if my.conn != nil && my.status == Online {
-		// my.err = my.conn.WriteMessage(websocket.CloseMessage, []byte{})
-		// if my.err != nil {
-		// 	if my.onCloseFailCallback != nil {
-		// 		my.onCloseFailCallback(my.groupName, my.name, my.conn, my.err)
-		// 	}
-		// 	my.status = Online
-		// } else {
 		my.err = my.conn.Close()
 		if my.err != nil {
 			if my.onCloseFailCallback != nil {
@@ -298,7 +298,6 @@ func (my *Client) Close() *Client {
 			my.status = Offline
 			close(my.receiveMessageChan) // 关闭同步消息通道
 		}
-		// }
 	} else {
 		my.conn = nil
 		my.status = Offline

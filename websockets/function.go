@@ -18,10 +18,10 @@ type (
 	serverConnectionCheckFn       func(header http.Header) (string, error)
 	serverReceiveMessageSuccessFn func(server *Server, message Message)
 	serverReceiveMessageFailFn    func(conn *websocket.Conn, err error)
-	serverReceivePingFn           func(conn *websocket.Conn)
-	serverSendMessageFailFn       func(err error)
-	serverSendMessageSuccessFn    func(conn *websocket.Conn, message, prototypeMessage []byte)
-	serverCloseCallbackFn         func(conn *websocket.Conn)
+	// serverReceivePingFn           func(conn *websocket.Conn)
+	serverSendMessageFailFn    func(err error)
+	serverSendMessageSuccessFn func(conn *websocket.Conn, message, prototypeMessage []byte)
+	serverCloseCallbackFn      func(conn *websocket.Conn)
 )
 
 var upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}

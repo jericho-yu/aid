@@ -66,6 +66,7 @@ func (my *ClientInstance) Close(name string) error {
 	} else {
 		err = client.Close().Error()
 		my.connections.RemoveByKey(client.name)
+
 		return err
 	}
 }

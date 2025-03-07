@@ -106,6 +106,7 @@ func (my *ServerPool) SetOnConnSuc(fn serverConnectionSuccessFn) *ServerPool {
 // SetOnConnectionSuccess 设置回调：当连接成功
 func (*ServerPool) SetOnConnectionSuccess(onConnectionSuccess serverConnectionSuccessFn) *ServerPool {
 	serverPool.onConnectionSuccess = onConnectionSuccess
+
 	return serverPool
 }
 
@@ -117,6 +118,7 @@ func (my *ServerPool) SetOnConnFail(fn serverConnectionFailFn) *ServerPool {
 // SetOnConnectionFail 设置回调：当连接失败
 func (*ServerPool) SetOnConnectionFail(onConnectionFail serverConnectionFailFn) *ServerPool {
 	serverPool.onConnectionFail = onConnectionFail
+
 	return serverPool
 }
 
@@ -128,6 +130,7 @@ func (my *ServerPool) SetOnSendMsgSuc(fn serverSendMessageSuccessFn) *ServerPool
 // SetOnSendMessageSuccess 设置回调：当发送消息成功
 func (*ServerPool) SetOnSendMessageSuccess(onSendMessageSuccess serverSendMessageSuccessFn) *ServerPool {
 	serverPool.onSendMessageSuccess = onSendMessageSuccess
+
 	return serverPool
 }
 
@@ -139,6 +142,7 @@ func (my *ServerPool) SetOnSendMsgFail(fn serverSendMessageFailFn) *ServerPool {
 // SetOnSendMessageFail 设置回调：当发送消息失败
 func (*ServerPool) SetOnSendMessageFail(onSendMessageFail serverSendMessageFailFn) *ServerPool {
 	serverPool.onSendMessageFail = onSendMessageFail
+
 	return serverPool
 }
 
@@ -150,6 +154,7 @@ func (my *ServerPool) SetOnRecMsgSuc(fn serverReceiveMessageSuccessFn) *ServerPo
 // SetOnReceiveMessageSuccess 设置回调：当接收消息成功
 func (*ServerPool) SetOnReceiveMessageSuccess(onReceiveMessageSuccess serverReceiveMessageSuccessFn) *ServerPool {
 	serverPool.onReceiveMessageSuccess = onReceiveMessageSuccess
+
 	return serverPool
 }
 
@@ -161,6 +166,7 @@ func (my *ServerPool) SetOnRecMsgFail(fn serverReceiveMessageFailFn) *ServerPool
 // SetOnReceiveMessageFail 设置回调：当接收消息失败
 func (*ServerPool) SetOnReceiveMessageFail(onReceiveMessageFail serverReceiveMessageFailFn) *ServerPool {
 	serverPool.onReceiveMessageFail = onReceiveMessageFail
+
 	return serverPool
 }
 
@@ -172,6 +178,7 @@ func (my *ServerPool) SetOnClsCb(fn serverCloseCallbackFn) *ServerPool {
 // SetOnCloseCallback 设置回调：关闭时回调
 func (*ServerPool) SetOnCloseCallback(onCloseCallback serverCloseCallbackFn) *ServerPool {
 	serverPool.onCloseCallback = onCloseCallback
+
 	return serverPool
 }
 

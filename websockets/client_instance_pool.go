@@ -68,6 +68,7 @@ func (*ClientInstancePool) Close(name string) error {
 	} else {
 		err = clientInstance.Close(name)
 		clientInstancePool.pool.RemoveByKey(clientInstance.name)
+
 		return err
 	}
 }
