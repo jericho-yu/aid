@@ -212,11 +212,8 @@ func (my *HttpClient) SetFormDataBody(texts map[string]string, files map[string]
 				my.Err = e
 				return my
 			}
-			defer func(file *os.File) {
-				if err := file.Close(); err != nil {
-					fmt.Printf("Failed to close file: %v", err)
-				}
-			}(file)
+
+			_ = file.Close()
 		}
 	}
 
