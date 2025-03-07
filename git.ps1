@@ -28,13 +28,13 @@ elseif ($operator -eq "help") {
     2、子程序名称为push-tag  ：创建并推送当前分支内容到tag（参数1表示tag名称）
     3、子程序名称为last-tag  ：获取当前最后一个tag名称
     4、其他子程序名称        ：分为三种情况
-        4.1、. .\git.ps1 . 提交说明          ：代表当前分支内容只提交不推送
+        4.1、. .\git.ps1 : 提交说明          ：代表当前分支内容只提交不推送
         4.2、. .\git.ps1 dev 提交说明        ：代表当前内容推送到dev分支
-        4.3、. .\git.ps1 dev>master 提交说明 ：代表先推送到dev分支然后合并到master再推送到master
+        4.3、. .\git.ps1 dev:master 提交说明 ：代表先推送到dev分支然后合并到master再推送到master
 "@
 }
 else {
-    $src_branch, $dst_branch = $operator -split ">"
+    $src_branch, $dst_branch = $operator -split ":"
     $commit = $arg1
     $tag = $arg2
 
