@@ -1,9 +1,11 @@
 package validator
 
 import (
+	"fmt"
 	"reflect"
 	"regexp"
 	"strings"
+	"time"
 	"unicode/utf8"
 
 	"github.com/jericho-yu/aid/common"
@@ -25,7 +27,7 @@ type (
 	}
 
 	checkFunction    func(rule string, fieldName string, value any) error
-	checkFunctionMap map[reflect.Kind]checkFunction
+	checkFunctionMap map[string]checkFunction
 )
 
 // NewValidator 实例化：验证器
@@ -45,7 +47,36 @@ func NewValidator[T any](data T, prefixNames ...string) *Validator[T] {
 		checkFunctions: make(checkFunctionMap, 0),
 	}
 
-	ins.checkFunctions = checkFunctionMap{reflect.String: ins.checkString, reflect.Int: ins.checkInt, reflect.Int8: ins.checkInt8, reflect.Int16: ins.checkInt16, reflect.Int32: ins.checkInt32, reflect.Int64: ins.checkInt64, reflect.Uint: ins.checkUint, reflect.Uint8: ins.checkUint8, reflect.Uint16: ins.checkUint16, reflect.Uint32: ins.checkUint32, reflect.Uint64: ins.checkUint64, reflect.Float32: ins.checkFloat32, reflect.Float64: ins.checkFloat64}
+	ins.checkFunctions = checkFunctionMap{
+		"string":     ins.checkString,
+		"*string":    ins.checkString,
+		"int":        ins.checkInt,
+		"*int":       ins.checkInt,
+		"int8":       ins.checkInt8,
+		"*int8":      ins.checkInt8,
+		"int16":      ins.checkInt16,
+		"*int16":     ins.checkInt16,
+		"int32":      ins.checkInt32,
+		"*int32":     ins.checkInt32,
+		"int64":      ins.checkInt64,
+		"*int64":     ins.checkInt64,
+		"uint":       ins.checkUint,
+		"*uint":      ins.checkUint,
+		"uint8":      ins.checkUint8,
+		"*uint8":     ins.checkUint8,
+		"uint16":     ins.checkUint16,
+		"*uint16":    ins.checkUint16,
+		"uint32":     ins.checkUint32,
+		"*uint32":    ins.checkUint32,
+		"uint64":     ins.checkUint64,
+		"*uint64":    ins.checkUint64,
+		"float32":    ins.checkFloat32,
+		"*float32":   ins.checkFloat32,
+		"float64":    ins.checkFloat64,
+		"*float64":   ins.checkFloat64,
+		"time.Time":  ins.checkTime,
+		"*time.Time": ins.checkTime,
+	}
 
 	return ins
 }
@@ -117,6 +148,7 @@ func (my *Validator[T]) validate(v any) error {
 
 	for i := range val.NumField() {
 		field := val.Type().Field(i)
+		fmt.Printf("OK: %#v\n", field.Name)
 		if field.Anonymous {
 			// 递归验证嵌套字段
 			if err := NewValidator(val.Field(i).Interface(), my.prefixNames...).Validate(); err != nil {
@@ -131,8 +163,9 @@ func (my *Validator[T]) validate(v any) error {
 		}
 
 		fieldName := my.concatFieldName(operation.Ternary(field.Tag.Get("v-name") != "", field.Tag.Get("v-name"), str.NewTransfer(val.Type().Name()).PascalToCamel()))
+
 		for _, rule := range strings.Split(tag, ";") {
-			if fn, exist := my.checkFunctions[reflect.TypeOf(val.Field(i).Interface()).Kind()]; exist {
+			if fn, exist := my.checkFunctions[fmt.Sprintf("%v", reflect.ValueOf(val.Field(i).Interface()).Type())]; exist {
 				if err := fn(rule, fieldName, val.Field(i).Interface()); err != nil {
 					return err
 				}
@@ -156,6 +189,20 @@ func (my *Validator[T]) concatFieldName(fieldName string) string {
 	return fieldName
 }
 
+func (my *Validator[T]) checkTime(rule, fieldName string, value any) error {
+	if reflect.TypeOf(value).Kind() == reflect.Ptr {
+		if rule == "required" && reflect.ValueOf(value).IsNil() {
+			return RequiredErr.New(fieldName)
+		}
+		value = reflect.ValueOf(value).Elem().Interface()
+	}
+
+	if !reflect.DeepEqual(value, time.Time{}) {
+		return TimeErr.NewFormat("[%s]必须是时间类型", fieldName)
+	}
+	return nil
+}
+
 // checkString 验证：string -> 支持的规则 required、email、email=、date、date=、time、time=、datetime、datetime=、min<、min<=、max>、max>=、range=
 func (my *Validator[T]) checkString(rule, fieldName string, value any) error {
 	if reflect.TypeOf(value).Kind() == reflect.Ptr {
@@ -170,23 +217,14 @@ func (my *Validator[T]) checkString(rule, fieldName string, value any) error {
 		if value == "" {
 			return RequiredErr.New(fieldName)
 		}
-	case rule == "email":
-		if matched, _ := regexp.MatchString(my.emailFormat, value.(string)); !matched {
-			return EmailErr.New(fieldName)
-		}
 	case rule == "email=":
 		emailFormat := strings.TrimPrefix(rule, "email=")
 		if matched, _ := regexp.MatchString(emailFormat, value.(string)); !matched {
 			return EmailErr.New(fieldName)
 		}
-	case strings.HasPrefix(rule, "date"):
-		if matched, _ := regexp.MatchString(my.dateFormat, value.(string)); !matched {
-			return TimeErr.NewFormat("[%s]日期格式错误，正确格式：%s", fieldName, my.dateFormat)
-		}
-	case strings.HasPrefix(rule, "date="):
-		dateFormat := strings.TrimPrefix(rule, "date=")
-		if matched, _ := regexp.MatchString(dateFormat, value.(string)); !matched {
-			return TimeErr.NewFormat("[%s]日期格式错误，正确格式：%s", fieldName, my.dateFormat)
+	case rule == "email":
+		if matched, _ := regexp.MatchString(my.emailFormat, value.(string)); !matched {
+			return EmailErr.New(fieldName)
 		}
 	case strings.HasPrefix(rule, "time"):
 		if matched, _ := regexp.MatchString(my.timeFormat, value.(string)); !matched {
@@ -195,36 +233,45 @@ func (my *Validator[T]) checkString(rule, fieldName string, value any) error {
 	case strings.HasPrefix(rule, "time="):
 		timeFormat := strings.TrimPrefix(rule, "time=")
 		if matched, _ := regexp.MatchString(timeFormat, value.(string)); !matched {
-			return TimeErr.NewFormat("[%s]时间格式错误，正确格式：%s", fieldName, my.timeFormat)
+			return TimeErr.NewFormat("[%s]时间格式错误，正确格式：%s", fieldName, timeFormat)
+		}
+	case strings.HasPrefix(rule, "datetime="):
+		datetimeFormat := strings.TrimPrefix(rule, "datetime=")
+		if matched, _ := regexp.MatchString(datetimeFormat, value.(string)); !matched {
+			return TimeErr.NewFormat("[%s]时间格式错误，正确格式：%s", fieldName, datetimeFormat)
 		}
 	case strings.HasPrefix(rule, "datetime"):
 		if matched, _ := regexp.MatchString(my.datetimeFormat, value.(string)); !matched {
 			return TimeErr.NewFormat("[%s]时间格式错误，正确格式：%s", fieldName, my.datetimeFormat)
 		}
-	case strings.HasPrefix(rule, "datetime="):
-		datetimeFormat := strings.TrimPrefix(rule, "datetime=")
-		if matched, _ := regexp.MatchString(datetimeFormat, value.(string)); !matched {
-			return TimeErr.NewFormat("[%s]时间格式错误，正确格式：%s", fieldName, my.datetimeFormat)
+	case strings.HasPrefix(rule, "date="):
+		dateFormat := strings.TrimPrefix(rule, "date=")
+		if matched, _ := regexp.MatchString(dateFormat, value.(string)); !matched {
+			return TimeErr.NewFormat("[%s]日期格式错误，正确格式：%s", fieldName, dateFormat)
 		}
-	case strings.HasPrefix(rule, "min<"):
-		min := strings.TrimPrefix(rule, "min<")
-		if utf8.RuneCountInString(value.(string)) < common.ToInt(min) {
-			return LengthErr.NewFormat("[%s]长度不能小于：%d", fieldName, common.ToInt(min))
+	case strings.HasPrefix(rule, "date"):
+		if matched, _ := regexp.MatchString(my.dateFormat, value.(string)); !matched {
+			return TimeErr.NewFormat("[%s]日期格式错误，正确格式：%s", fieldName, my.dateFormat)
 		}
 	case strings.HasPrefix(rule, "min<="):
 		min := strings.TrimPrefix(rule, "min<=")
 		if utf8.RuneCountInString(value.(string)) <= common.ToInt(min) {
 			return LengthErr.NewFormat("[%s]长度不能小于等于：%d", fieldName, common.ToInt(min))
 		}
-	case strings.HasPrefix(rule, "max>"):
-		max := strings.TrimPrefix(rule, "max>")
-		if utf8.RuneCountInString(value.(string)) > common.ToInt(max) {
-			return LengthErr.NewFormat("[%s]长度不能大于：%d", fieldName, common.ToInt(max))
+	case strings.HasPrefix(rule, "min<"):
+		min := strings.TrimPrefix(rule, "min<")
+		if utf8.RuneCountInString(value.(string)) < common.ToInt(min) {
+			return LengthErr.NewFormat("[%s]长度不能小于：%d", fieldName, common.ToInt(min))
 		}
 	case strings.HasPrefix(rule, "max>="):
 		max := strings.TrimPrefix(rule, "max>=")
 		if utf8.RuneCountInString(value.(string)) >= common.ToInt(max) {
 			return LengthErr.NewFormat("[%s]长度不能大于等于：%d", fieldName, common.ToInt(max))
+		}
+	case strings.HasPrefix(rule, "max>"):
+		max := strings.TrimPrefix(rule, "max>")
+		if utf8.RuneCountInString(value.(string)) > common.ToInt(max) {
+			return LengthErr.NewFormat("[%s]长度不能大于：%d", fieldName, common.ToInt(max))
 		}
 	case strings.HasPrefix(rule, "range="):
 		between := strings.TrimPrefix(rule, "range=")
@@ -252,25 +299,25 @@ func (my *Validator[T]) checkInt(rule, fieldName string, value any) error {
 	}
 
 	switch {
-	case strings.HasPrefix(rule, "min<"):
-		min := strings.TrimPrefix(rule, "min<")
-		if value.(int) < common.ToInt(min) {
-			return LengthErr.NewFormat("[%s]长度不能小于：%d", fieldName, common.ToInt(min))
-		}
 	case strings.HasPrefix(rule, "min<="):
 		min := strings.TrimPrefix(rule, "min<=")
 		if value.(int) <= common.ToInt(min) {
 			return LengthErr.NewFormat("[%s]长度不能小于等于：%d", fieldName, common.ToInt(min))
 		}
-	case strings.HasPrefix(rule, "max>"):
-		max := strings.TrimPrefix(rule, "max>")
-		if value.(int) > common.ToInt(max) {
-			return LengthErr.NewFormat("[%s]长度不能大于：%d", fieldName, common.ToInt(max))
+	case strings.HasPrefix(rule, "min<"):
+		min := strings.TrimPrefix(rule, "min<")
+		if value.(int) < common.ToInt(min) {
+			return LengthErr.NewFormat("[%s]长度不能小于：%d", fieldName, common.ToInt(min))
 		}
 	case strings.HasPrefix(rule, "max>="):
 		max := strings.TrimPrefix(rule, "max>=")
 		if value.(int) >= common.ToInt(max) {
 			return LengthErr.NewFormat("[%s]长度不能大于等于：%d", fieldName, common.ToInt(max))
+		}
+	case strings.HasPrefix(rule, "max>"):
+		max := strings.TrimPrefix(rule, "max>")
+		if value.(int) > common.ToInt(max) {
+			return LengthErr.NewFormat("[%s]长度不能大于：%d", fieldName, common.ToInt(max))
 		}
 	case strings.HasPrefix(rule, "range="):
 		between := strings.TrimPrefix(rule, "range=")
@@ -298,25 +345,25 @@ func (my *Validator[T]) checkInt8(rule, fieldName string, value any) error {
 	}
 
 	switch {
-	case strings.HasPrefix(rule, "min<"):
-		min := strings.TrimPrefix(rule, "min<")
-		if value.(int8) < common.ToInt8(min) {
-			return LengthErr.NewFormat("[%s]长度不能小于：%d", fieldName, common.ToInt(min))
-		}
 	case strings.HasPrefix(rule, "min<="):
 		min := strings.TrimPrefix(rule, "min<=")
 		if value.(int8) <= common.ToInt8(min) {
 			return LengthErr.NewFormat("[%s]长度不能小于等于：%d", fieldName, common.ToInt(min))
 		}
-	case strings.HasPrefix(rule, "max>"):
-		max := strings.TrimPrefix(rule, "max>")
-		if value.(int8) > common.ToInt8(max) {
-			return LengthErr.NewFormat("[%s]长度不能大于：%d", fieldName, common.ToInt(max))
+	case strings.HasPrefix(rule, "min<"):
+		min := strings.TrimPrefix(rule, "min<")
+		if value.(int8) < common.ToInt8(min) {
+			return LengthErr.NewFormat("[%s]长度不能小于：%d", fieldName, common.ToInt(min))
 		}
 	case strings.HasPrefix(rule, "max>="):
 		max := strings.TrimPrefix(rule, "max>=")
 		if value.(int8) >= common.ToInt8(max) {
 			return LengthErr.NewFormat("[%s]长度不能大于等于：%d", fieldName, common.ToInt(max))
+		}
+	case strings.HasPrefix(rule, "max>"):
+		max := strings.TrimPrefix(rule, "max>")
+		if value.(int8) > common.ToInt8(max) {
+			return LengthErr.NewFormat("[%s]长度不能大于：%d", fieldName, common.ToInt(max))
 		}
 	case strings.HasPrefix(rule, "range="):
 		between := strings.TrimPrefix(rule, "range=")
@@ -344,25 +391,25 @@ func (my *Validator[T]) checkInt16(rule, fieldName string, value any) error {
 	}
 
 	switch {
-	case strings.HasPrefix(rule, "min<"):
-		min := strings.TrimPrefix(rule, "min<")
-		if value.(int16) < common.ToInt16(min) {
-			return LengthErr.NewFormat("[%s]长度不能小于：%d", fieldName, common.ToInt(min))
-		}
 	case strings.HasPrefix(rule, "min<="):
 		min := strings.TrimPrefix(rule, "min<=")
 		if value.(int16) <= common.ToInt16(min) {
 			return LengthErr.NewFormat("[%s]长度不能小于等于：%d", fieldName, common.ToInt(min))
 		}
-	case strings.HasPrefix(rule, "max>"):
-		max := strings.TrimPrefix(rule, "max>")
-		if value.(int16) > common.ToInt16(max) {
-			return LengthErr.NewFormat("[%s]长度不能大于：%d", fieldName, common.ToInt(max))
+	case strings.HasPrefix(rule, "min<"):
+		min := strings.TrimPrefix(rule, "min<")
+		if value.(int16) < common.ToInt16(min) {
+			return LengthErr.NewFormat("[%s]长度不能小于：%d", fieldName, common.ToInt(min))
 		}
 	case strings.HasPrefix(rule, "max>="):
 		max := strings.TrimPrefix(rule, "max>=")
 		if value.(int16) >= common.ToInt16(max) {
 			return LengthErr.NewFormat("[%s]长度不能大于等于：%d", fieldName, common.ToInt(max))
+		}
+	case strings.HasPrefix(rule, "max>"):
+		max := strings.TrimPrefix(rule, "max>")
+		if value.(int16) > common.ToInt16(max) {
+			return LengthErr.NewFormat("[%s]长度不能大于：%d", fieldName, common.ToInt(max))
 		}
 	case strings.HasPrefix(rule, "range="):
 		between := strings.TrimPrefix(rule, "range=")
@@ -390,25 +437,25 @@ func (my *Validator[T]) checkInt32(rule, fieldName string, value any) error {
 	}
 
 	switch {
-	case strings.HasPrefix(rule, "min<"):
-		min := strings.TrimPrefix(rule, "min<")
-		if value.(int32) < common.ToInt32(min) {
-			return LengthErr.NewFormat("[%s]长度不能小于：%d", fieldName, common.ToInt(min))
-		}
 	case strings.HasPrefix(rule, "min<="):
 		min := strings.TrimPrefix(rule, "min<=")
 		if value.(int32) <= common.ToInt32(min) {
 			return LengthErr.NewFormat("[%s]长度不能小于等于：%d", fieldName, common.ToInt(min))
 		}
-	case strings.HasPrefix(rule, "max>"):
-		max := strings.TrimPrefix(rule, "max>")
-		if value.(int32) > common.ToInt32(max) {
-			return LengthErr.NewFormat("[%s]长度不能大于：%d", fieldName, common.ToInt(max))
+	case strings.HasPrefix(rule, "min<"):
+		min := strings.TrimPrefix(rule, "min<")
+		if value.(int32) < common.ToInt32(min) {
+			return LengthErr.NewFormat("[%s]长度不能小于：%d", fieldName, common.ToInt(min))
 		}
 	case strings.HasPrefix(rule, "max>="):
 		max := strings.TrimPrefix(rule, "max>=")
 		if value.(int32) >= common.ToInt32(max) {
 			return LengthErr.NewFormat("[%s]长度不能大于等于：%d", fieldName, common.ToInt(max))
+		}
+	case strings.HasPrefix(rule, "max>"):
+		max := strings.TrimPrefix(rule, "max>")
+		if value.(int32) > common.ToInt32(max) {
+			return LengthErr.NewFormat("[%s]长度不能大于：%d", fieldName, common.ToInt(max))
 		}
 	case strings.HasPrefix(rule, "range="):
 		between := strings.TrimPrefix(rule, "range=")
@@ -436,25 +483,25 @@ func (my *Validator[T]) checkInt64(rule, fieldName string, value any) error {
 	}
 
 	switch {
-	case strings.HasPrefix(rule, "min<"):
-		min := strings.TrimPrefix(rule, "min<")
-		if value.(int64) < common.ToInt64(min) {
-			return LengthErr.NewFormat("[%s]长度不能小于：%d", fieldName, common.ToInt(min))
-		}
 	case strings.HasPrefix(rule, "min<="):
 		min := strings.TrimPrefix(rule, "min<=")
 		if value.(int64) <= common.ToInt64(min) {
 			return LengthErr.NewFormat("[%s]长度不能小于等于：%d", fieldName, common.ToInt(min))
 		}
-	case strings.HasPrefix(rule, "max>"):
-		max := strings.TrimPrefix(rule, "max>")
-		if value.(int64) > common.ToInt64(max) {
-			return LengthErr.NewFormat("[%s]长度不能大于：%d", fieldName, common.ToInt(max))
+	case strings.HasPrefix(rule, "min<"):
+		min := strings.TrimPrefix(rule, "min<")
+		if value.(int64) < common.ToInt64(min) {
+			return LengthErr.NewFormat("[%s]长度不能小于：%d", fieldName, common.ToInt(min))
 		}
 	case strings.HasPrefix(rule, "max>="):
 		max := strings.TrimPrefix(rule, "max>=")
 		if value.(int64) >= common.ToInt64(max) {
 			return LengthErr.NewFormat("[%s]长度不能大于等于：%d", fieldName, common.ToInt(max))
+		}
+	case strings.HasPrefix(rule, "max>"):
+		max := strings.TrimPrefix(rule, "max>")
+		if value.(int64) > common.ToInt64(max) {
+			return LengthErr.NewFormat("[%s]长度不能大于：%d", fieldName, common.ToInt(max))
 		}
 	case strings.HasPrefix(rule, "range="):
 		between := strings.TrimPrefix(rule, "range=")
@@ -482,25 +529,25 @@ func (my *Validator[T]) checkUint(rule, fieldName string, value any) error {
 	}
 
 	switch {
-	case strings.HasPrefix(rule, "min<"):
-		min := strings.TrimPrefix(rule, "min<")
-		if value.(uint) < common.ToUint(min) {
-			return LengthErr.NewFormat("[%s]长度不能小于：%d", fieldName, common.ToInt(min))
-		}
 	case strings.HasPrefix(rule, "min<="):
 		min := strings.TrimPrefix(rule, "min<=")
 		if value.(uint) <= common.ToUint(min) {
 			return LengthErr.NewFormat("[%s]长度不能小于等于：%d", fieldName, common.ToInt(min))
 		}
-	case strings.HasPrefix(rule, "max>"):
-		max := strings.TrimPrefix(rule, "max>")
-		if value.(uint) > common.ToUint(max) {
-			return LengthErr.NewFormat("[%s]长度不能大于：%d", fieldName, common.ToInt(max))
+	case strings.HasPrefix(rule, "min<"):
+		min := strings.TrimPrefix(rule, "min<")
+		if value.(uint) < common.ToUint(min) {
+			return LengthErr.NewFormat("[%s]长度不能小于：%d", fieldName, common.ToInt(min))
 		}
 	case strings.HasPrefix(rule, "max>="):
 		max := strings.TrimPrefix(rule, "max>=")
 		if value.(uint) >= common.ToUint(max) {
 			return LengthErr.NewFormat("[%s]长度不能大于等于：%d", fieldName, common.ToInt(max))
+		}
+	case strings.HasPrefix(rule, "max>"):
+		max := strings.TrimPrefix(rule, "max>")
+		if value.(uint) > common.ToUint(max) {
+			return LengthErr.NewFormat("[%s]长度不能大于：%d", fieldName, common.ToInt(max))
 		}
 	case strings.HasPrefix(rule, "range="):
 		between := strings.TrimPrefix(rule, "range=")
@@ -528,25 +575,25 @@ func (my *Validator[T]) checkUint8(rule, fieldName string, value any) error {
 	}
 
 	switch {
-	case strings.HasPrefix(rule, "min<"):
-		min := strings.TrimPrefix(rule, "min<")
-		if value.(uint8) < common.ToUint8(min) {
-			return LengthErr.NewFormat("[%s]长度不能小于：%d", fieldName, common.ToInt(min))
-		}
 	case strings.HasPrefix(rule, "min<="):
 		min := strings.TrimPrefix(rule, "min<=")
 		if value.(uint8) <= common.ToUint8(min) {
 			return LengthErr.NewFormat("[%s]长度不能小于等于：%d", fieldName, common.ToInt(min))
 		}
-	case strings.HasPrefix(rule, "max>"):
-		max := strings.TrimPrefix(rule, "max>")
-		if value.(uint8) > common.ToUint8(max) {
-			return LengthErr.NewFormat("[%s]长度不能大于：%d", fieldName, common.ToInt(max))
+	case strings.HasPrefix(rule, "min<"):
+		min := strings.TrimPrefix(rule, "min<")
+		if value.(uint8) < common.ToUint8(min) {
+			return LengthErr.NewFormat("[%s]长度不能小于：%d", fieldName, common.ToInt(min))
 		}
 	case strings.HasPrefix(rule, "max>="):
 		max := strings.TrimPrefix(rule, "max>=")
 		if value.(uint8) >= common.ToUint8(max) {
 			return LengthErr.NewFormat("[%s]长度不能大于等于：%d", fieldName, common.ToInt(max))
+		}
+	case strings.HasPrefix(rule, "max>"):
+		max := strings.TrimPrefix(rule, "max>")
+		if value.(uint8) > common.ToUint8(max) {
+			return LengthErr.NewFormat("[%s]长度不能大于：%d", fieldName, common.ToInt(max))
 		}
 	case strings.HasPrefix(rule, "range="):
 		between := strings.TrimPrefix(rule, "range=")
@@ -574,25 +621,25 @@ func (my *Validator[T]) checkUint16(rule, fieldName string, value any) error {
 	}
 
 	switch {
-	case strings.HasPrefix(rule, "min<"):
-		min := strings.TrimPrefix(rule, "min<")
-		if value.(uint16) < common.ToUint16(min) {
-			return LengthErr.NewFormat("[%s]长度不能小于：%d", fieldName, common.ToInt(min))
-		}
 	case strings.HasPrefix(rule, "min<="):
 		min := strings.TrimPrefix(rule, "min<=")
 		if value.(uint16) <= common.ToUint16(min) {
 			return LengthErr.NewFormat("[%s]长度不能小于等于：%d", fieldName, common.ToInt(min))
 		}
-	case strings.HasPrefix(rule, "max>"):
-		max := strings.TrimPrefix(rule, "max>")
-		if value.(uint16) > common.ToUint16(max) {
-			return LengthErr.NewFormat("[%s]长度不能大于：%d", fieldName, common.ToInt(max))
+	case strings.HasPrefix(rule, "min<"):
+		min := strings.TrimPrefix(rule, "min<")
+		if value.(uint16) < common.ToUint16(min) {
+			return LengthErr.NewFormat("[%s]长度不能小于：%d", fieldName, common.ToInt(min))
 		}
 	case strings.HasPrefix(rule, "max>="):
 		max := strings.TrimPrefix(rule, "max>=")
 		if value.(uint16) >= common.ToUint16(max) {
 			return LengthErr.NewFormat("[%s]长度不能大于等于：%d", fieldName, common.ToInt(max))
+		}
+	case strings.HasPrefix(rule, "max>"):
+		max := strings.TrimPrefix(rule, "max>")
+		if value.(uint16) > common.ToUint16(max) {
+			return LengthErr.NewFormat("[%s]长度不能大于：%d", fieldName, common.ToInt(max))
 		}
 	case strings.HasPrefix(rule, "range="):
 		between := strings.TrimPrefix(rule, "range=")
@@ -620,25 +667,25 @@ func (my *Validator[T]) checkUint32(rule, fieldName string, value any) error {
 	}
 
 	switch {
-	case strings.HasPrefix(rule, "min<"):
-		min := strings.TrimPrefix(rule, "min<")
-		if value.(uint32) < common.ToUint32(min) {
-			return LengthErr.NewFormat("[%s]长度不能小于：%d", fieldName, common.ToInt(min))
-		}
 	case strings.HasPrefix(rule, "min<="):
 		min := strings.TrimPrefix(rule, "min<=")
 		if value.(uint32) <= common.ToUint32(min) {
 			return LengthErr.NewFormat("[%s]长度不能小于等于：%d", fieldName, common.ToInt(min))
 		}
-	case strings.HasPrefix(rule, "max>"):
-		max := strings.TrimPrefix(rule, "max>")
-		if value.(uint32) > common.ToUint32(max) {
-			return LengthErr.NewFormat("[%s]长度不能大于：%d", fieldName, common.ToInt(max))
+	case strings.HasPrefix(rule, "min<"):
+		min := strings.TrimPrefix(rule, "min<")
+		if value.(uint32) < common.ToUint32(min) {
+			return LengthErr.NewFormat("[%s]长度不能小于：%d", fieldName, common.ToInt(min))
 		}
 	case strings.HasPrefix(rule, "max>="):
 		max := strings.TrimPrefix(rule, "max>=")
 		if value.(uint32) >= common.ToUint32(max) {
 			return LengthErr.NewFormat("[%s]长度不能大于等于：%d", fieldName, common.ToInt(max))
+		}
+	case strings.HasPrefix(rule, "max>"):
+		max := strings.TrimPrefix(rule, "max>")
+		if value.(uint32) > common.ToUint32(max) {
+			return LengthErr.NewFormat("[%s]长度不能大于：%d", fieldName, common.ToInt(max))
 		}
 	case strings.HasPrefix(rule, "range="):
 		between := strings.TrimPrefix(rule, "range=")
@@ -666,25 +713,25 @@ func (my *Validator[T]) checkUint64(rule, fieldName string, value any) error {
 	}
 
 	switch {
-	case strings.HasPrefix(rule, "min<"):
-		min := strings.TrimPrefix(rule, "min<")
-		if value.(uint64) < common.ToUint64(min) {
-			return LengthErr.NewFormat("[%s]长度不能小于：%d", fieldName, common.ToInt(min))
-		}
 	case strings.HasPrefix(rule, "min<="):
 		min := strings.TrimPrefix(rule, "min<=")
 		if value.(uint64) <= common.ToUint64(min) {
 			return LengthErr.NewFormat("[%s]长度不能小于等于：%d", fieldName, common.ToInt(min))
 		}
-	case strings.HasPrefix(rule, "max>"):
-		max := strings.TrimPrefix(rule, "max>")
-		if value.(uint64) > common.ToUint64(max) {
-			return LengthErr.NewFormat("[%s]长度不能大于：%d", fieldName, common.ToInt(max))
+	case strings.HasPrefix(rule, "min<"):
+		min := strings.TrimPrefix(rule, "min<")
+		if value.(uint64) < common.ToUint64(min) {
+			return LengthErr.NewFormat("[%s]长度不能小于：%d", fieldName, common.ToInt(min))
 		}
 	case strings.HasPrefix(rule, "max>="):
 		max := strings.TrimPrefix(rule, "max>=")
 		if value.(uint64) >= common.ToUint64(max) {
 			return LengthErr.NewFormat("[%s]长度不能大于等于：%d", fieldName, common.ToInt(max))
+		}
+	case strings.HasPrefix(rule, "max>"):
+		max := strings.TrimPrefix(rule, "max>")
+		if value.(uint64) > common.ToUint64(max) {
+			return LengthErr.NewFormat("[%s]长度不能大于：%d", fieldName, common.ToInt(max))
 		}
 	case strings.HasPrefix(rule, "range="):
 		between := strings.TrimPrefix(rule, "range=")
@@ -712,25 +759,25 @@ func (my *Validator[T]) checkFloat32(rule, fieldName string, value any) error {
 	}
 
 	switch {
-	case strings.HasPrefix(rule, "min<"):
-		min := strings.TrimPrefix(rule, "min<")
-		if value.(float32) < common.ToFloat32(min) {
-			return LengthErr.NewFormat("[%s]长度不能小于[%f]", fieldName, common.ToFloat32(min))
-		}
 	case strings.HasPrefix(rule, "min<="):
 		min := strings.TrimPrefix(rule, "min<=")
 		if value.(float32) <= common.ToFloat32(min) {
 			return LengthErr.NewFormat("[%s]长度不能小于等于：%f", fieldName, common.ToFloat32(min))
 		}
-	case strings.HasPrefix(rule, "max>"):
-		max := strings.TrimPrefix(rule, "max>")
-		if value.(float32) > common.ToFloat32(max) {
-			return LengthErr.NewFormat("[%s]长度不能大于[%f]", fieldName, common.ToFloat32(max))
+	case strings.HasPrefix(rule, "min<"):
+		min := strings.TrimPrefix(rule, "min<")
+		if value.(float32) < common.ToFloat32(min) {
+			return LengthErr.NewFormat("[%s]长度不能小于[%f]", fieldName, common.ToFloat32(min))
 		}
 	case strings.HasPrefix(rule, "max>="):
 		max := strings.TrimPrefix(rule, "max>=")
 		if value.(float32) >= common.ToFloat32(max) {
 			return LengthErr.NewFormat("[%s]长度不能大于等于：%f", fieldName, common.ToFloat32(max))
+		}
+	case strings.HasPrefix(rule, "max>"):
+		max := strings.TrimPrefix(rule, "max>")
+		if value.(float32) > common.ToFloat32(max) {
+			return LengthErr.NewFormat("[%s]长度不能大于[%f]", fieldName, common.ToFloat32(max))
 		}
 	case strings.HasPrefix(rule, "range="):
 		between := strings.TrimPrefix(rule, "range=")
@@ -758,25 +805,25 @@ func (my *Validator[T]) checkFloat64(rule, fieldName string, value any) error {
 	}
 
 	switch {
-	case strings.HasPrefix(rule, "min<"):
-		min := strings.TrimPrefix(rule, "min<")
-		if value.(float64) < common.ToFloat64(min) {
-			return LengthErr.NewFormat("[%s]长度不能小于[%f]", fieldName, common.ToFloat64(min))
-		}
 	case strings.HasPrefix(rule, "min<="):
 		min := strings.TrimPrefix(rule, "min<=")
 		if value.(float64) <= common.ToFloat64(min) {
 			return LengthErr.NewFormat("[%s]长度不能小于等于：%f", fieldName, common.ToFloat64(min))
 		}
-	case strings.HasPrefix(rule, "max>"):
-		max := strings.TrimPrefix(rule, "max>")
-		if value.(float64) > common.ToFloat64(max) {
-			return LengthErr.NewFormat("[%s]长度不能大于[%f]", fieldName, common.ToFloat64(max))
+	case strings.HasPrefix(rule, "min<"):
+		min := strings.TrimPrefix(rule, "min<")
+		if value.(float64) < common.ToFloat64(min) {
+			return LengthErr.NewFormat("[%s]长度不能小于[%f]", fieldName, common.ToFloat64(min))
 		}
 	case strings.HasPrefix(rule, "max>="):
 		max := strings.TrimPrefix(rule, "max>=")
 		if value.(float64) >= common.ToFloat64(max) {
 			return LengthErr.NewFormat("[%s]长度不能大于等于：%f", fieldName, common.ToFloat64(max))
+		}
+	case strings.HasPrefix(rule, "max>"):
+		max := strings.TrimPrefix(rule, "max>")
+		if value.(float64) > common.ToFloat64(max) {
+			return LengthErr.NewFormat("[%s]长度不能大于[%f]", fieldName, common.ToFloat64(max))
 		}
 	case strings.HasPrefix(rule, "range="):
 		between := strings.TrimPrefix(rule, "range=")
