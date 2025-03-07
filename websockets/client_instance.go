@@ -11,6 +11,7 @@ type ClientInstance struct {
 
 var ClientInstanceApp ClientInstance
 
+// New 实例化：websocket客户端实例
 func (*ClientInstance) New(name string) *ClientInstance { return NewClientInstance(name) }
 
 // NewClientInstance 实例化：websocket客户端实例

@@ -34,9 +34,12 @@ type (
 
 var ClientApp Client
 
-func (*Client) New(groupName, name, addr string,
+// New 实例化：链接
+func (*Client) New(
+	groupName, name, addr string,
 	clientCallbackConfig ClientCallbackConfig,
-	options ...any) (*Client, error) {
+	options ...any,
+) (*Client, error) {
 	return NewClient(groupName, name, addr, clientCallbackConfig, options...)
 }
 
