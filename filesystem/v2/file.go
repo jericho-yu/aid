@@ -47,6 +47,30 @@ func (*File) NewByRel(path string) *File {
 	return ins
 }
 
+// Lock 加锁：写锁
+func (my *File) Lock() *File {
+	my.mu.Lock()
+	return my
+}
+
+// Unlock 解锁：写锁
+func (my *File) Unlock() *File {
+	my.mu.Unlock()
+	return my
+}
+
+// RLock 加锁：读锁
+func (my *File) RLock() *File {
+	my.mu.RLock()
+	return my
+}
+
+// RUnlock 解锁：读锁
+func (my *File) RUnlock() *File {
+	my.mu.RUnlock()
+	return my
+}
+
 // getName 获取文件名
 func (my *File) getName() string { return my.name }
 
