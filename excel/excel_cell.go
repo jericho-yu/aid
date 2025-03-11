@@ -14,11 +14,8 @@ type (
 	Cell struct {
 		content                                                                                                              any
 		contentType                                                                                                          CellContentType
-		coordinate                                                                                                           string
-		fontRgb                                                                                                              string
-		patternRgb                                                                                                           string
-		fontBold                                                                                                             bool
-		fontItalic                                                                                                           bool
+		coordinate, fontRgb, patternRgb                                                                                      string
+		fontBold, fontItalic                                                                                                 bool
 		fontFamily                                                                                                           string
 		fontSize                                                                                                             float64
 		borderTopRgb, borderBottomRgb, borderLeftRgb, borderRightRgb, borderDiagonalUpRgb, borderDiagonalDownRgb             string
