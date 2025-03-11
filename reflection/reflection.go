@@ -328,7 +328,7 @@ func compareTagAndTarget(
 func (my *Reflection) HasField(fieldName string) bool { return my.hasField(my.original, fieldName) }
 
 // hasField 判断结构体是否有某个字段
-func (my *Reflection) hasField(v interface{}, fieldName string) bool {
+func (my *Reflection) hasField(v any, fieldName string) bool {
 	val := reflect.ValueOf(v)
 
 	if val.Kind() == reflect.Ptr {
