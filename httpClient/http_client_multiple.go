@@ -52,6 +52,4 @@ func (my *Multiple) Send() *Multiple {
 }
 
 // GetClients 获取链接池
-func (my *Multiple) GetClients() []*HttpClient {
-	return my.clients
-}
+func (my *Multiple) GetClients() []*HttpClient { return my.clients }
