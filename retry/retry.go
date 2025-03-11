@@ -14,9 +14,7 @@ type (
 	}
 )
 
-var (
-	RetryApp Retry
-)
+var RetryApp Retry
 
 // New 实例化：重试器
 func (*Retry) New() *Retry { return &Retry{sleep: time.Second, fn: nil, ctx: context.TODO()} }
@@ -24,18 +22,21 @@ func (*Retry) New() *Retry { return &Retry{sleep: time.Second, fn: nil, ctx: con
 // SetSleep 设置重试间隔
 func (my *Retry) SetSleep(sleep time.Duration) *Retry {
 	my.sleep = sleep
+
 	return my
 }
 
 // SetFn 设置重试方法
 func (my *Retry) SetFn(fn func() error) *Retry {
 	my.fn = fn
+
 	return my
 }
 
 // SetCtx 设置上下文
 func (my *Retry) SetCtx(ctx context.Context) *Retry {
 	my.ctx = ctx
+
 	return my
 }
 
@@ -52,6 +53,7 @@ func (my *Retry) Do(attempts int) error {
 		}
 		return err
 	}
+
 	return nil
 }
 
@@ -72,6 +74,7 @@ func (my *Retry) WithContext(attempts int) error {
 		}
 		return err
 	}
+
 	return nil
 }
 
@@ -95,5 +98,6 @@ func (my *Retry) WithContextAndJitter(attempts int) error {
 		}
 		return err
 	}
+
 	return nil
 }
