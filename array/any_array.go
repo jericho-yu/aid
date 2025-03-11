@@ -27,6 +27,30 @@ func Make[T any](size int) *AnyArray[T] {
 	return &AnyArray[T]{data: make([]T, size), mu: sync.RWMutex{}}
 }
 
+// Lock 加锁：写锁
+func (my *AnyArray[T]) Lock() *AnyArray[T] {
+	my.mu.Lock()
+	return my
+}
+
+// Unlock 解锁：写锁
+func (my *AnyArray[T]) Unlock() *AnyArray[T] {
+	my.mu.Unlock()
+	return my
+}
+
+// RLock 加锁：读锁
+func (my *AnyArray[T]) RLock() *AnyArray[T] {
+	my.mu.RLock()
+	return my
+}
+
+// RUnlock 解锁：读锁
+func (my *AnyArray[T]) RUnlock() *AnyArray[T] {
+	my.mu.RUnlock()
+	return my
+}
+
 // isEmpty 判断是否为空
 func (my *AnyArray[T]) isEmpty() bool { return len(my.data) == 0 }
 
@@ -711,7 +735,7 @@ func ToAny(slice any) []any {
 	}
 
 	result := make([]any, v.Len())
-	for i := 0; i < v.Len(); i++ {
+	for i := range v.Len() {
 		result[i] = v.Index(i).Interface()
 	}
 

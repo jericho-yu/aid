@@ -47,6 +47,30 @@ func Make[K comparable, V any]() *AnyDict[K, V] {
 	}
 }
 
+// Lock 加锁：写锁
+func (my *AnyDict[K, V]) Lock() *AnyDict[K, V] {
+	my.mu.Lock()
+	return my
+}
+
+// Unlock 解锁：写锁
+func (my *AnyDict[K, V]) Unlock() *AnyDict[K, V] {
+	my.mu.Unlock()
+	return my
+}
+
+// RLock 加锁：读锁
+func (my *AnyDict[K, V]) RLock() *AnyDict[K, V] {
+	my.mu.RLock()
+	return my
+}
+
+// RUnlock 解锁：读锁
+func (my *AnyDict[K, V]) RUnlock() *AnyDict[K, V] {
+	my.mu.RUnlock()
+	return my
+}
+
 func (my *AnyDict[K, V]) getKeyByIndex(idx int) K { return my.keys[idx] }
 
 // GetKeyByIdx 通过索引获取键
