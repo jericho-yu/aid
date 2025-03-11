@@ -158,7 +158,7 @@ func (my *AnyArray[T]) First() T {
 func (my *AnyArray[T]) last() T {
 	var t T
 
-	return operation.Ternary[T](my.Len() > 1, my.data[len(my.data)-1], operation.Ternary[T](my.Len() == 0, t, my.data[0]))
+	return operation.Ternary(my.Len() > 1, my.data[len(my.data)-1], operation.Ternary(my.Len() == 0, t, my.data[0]))
 }
 
 // Lst 获取最后一个值

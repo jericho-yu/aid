@@ -1,8 +1,9 @@
 package excel
 
 import (
-	"github.com/jericho-yu/aid/dict"
 	"time"
+
+	"github.com/jericho-yu/aid/dict"
 
 	"github.com/jericho-yu/aid/str"
 	"github.com/xuri/excelize/v2"
@@ -79,7 +80,7 @@ func WriteDemo(filename string) {
 					NewCellAny("王五"),
 					NewCellAny(80).
 						SetFontRgbFunc(func() (string, bool) {
-							if 80 > 80 {
+							if 80 > 90 {
 								return "FF0000", true
 							} else {
 								return "", false

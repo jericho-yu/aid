@@ -64,7 +64,7 @@ func (my *Reader) DataWithTitle() (*dict.AnyDict[uint64, *dict.AnyDict[string, s
 	newDict := dict.Make[uint64, *dict.AnyDict[string, string]]()
 
 	for idx, value := range my.data.ToMap() {
-		newDict.Set(idx, dict.Zip[string, string](my.titles.ToSlice(), value.ToSlice()))
+		newDict.Set(idx, dict.Zip(my.titles.ToSlice(), value.ToSlice()))
 	}
 
 	return newDict, nil
@@ -126,7 +126,7 @@ func (my *Reader) SetTitle(titles []string) *Reader {
 		my.Err = errors.New("表头不能为空")
 		return my
 	}
-	my.titles = array.New[string](titles)
+	my.titles = array.New(titles)
 
 	return my
 }
