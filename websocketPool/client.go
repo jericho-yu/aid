@@ -77,7 +77,7 @@ func NewClient(
 func (my *Client) SendMsg(msgType int, msg []byte) ([]byte, error) {
 	var (
 		err error
-		res = make([]byte, 0)
+		res []byte
 	)
 
 	if my.timeout == nil || my.timeout.interval == 0 {

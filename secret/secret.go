@@ -18,7 +18,7 @@ import (
 func EncryptAuthorization(key, secretKey string, iv []byte, randStr ...string) (string, string, error) {
 	var (
 		err   error
-		uuid  = ""
+		uuid  string
 		token []byte
 	)
 

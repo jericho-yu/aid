@@ -501,9 +501,9 @@ func (my *HttpClient) Download(filename, processContent string) *HttpClient {
 		defer f.Close()
 
 		if processContent != "" {
-			io.Copy(io.MultiWriter(f, processBar.DefaultBytes(my.response.ContentLength, processContent)), my.response.Body)
+			_, _ = io.Copy(io.MultiWriter(f, processBar.DefaultBytes(my.response.ContentLength, processContent)), my.response.Body)
 		} else {
-			io.Copy(f, my.response.Body)
+			_, _ = io.Copy(f, my.response.Body)
 		}
 
 		return my
