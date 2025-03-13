@@ -62,3 +62,10 @@ func (my *zapConfig) SetNeedCompress(needCompress bool) *zapConfig {
 
 	return my
 }
+
+// SetInConsole 设置是否需要在终端显示
+func (my *zapConfig) SetInConsole(InConsole bool) *zapConfig {
+	my.InConsole = InConsole
+
+	return my
+}
