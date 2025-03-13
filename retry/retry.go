@@ -6,13 +6,11 @@ import (
 	"time"
 )
 
-type (
-	Retry struct {
-		sleep time.Duration
-		fn    func() error
-		ctx   context.Context
-	}
-)
+type Retry struct {
+	sleep time.Duration
+	fn    func() error
+	ctx   context.Context
+}
 
 var RetryApp Retry
 
