@@ -2,60 +2,23 @@ package zapLogger
 
 import "go.uber.org/zap/zapcore"
 
-type (
-	zapConfig struct {
-		Path         string
-		PathAbs      bool
-		MaxSize      int
-		MaxBackup    int
-		MaxDay       int
-		NeedCompress bool
-		InConsole    bool
-		Extension    string
-		Level        zapcore.Level
-		EncoderType  EncoderType
-	}
-
-	zapConfigPath         struct{ Value string }
-	zapConfigPathAbs      struct{ Value bool }
-	zapConfigMaxSize      struct{ Value int }
-	zapConfigMaxBackup    struct{ Value int }
-	zapConfigMaxDay       struct{ Value int }
-	zapConfigNeedCompress struct{ Value bool }
-	zapConfigInConsole    struct{ Value bool }
-	zapConfigExtension    struct{ Value string }
-
-	ConfigType string
-)
+type zapConfig struct {
+	Path         string
+	PathAbs      bool
+	MaxSize      int
+	MaxBackup    int
+	MaxDay       int
+	NeedCompress bool
+	InConsole    bool
+	Extension    string
+	Level        zapcore.Level
+	EncoderType  EncoderType
+}
 
 var ZapProviderConfig zapConfig
 
-func NewZapConfigMaxSize(value int) *zapConfigMaxSize {
-	return &zapConfigMaxSize{Value: value}
-}
-
-func NewZapConfigMaxBackup(value int) *zapConfigMaxBackup {
-	return &zapConfigMaxBackup{Value: value}
-}
-
-func NewZapConfigMaxDay(value int) *zapConfigMaxDay {
-	return &zapConfigMaxDay{Value: value}
-}
-
-func NewZapConfigNeedCompress(value bool) *zapConfigNeedCompress {
-	return &zapConfigNeedCompress{Value: value}
-}
-
-func NewZapConfigInConsole(value bool) *zapConfigInConsole {
-	return &zapConfigInConsole{Value: value}
-}
-
-func NewZapConfigExtension(value string) *zapConfigExtension {
-	return &zapConfigExtension{Value: value}
-}
-
 // New 实例化：日志配置
-func (*zapConfig) New(path string, pathAbs bool, encoderType EncoderType, level zapcore.Level, zapConfigItems ...any) *zapConfig {
+func (*zapConfig) New(path string, pathAbs bool, encoderType EncoderType, level zapcore.Level) *zapConfig {
 	ins := &zapConfig{
 		Path:         path,
 		PathAbs:      pathAbs,
@@ -67,25 +30,6 @@ func (*zapConfig) New(path string, pathAbs bool, encoderType EncoderType, level 
 		NeedCompress: false,
 		InConsole:    false,
 		Extension:    ".log",
-	}
-
-	if len(zapConfigItems) > 0 {
-		for _, item := range zapConfigItems {
-			switch i := item.(type) {
-			case *zapConfigMaxSize:
-				ins.MaxSize = i.Value
-			case *zapConfigMaxBackup:
-				ins.MaxBackup = i.Value
-			case *zapConfigMaxDay:
-				ins.MaxDay = i.Value
-			case *zapConfigExtension:
-				ins.Extension = i.Value
-			case *zapConfigNeedCompress:
-				ins.NeedCompress = i.Value
-			case *zapConfigInConsole:
-				ins.InConsole = i.Value
-			}
-		}
 	}
 
 	return ins

@@ -8,14 +8,12 @@ import (
 	"fmt"
 )
 
-type (
-	PemBase64 struct {
-		base64PublicKey  string
-		base64PrivateKey string
-		publicKey        []byte
-		privateKey       []byte
-	}
-)
+type PemBase64 struct {
+	base64PublicKey  string
+	base64PrivateKey string
+	publicKey        []byte
+	privateKey       []byte
+}
 
 var PemBase64App PemBase64
 

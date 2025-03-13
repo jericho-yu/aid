@@ -10,15 +10,10 @@ import (
 func Test1(t *testing.T) {
 	t.Run("test1 创建日志", func(t *testing.T) {
 		zapLogger := ZapProviderApp.New(
-			ZapProviderConfig.New(
-				"./",
-				false,
-				EncoderTypeConsole,
-				zapcore.ErrorLevel,
-				NewZapConfigMaxBackup(30),
-				NewZapConfigMaxSize(10),
-				NewZapConfigMaxDay(30),
-			),
+			ZapProviderConfig.New("./", false, EncoderTypeConsole, zapcore.ErrorLevel).
+				SetMaxBackup(30).
+				SetMaxSize(10).
+				SetMaxDay(30),
 		)
 
 		zapLogger.Info("test-info", zap.String("a", "b"))

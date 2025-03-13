@@ -120,7 +120,7 @@ func GetWriteSync(config *zapConfig, path string) zapcore.WriteSyncer {
 		Compress:   config.NeedCompress, // 是否压缩处理,压缩以后文件为xxxxx.gz
 	}
 
-	return operation.Ternary[zapcore.WriteSyncer](config.InConsole, zapcore.NewMultiWriteSyncer(zapcore.AddSync(fileWriter), zapcore.AddSync(os.Stdout)), zapcore.AddSync(fileWriter))
+	return operation.Ternary(config.InConsole, zapcore.NewMultiWriteSyncer(zapcore.AddSync(fileWriter), zapcore.AddSync(os.Stdout)), zapcore.AddSync(fileWriter))
 }
 
 // New 实例化：Zap日志服务提供者

@@ -6,15 +6,6 @@ import (
 	"time"
 )
 
-var (
-	Letters      = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" // 52
-	UpperLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"                           // 26
-	LowerLetters = "abcdefghijklmnopqrstuvwxyz"                           // 26
-	Symbols      = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"                   // 32
-	Digits       = "0123456789"                                           // 10
-	characters   = Letters + Digits + Symbols                             // 94
-)
-
 type Rand struct {
 	// bufferChan is the buffer for random bytes,
 	// every item storing 4 bytes.
@@ -22,8 +13,16 @@ type Rand struct {
 }
 
 var (
-	RandApp Rand
+	Letters      = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" // 52
+	UpperLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"                           // 26
+	LowerLetters = "abcdefghijklmnopqrstuvwxyz"                           // 26
+	Symbols      = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"                   // 32
+	Digits       = "0123456789"                                           // 10
+	characters   = Letters + Digits + Symbols                             // 94
+	RandApp      Rand
 )
+
+var ()
 
 // Buffer size for uint32 random number.
 const bufferChanSize = 10000
