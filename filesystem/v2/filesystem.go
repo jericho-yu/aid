@@ -19,7 +19,10 @@ func CopyFiles(srcFiles, dstFiles *array.AnyArray[*File]) {
 
 // CopyFilesByDstPath 批量复制文件：通过dst绝对路径（无法指定拷贝后的文件名）
 func CopyFilesByDstPath(srcFiles *array.AnyArray[*File], dstPath string) {
-	CopyFiles(srcFiles, srcFiles.Copy().Every(func(item *File) *File { return FileApp.NewByAbs(filepath.Join(dstPath, item.GetName())) }))
+	dstFiles := array.Make[*File](0)
+	srcFiles.Each(func(idx int, item *File) { dstFiles.Append(FileApp.NewByAbs(filepath.Join(dstPath, item.GetName()))) })
+
+	CopyFiles(srcFiles, dstFiles)
 }
 
 // CopyFilesBy2Path 批量复制文件：通过src绝对路径到dst绝对路径（无法指定拷贝后的文件名）

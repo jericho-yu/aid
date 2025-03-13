@@ -1,7 +1,6 @@
 package v2
 
 import (
-	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -423,8 +422,6 @@ func (my *Dir) copyAllDirsTo(dstDir string) {
 	if my.getDirs().IsNotEmpty() {
 		my.dirs.Each(func(idx int, item *Dir) {
 			dstFullPath := dst.Copy().Join(item.getName()).Create(item.getMode()).GetFullPath()
-			log.Printf("OK1: %v\n", item.GetFullPath())
-			log.Printf("OK2: %v\n", dstFullPath)
 			if item.files.IsNotEmpty() {
 				item.copyAllFilesTo(dstFullPath)
 			}

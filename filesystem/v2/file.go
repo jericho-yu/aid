@@ -4,6 +4,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"path/filepath"
 	"sync"
 )
 
@@ -181,8 +182,8 @@ func (my *File) refresh() {
 				my.name = ""
 				my.size = 0
 				my.mode = 0
-				my.basePath = path.Dir(my.fullPath)
-				my.extension = path.Ext(my.fullPath)
+				my.basePath = filepath.Dir(my.fullPath)
+				my.extension = filepath.Ext(my.fullPath)
 				my.exist = false
 				my.err = nil
 				return
@@ -356,6 +357,10 @@ func (my *File) copyTo(dstFilename string) int64 {
 	}
 
 	dstFile := FileApp.NewByAbs(dstFilename)
+	dstDir := DirApp.NewByAbs(dstFile.GetBasePath())
+	if !dstDir.GetExist() {
+		dstDir.CreateDefaultMode()
+	}
 	dstFile.Create(my.getMode())
 	if dstFile.Error() != nil {
 		my.err = CopyFileDstErr.Wrap(dstFile.Error())

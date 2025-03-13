@@ -623,7 +623,8 @@ func (my *AnyArray[T]) RemoveByValues(targets ...T) *AnyArray[T] {
 
 func (my *AnyArray[T]) every(fn func(item T) T) *AnyArray[T] {
 	for idx := range my.data {
-		my.data[idx] = fn(my.data[idx])
+		v := fn(my.data[idx])
+		my.data[idx] = v
 	}
 
 	return my
