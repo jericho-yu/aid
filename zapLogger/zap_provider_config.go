@@ -69,3 +69,10 @@ func (my *zapConfig) SetInConsole(InConsole bool) *zapConfig {
 
 	return my
 }
+
+// SetExtension 设置扩展名
+func (my *zapConfig) SetExtension(extension string) *zapConfig {
+	my.Extension = extension
+
+	return my
+}
