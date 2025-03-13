@@ -34,8 +34,8 @@ func NewMessage(async bool, message []byte) Message {
 	b.Write(message)
 	return Message{
 		async:            async,
-		messageId:        operation.Ternary[string](async, u, ""),
-		message:          operation.Ternary[[]byte](async, b.Bytes(), message),
+		messageId:        operation.Ternary(async, u, ""),
+		message:          operation.Ternary(async, b.Bytes(), message),
 		prototypeMessage: message,
 	}
 }
@@ -70,7 +70,7 @@ func (my *Message) GetMessageId() string { return my.messageId }
 
 // GetMessage 获取消息
 func (my *Message) GetMessage() []byte {
-	return operation.Ternary[[]byte](my.async, my.message, my.prototypeMessage)
+	return operation.Ternary(my.async, my.message, my.prototypeMessage)
 }
 
 // GetPrototypeMessage 获取原始消息
