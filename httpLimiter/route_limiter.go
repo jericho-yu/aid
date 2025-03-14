@@ -21,7 +21,12 @@ var (
 	routerLimiterOnce = sync.Once{}
 	routerLimiterIns  *RouteLimiter
 	RouterLimiterApp  RouteLimiter
+	visitorApp        visitor
 )
+
+func (*visitor) New(t time.Duration, maxVisitTimes uint16) *visitor {
+	return &visitor{ipLimiter: NewIpLimiter(), t: t, maxVisitTimes: maxVisitTimes}
+}
 
 func (*RouteLimiter) Once() *RouteLimiter { return OnceRouteLimiter() }
 
@@ -36,7 +41,7 @@ func OnceRouteLimiter() *RouteLimiter {
 
 // Add 添加限流规则
 func (my *RouteLimiter) Add(router string, t time.Duration, maxVisitTimes uint16) *RouteLimiter {
-	my.RouteSetMap.Store(router, &visitor{ipLimiter: NewIpLimiter(), t: t, maxVisitTimes: maxVisitTimes})
+	my.RouteSetMap.Store(router, visitorApp.New(t, maxVisitTimes))
 
 	return my
 }

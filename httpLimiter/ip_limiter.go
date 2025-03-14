@@ -22,6 +22,10 @@ var (
 	IpLimiterApp IpLimiter
 )
 
+func (*Visit) New() *Visit {
+	return &Visit{lastVisit: time.Now(), visitTimes: 1}
+}
+
 func (*IpLimiter) New() *IpLimiter { return NewIpLimiter() }
 
 // NewIpLimiter 实例化：Ip 限流
@@ -37,7 +41,7 @@ func (my *IpLimiter) Affirm(ip string, t time.Duration, maxVisitTimes uint16) (*
 
 	v, ok := my.visitMap[ip]
 	if !ok {
-		my.visitMap[ip] = &Visit{lastVisit: time.Now(), visitTimes: 1}
+		my.visitMap[ip] = VisitApp.New()
 		return nil, true
 	}
 
