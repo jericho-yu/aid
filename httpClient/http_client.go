@@ -17,7 +17,6 @@ import (
 	"time"
 
 	"github.com/jericho-yu/aid/str"
-	processBar "github.com/schollz/progressbar/v3"
 )
 
 type (
@@ -485,30 +484,35 @@ func (my *HttpClient) beforeSend() *http.Client {
 	return client
 }
 
-// Download 下载文件
-func (my *HttpClient) Download(filename, processContent string) *HttpClient {
-	client := my.beforeSend()
-	if my.Err != nil {
-		return my
-	}
-
-	if my.response, my.Err = client.Do(my.request); my.Err != nil {
-		return my
-	} else {
-		defer my.response.Body.Close()
-
-		f, _ := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0644)
-		defer f.Close()
-
-		if processContent != "" {
-			_, _ = io.Copy(io.MultiWriter(f, processBar.DefaultBytes(my.response.ContentLength, processContent)), my.response.Body)
-		} else {
-			_, _ = io.Copy(f, my.response.Body)
-		}
-
-		return my
-	}
+// Download 使用下载器下载文件
+func (my *HttpClient) Download(filename string) *HttpClientDownload {
+	return HttpClientDownloadApp.New(my, filename)
 }
+
+// Download 下载文件
+// func (my *HttpClient) Download(filename, processContent string) *HttpClient {
+// 	client := my.beforeSend()
+// 	if my.Err != nil {
+// 		return my
+// 	}
+
+// 	if my.response, my.Err = client.Do(my.request); my.Err != nil {
+// 		return my
+// 	} else {
+// 		defer my.response.Body.Close()
+
+// 		f, _ := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0644)
+// 		defer f.Close()
+
+// 		if processContent != "" {
+// 			_, _ = io.Copy(io.MultiWriter(f, processBar.DefaultBytes(my.response.ContentLength, processContent)), my.response.Body)
+// 		} else {
+// 			_, _ = io.Copy(f, my.response.Body)
+// 		}
+
+// 		return my
+// 	}
+// }
 
 // Send 发送请求
 func (my *HttpClient) Send() *HttpClient {
