@@ -28,9 +28,7 @@ type (
 	}
 
 	// ServerInstance websocket服务端实例
-	ServerInstance struct {
-		Connections *array.AnyArray[*Server]
-	}
+	ServerInstance struct{ Connections *array.AnyArray[*Server] }
 
 	// Server websocket服务端链接
 	Server struct {
@@ -48,70 +46,79 @@ var (
 )
 
 // Once 单例化：服务端连接池
-func (ServerPool) Once() *ServerPool {
+func (*ServerPool) Once() *ServerPool {
 	serverPoolOnce.Do(func() {
 		serverPoolIns = &ServerPool{}
-		serverPoolIns.serverInstances = dict.MakeAnyDict[string, *ServerInstance]()
-		serverPoolIns.router = dict.MakeAnyDict[string, func(*websocket.Conn)]()
+		serverPoolIns.serverInstances = dict.Make[string, *ServerInstance]()
+		serverPoolIns.router = dict.Make[string, func(*websocket.Conn)]()
 	})
+
 	return serverPoolIns
 }
 
 // New 实例化：链接切片
-func (ServerInstance) New() *ServerInstance {
-	return &ServerInstance{Connections: array.MakeAnyArray[*Server](0)}
+func (*ServerInstance) New() *ServerInstance {
+	return &ServerInstance{Connections: array.Make[*Server](0)}
 }
 
 // SetOnConnect 设置回调：链接成功后
-func (ServerPool) SetOnConnect(onConnect func(*websocket.Conn)) *ServerPool {
+func (*ServerPool) SetOnConnect(onConnect func(*websocket.Conn)) *ServerPool {
 	serverPoolIns.onConnect = onConnect
+
 	return serverPoolIns
 }
 
 // SetOnConnectErr 设置回调：链接失败后
-func (ServerPool) SetOnConnectErr(onConnectErr func(error)) *ServerPool {
+func (*ServerPool) SetOnConnectErr(onConnectErr func(error)) *ServerPool {
 	serverPoolIns.onConnectErr = onConnectErr
+
 	return serverPoolIns
 }
 
 // SetOnReceiveMsg 设置回调：接收消息
-func (ServerPool) SetOnReceiveMsg(onMessage func(*websocket.Conn, []byte) string) *ServerPool {
+func (*ServerPool) SetOnReceiveMsg(onMessage func(*websocket.Conn, []byte) string) *ServerPool {
 	serverPoolIns.onReceiveMsg = onMessage
+
 	return serverPoolIns
 }
 
 // SetOnReceiveMsgErr 设置回调：接收消息失败
-func (ServerPool) SetOnReceiveMsgErr(onMessageErr func(*websocket.Conn, error)) *ServerPool {
+func (*ServerPool) SetOnReceiveMsgErr(onMessageErr func(*websocket.Conn, error)) *ServerPool {
 	serverPoolIns.onReceiveMsgErr = onMessageErr
+
 	return serverPoolIns
 }
 
 // SetOnRouterErr 设置回调：路由解析失败
-func (ServerPool) SetOnRouterErr(onRouterErr func(*websocket.Conn, error)) *ServerPool {
+func (*ServerPool) SetOnRouterErr(onRouterErr func(*websocket.Conn, error)) *ServerPool {
 	serverPoolIns.onRouterErr = onRouterErr
+
 	return serverPoolIns
 }
 
 // SetOnCloseConnErr 设置回调：关闭链接错误
-func (ServerPool) SetOnCloseConnErr(onCloseConnectionErr func(conn *websocket.Conn, err error)) *ServerPool {
+func (*ServerPool) SetOnCloseConnErr(onCloseConnectionErr func(conn *websocket.Conn, err error)) *ServerPool {
 	serverPoolIns.onCloseConnErr = onCloseConnectionErr
+
 	return serverPoolIns
 }
 
 // SetOnSendMsgErr 设置回调：发送消息失败
-func (ServerPool) SetOnSendMsgErr(onSendMessageErr func(conn *websocket.Conn, err error)) *ServerPool {
+func (*ServerPool) SetOnSendMsgErr(onSendMessageErr func(conn *websocket.Conn, err error)) *ServerPool {
 	serverPoolIns.onSendMsgErr = onSendMessageErr
+
 	return serverPoolIns
 }
 
 // SetOnPing 设置回调：ping
-func (ServerPool) SetOnPing(fn func(*websocket.Conn)) *ServerPool {
+func (*ServerPool) SetOnPing(fn func(*websocket.Conn)) *ServerPool {
 	serverPoolIns.onPing = fn
+
 	return serverPoolIns
 }
 
 // Handle 消息处理
-func (ServerPool) Handle(
+func (*ServerPool) Handle(
 	writer http.ResponseWriter,
 	req *http.Request,
 	header http.Header,
@@ -122,7 +129,7 @@ func (ServerPool) Handle(
 		ws                   *websocket.Conn
 		message              []byte
 		accountOpenId        string
-		cond, exist          bool
+		cond                 bool
 		serverInstance, rout any
 		wsc                  *ServerInstance
 		messageType          int
@@ -137,13 +144,13 @@ func (ServerPool) Handle(
 
 	accountOpenId, cond = condition()
 	if cond {
-		serverInstance, exist = serverPoolIns.serverInstances.Get(accountOpenId)
-		if !exist {
+		if serverPoolIns.serverInstances.GetIndexByKey(accountOpenId) > -1 {
+			serverInstance = serverPoolIns.serverInstances.GetValueByKey(accountOpenId)
+			serverInstance.(*ServerInstance).Connections.Append(&Server{Conn: ws})
+		} else {
 			wsc = SeverInstanceApp.New()
 			wsc.Connections.Append(&Server{Conn: ws})
 			serverPoolIns.serverInstances.Set(accountOpenId, wsc)
-		} else {
-			serverInstance.(*ServerInstance).Connections.Append(&Server{Conn: ws})
 		}
 
 		if serverPoolIns.onConnect != nil {
@@ -162,8 +169,9 @@ func (ServerPool) Handle(
 		case websocket.TextMessage:
 			routerKey := serverPoolIns.onReceiveMsg(ws, message)
 			if routerKey != "" {
-				if rout, exist = serverPoolIns.router.Get(routerKey); exist {
-					rout.(func(*websocket.Conn))(ws) // 执行路由中的函数
+				if serverPoolIns.router.GetIndexByKey(routerKey) > -1 {
+					rout = serverPoolIns.router.GetValueByKey(routerKey)
+					rout.(func(*websocket.Conn))(ws)
 				} else {
 					if serverPoolIns.onRouterErr != nil {
 						serverPoolIns.onRouterErr(ws, fmt.Errorf("没有找到路由：%s", routerKey))
@@ -189,7 +197,7 @@ func (ServerPool) Handle(
 }
 
 // SendMsgByWsConn 通过链接发送消息
-func (ServerPool) SendMsgByWsConn(ws *websocket.Conn, message []byte) error {
+func (*ServerPool) SendMsgByWsConn(ws *websocket.Conn, message []byte) error {
 	err := ws.WriteMessage(websocket.TextMessage, message)
 	if err != nil {
 		if serverPoolIns.onSendMsgErr != nil {
@@ -197,13 +205,14 @@ func (ServerPool) SendMsgByWsConn(ws *websocket.Conn, message []byte) error {
 		}
 		return fmt.Errorf("发送消息失败：%s ==> %s", err.Error(), ws.RemoteAddr())
 	}
+
 	return nil
 }
 
 // SendMsgByWsManyConn 通过链接切片发送消息
-func (ServerPool) SendMsgByWsManyConn(servers *array.AnyArray[*Server], message []byte) {
+func (*ServerPool) SendMsgByWsManyConn(servers *array.AnyArray[*Server], message []byte) {
 	if servers.Len() > 0 {
-		for _, server := range servers.All() {
+		for _, server := range servers.ToSlice() {
 			if server != nil {
 				err := serverPoolIns.SendMsgByWsConn(server.Conn, message)
 				if err != nil {
@@ -217,9 +226,9 @@ func (ServerPool) SendMsgByWsManyConn(servers *array.AnyArray[*Server], message 
 }
 
 // SendMsgByAccountOpenId 根据用户openId发送消息
-func (ServerPool) SendMsgByAccountOpenId(accountOpenId string, message []byte) error {
-	client, exist := serverPoolIns.serverInstances.Get(accountOpenId)
-	if exist {
+func (*ServerPool) SendMsgByAccountOpenId(accountOpenId string, message []byte) error {
+	if serverPoolIns.serverInstances.GetIndexByKey(accountOpenId) > -1 {
+		client := serverPoolIns.serverInstances.GetValueByKey(accountOpenId)
 		serverPoolIns.SendMsgByWsManyConn(client.Connections, message)
 	}
 
@@ -227,28 +236,29 @@ func (ServerPool) SendMsgByAccountOpenId(accountOpenId string, message []byte) e
 }
 
 // RegisterRouter 注册路由
-func (ServerPool) RegisterRouter(routerKey string, fn func(ws *websocket.Conn)) *ServerPool {
-	if _, exist := serverPoolIns.router.Get(routerKey); exist {
+func (*ServerPool) RegisterRouter(routerKey string, fn func(ws *websocket.Conn)) *ServerPool {
+	if serverPoolIns.router.GetIndexByKey(routerKey) > -1 {
 		serverPoolIns.router.RemoveByKey(routerKey)
 	}
 	serverPoolIns.router.Set(routerKey, fn)
+
 	return serverPoolIns
 }
 
 // Close 关闭连接池
-func (ServerPool) Close() {
+func (*ServerPool) Close() {
 	var err error
 
-	for _, value := range serverPoolIns.serverInstances.All() {
-		for _, server := range value.Connections.All() {
-			if err = server.Conn.Close(); err != nil {
+	serverPoolIns.serverInstances.Each(func(key string, value *ServerInstance) {
+		value.Connections.Each(func(idx int, item *Server) {
+			if err = item.Conn.Close(); err != nil {
 				if serverPoolIns.onCloseConnErr != nil {
-					serverPoolIns.onCloseConnErr(server.Conn, err)
+					serverPoolIns.onCloseConnErr(item.Conn, err)
 				}
 				return
 			}
-			server.done <- struct{}{}
-		}
+			item.done <- struct{}{}
+		})
 		value.Connections.Clean()
-	}
+	})
 }

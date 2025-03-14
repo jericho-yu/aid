@@ -36,18 +36,26 @@ type (
 	}
 )
 
+var AesApp Aes
+
+func (*Aes) New(sail string) *Aes { return &Aes{sailStr: sail} }
+
 // NewAes 实例化：Aes密钥
+//
+//go:fix 推荐使用：New方法
 func NewAes(sail string) *Aes { return &Aes{sailStr: sail} }
 
 // NewEncrypt 实例化：Aes加密密钥对象
 func (my *Aes) NewEncrypt() *Aes {
 	my.Encrypt = NewAesEncrypt(my.sailStr)
+
 	return my
 }
 
 // NewDecrypt 实例化：Aes解密密钥对象
 func (my *Aes) NewDecrypt(openKey string) *Aes {
 	my.Decrypt = NewAesDecrypt(my.sailStr, openKey)
+
 	return my
 }
 
@@ -89,20 +97,17 @@ func (r *AesEncrypt) sailByByte() *AesEncrypt {
 }
 
 // GetAesKey 获取加盐后的密钥
-func (r *AesEncrypt) GetAesKey() []byte {
-	return r.aesKey
-}
+func (r *AesEncrypt) GetAesKey() []byte { return r.aesKey }
 
 // SetAesKey 设置加盐后的密钥
 func (r *AesEncrypt) SetAesKey(aesKey []byte) *AesEncrypt {
 	r.aesKey = aesKey
+
 	return r
 }
 
 // GetOpenKey 获取公开密码
-func (r *AesEncrypt) GetOpenKey() string {
-	return r.openKey
-}
+func (r *AesEncrypt) GetOpenKey() string { return r.openKey }
 
 // NewAesDecrypt 实例化：Aes解密密钥对象
 func NewAesDecrypt(sailStr, openKey string) *AesDecrypt {

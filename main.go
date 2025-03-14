@@ -1,24 +1,16 @@
 package main
 
 import (
-	"crypto/sha256"
-	"encoding/binary"
-	"fmt"
+	filesystem "github.com/jericho-yu/aid/filesystem/v2"
 )
 
-// hashString 生成字符串的 SHA-256 哈希值
-func hashString(s string) int {
-	hash := sha256.New()
-	hash.Write([]byte(s))
-	hashBytes := hash.Sum(nil)
-	return int(binary.BigEndian.Uint32(hashBytes[:4]))
-}
-
 func main() {
-	str := "AinfinitCabinetExtendedDevices-com.jz.autobooth!"
-	hashedInt := hashString(str)
-	hashedHex := fmt.Sprintf("%x", hashedInt)
-	fmt.Println("Original String:", str)
-	fmt.Println("Hashed Int:", hashedInt)
-	fmt.Println("Hashed Hex:", hashedHex)
+	src := filesystem.DirApp.NewByRel("./a1")
+	src.Ls()
+	// dst := src.GetFiles().Copy().Every(func(item *filesystem.File) *filesystem.File {
+	// 	return filesystem.FileApp.NewByAbs(filepath.Join(item.GetBasePath(), "..", "a2", item.GetName()))
+	// })
+	// dst.Each(func(idx int, item *filesystem.File) { fmt.Printf("%s\n", item.GetFullPath()) })
+
+	filesystem.CopyFilesByDstPath(src.GetFiles(), src.Join("../a2").GetFullPath())
 }

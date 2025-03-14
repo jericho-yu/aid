@@ -6,13 +6,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jericho-yu/aid/common"
+	"github.com/spf13/cast"
 )
 
 type (
-	Str struct {
-		original string
-	}
+	Str struct{ original string }
 
 	TerminalLog struct {
 		format string
@@ -20,6 +18,11 @@ type (
 	}
 
 	TerminalLogColor string
+)
+
+var (
+	StrApp         Str
+	TerminalLogApp TerminalLog
 )
 
 const (
@@ -34,6 +37,11 @@ const (
 	TerminalLogColorReset   TerminalLogColor = "\033[0m"
 )
 
+func (*Str) New(original string) *Str { return &Str{original: original} }
+
+// NewStr 实例化：字符串
+//
+//go:fix 推荐使用：New方法
 func NewStr(original string) *Str { return &Str{original: original} }
 
 // PadLeftZeros 前置补零
@@ -83,13 +91,25 @@ func (my *Str) PadRightZeros(length int) (string, error) {
 // PadRight 后置填充
 func (my *Str) PadRight(length int, s string) string {
 	my.original += strings.Repeat(s, length-(len(my.original)%length))
+
 	return my.original
 }
 
 // PadLeft 前置补充
 func (my *Str) PadLeft(length int, s string) string {
 	my.original = strings.Repeat(s, length-(len(my.original)%length)) + s
+
 	return my.original
+}
+
+// New 实例化：控制台日志
+func (*TerminalLog) New(format ...string) *TerminalLog {
+	var f string
+	for _, v := range format {
+		f += v
+	}
+
+	return &TerminalLog{format: f, enable: cast.ToBool(os.Getenv("AID__STR__TERMINAL_LOG__ENABLE"))}
 }
 
 // NewTerminalLog 实例化：控制台日志
@@ -98,7 +118,8 @@ func NewTerminalLog(format ...string) *TerminalLog {
 	for _, v := range format {
 		f += v
 	}
-	return &TerminalLog{format: f, enable: common.ToBool(os.Getenv("AID__STR__TERMINAL_LOG__ENABLE"))}
+
+	return &TerminalLog{format: f, enable: cast.ToBool(os.Getenv("AID__STR__TERMINAL_LOG__ENABLE"))}
 }
 
 // Default 打印日志行

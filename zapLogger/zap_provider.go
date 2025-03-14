@@ -1,60 +1,53 @@
-package log
+package zapLogger
 
 import (
 	"fmt"
-	"github.com/jericho-yu/aid/filesystem"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/jericho-yu/aid/filesystem"
+	"github.com/jericho-yu/aid/operation"
+	"github.com/natefinch/lumberjack"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 // ZapProvider Zap日志服务提供者
 type (
-	ZapProvider struct {
-		path      string
-		inConsole bool
-	}
-	fileRotateLogs struct{}
-	Cutter         struct {
+	ZapProvider struct{}
+	Cutter      struct {
 		level    string        // 日志级别(debug, info, warn, error, dpanic, panic, fatal)
 		format   string        // 时间格式(2006-01-02)
 		Director string        // 日志文件夹
 		file     *os.File      // 文件句柄
 		mutex    *sync.RWMutex // 读写锁
 	}
-	CutterOption func(*Cutter)
 
 	EncoderType string
 )
+
+var ZapProviderApp ZapProvider
 
 const (
 	EncoderTypeConsole EncoderType = "CONSOLE"
 	EncoderTypeJson    EncoderType = "JSON"
 )
 
-// WithCutterFormat 设置时间格式
-func WithCutterFormat(format string) CutterOption {
-	return func(c *Cutter) {
-		c.format = format
-	}
-}
-
-func NewCutter(director string, level string, options ...CutterOption) *Cutter {
-	rotate := &Cutter{
-		level:    level,
-		Director: director,
-		mutex:    new(sync.RWMutex),
-	}
-	for i := 0; i < len(options); i++ {
-		options[i](rotate)
-	}
-	return rotate
-}
+// func newCutter(director string, level string, options ...func(*Cutter)) *Cutter {
+// 	rotate := &Cutter{
+// 		level:    level,
+// 		Director: director,
+// 		mutex:    new(sync.RWMutex),
+// 	}
+// 	for i := 0; i < len(options); i++ {
+// 		options[i](rotate)
+// 	}
+// 	return rotate
+// }
 
 // Write satisfies the io.Writer interface. It writes to the
 // appropriate file handle that is currently being used.
@@ -111,26 +104,32 @@ func (c *Cutter) Write(bytes []byte) (n int, err error) {
 	if err != nil {
 		return 0, err
 	}
+
 	return c.file.Write(bytes)
 }
 
-var (
-	zapProvider    *ZapProvider
-	FileRotateLogs = new(fileRotateLogs)
-)
-
 // GetWriteSync 获取 zapcore.WriteSync
-// Author [SliverHorn](https://github.com/SliverHorn)
-func (r *fileRotateLogs) GetWriteSync(path, level string, inConsole bool) zapcore.WriteSyncer {
-	fileWriter := NewCutter(path, level, WithCutterFormat(time.DateOnly))
-	if inConsole {
-		return zapcore.NewMultiWriteSyncer(zapcore.AddSync(fileWriter), zapcore.AddSync(os.Stdout))
+func GetWriteSync(config *zapConfig, path string) zapcore.WriteSyncer {
+	// fileWriter := newCutter(path, level.String(), func(c *Cutter) { c.format = time.DateOnly })
+
+	fileWriter := &lumberjack.Logger{
+		Filename:   path,                // 日志文件名称
+		MaxSize:    config.MaxSize,      // 文件大小限制,单位MB
+		MaxBackups: config.MaxBackup,    // 最大保留日志文件数量
+		MaxAge:     config.MaxDay,       // 日志文件保留天数
+		Compress:   config.NeedCompress, // 是否压缩处理,压缩以后文件为xxxxx.gz
 	}
-	return zapcore.AddSync(fileWriter)
+
+	return operation.Ternary(config.InConsole, zapcore.NewMultiWriteSyncer(zapcore.AddSync(fileWriter), zapcore.AddSync(os.Stdout)), zapcore.AddSync(fileWriter))
 }
 
+// New 实例化：Zap日志服务提供者
+func (*ZapProvider) New(config *zapConfig) *zap.Logger { return NewZapProvider(config) }
+
 // NewZapProvider 实例化：Zap日志服务提供者
-func NewZapProvider(path string, inConsole bool, encoderType EncoderType) *zap.Logger {
+//
+//go:fix 推荐使用：New方法
+func NewZapProvider(config *zapConfig) *zap.Logger {
 	var (
 		e               error
 		fs              *filesystem.FileSystem
@@ -157,11 +156,7 @@ func NewZapProvider(path string, inConsole bool, encoderType EncoderType) *zap.L
 		}
 	)
 
-	if zapProvider == nil {
-		zapProvider = &ZapProvider{path: path, inConsole: inConsole}
-	}
-
-	fs = filesystem.FileSystemApp.NewByRelative(path)
+	fs = operation.TernaryFuncAll(func() bool { return config.PathAbs }, func() *filesystem.FileSystem { return filesystem.FileSystemApp.NewByAbs(config.Path) }, func() *filesystem.FileSystem { return filesystem.FileSystemApp.NewByRel(config.Path) })
 	if !fs.IsExist {
 		e = fs.MkDir()
 		if e != nil {
@@ -169,27 +164,28 @@ func NewZapProvider(path string, inConsole bool, encoderType EncoderType) *zap.L
 		}
 	}
 
-	for _, level := range []zapcore.Level{
-		zapcore.DebugLevel,
-		zapcore.InfoLevel,
-		zapcore.WarnLevel,
-		zapcore.ErrorLevel,
-		zapcore.DPanicLevel,
-		zapcore.PanicLevel,
-		zapcore.FatalLevel,
-	} {
-		writer := FileRotateLogs.GetWriteSync(path, level.String(), inConsole)
-		zapCores = append(zapCores, zapcore.NewCore(encoderTypes[encoderType](zapLoggerConfig), writer, level))
+	if config.Level < zapcore.DebugLevel {
+		config.Level = zapcore.DebugLevel
+	}
+
+	if config.Level > zapcore.FatalLevel {
+		config.Level = zapcore.FatalLevel
+	}
+
+	for _, logLevel := range []zapcore.Level{zapcore.DebugLevel, zapcore.InfoLevel, zapcore.WarnLevel, zapcore.ErrorLevel, zapcore.DPanicLevel, zapcore.PanicLevel, zapcore.FatalLevel} {
+		if config.Level >= logLevel {
+			writer := GetWriteSync(config, fs.Copy().Join(fmt.Sprintf("%s%s", logLevel.String(), config.Extension)).GetDir())
+			zapCores = append(zapCores, zapcore.NewCore(encoderTypes[config.EncoderType](zapLoggerConfig), writer, logLevel))
+		}
 	}
 
 	zapLogger = zap.New(zapcore.NewTee(zapCores...))
 
 	defer func() {
-		if inConsole {
+		if config.InConsole {
 			return
 		}
-		e = zapLogger.Sync()
-		if e != nil {
+		if e = zapLogger.Sync(); e != nil {
 			panic(e)
 		}
 	}()
@@ -197,6 +193,6 @@ func NewZapProvider(path string, inConsole bool, encoderType EncoderType) *zap.L
 	return zapLogger
 }
 
-func CustomTimeEncoder(t time.Time, encoder zapcore.PrimitiveArrayEncoder) {
-	encoder.AppendString(t.Format(time.DateTime + ".000"))
-}
+// func CustomTimeEncoder(t time.Time, encoder zapcore.PrimitiveArrayEncoder) {
+// 	encoder.AppendString(t.Format(time.DateTime + ".000"))
+// }

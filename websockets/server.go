@@ -22,7 +22,13 @@ type (
 	}
 )
 
+var ServerApp Server
+
+func (*Server) New(conn *websocket.Conn) *Server { return NewServer(conn) }
+
 // NewServer 实例话：websocket服务端
+//
+//go:fix 推荐使用：推荐使用New方法
 func NewServer(conn *websocket.Conn) *Server {
 	return &Server{
 		addr:               conn.RemoteAddr().String(),

@@ -14,18 +14,21 @@ type RedisSetting struct {
 	}
 }
 
+var RedisSettingApp RedisSetting
+
 // New 初始化：数据库配置
-func (RedisSetting) New(path string) *RedisSetting {
+func (*RedisSetting) New(path string) *RedisSetting {
 	var redisSetting *RedisSetting = &RedisSetting{}
-	err := honestMan.App.New(path).LoadYaml(redisSetting)
+	err := honestMan.HonestManApp.New(path).LoadYaml(redisSetting)
 	if err != nil {
 		return nil
 	}
+
 	return redisSetting
 }
 
 // ExampleYaml 示例配置文件
-func (RedisSetting) ExampleYaml() string {
+func (*RedisSetting) ExampleYaml() string {
 	return `host: 127.0.0.1
 port: 6379
 password: ""

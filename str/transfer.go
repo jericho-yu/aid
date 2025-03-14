@@ -6,15 +6,16 @@ import (
 	"unicode"
 )
 
-type (
-	Transfer struct {
-		original string
-	}
-)
+type Transfer struct{ original string }
 
-func NewTransfer(original string) *Transfer {
-	return &Transfer{original: original}
-}
+var TransferApp Transfer
+
+func (*Transfer) New(original string) *Transfer { return &Transfer{original: original} }
+
+// NewTransfer 实例化：字符串转换
+//
+//go:fix 推荐使用：New方法
+func NewTransfer(original string) *Transfer { return &Transfer{original: original} }
 
 // PascalToCamel 大驼峰 -> 小驼峰
 func (my *Transfer) PascalToCamel() string {
@@ -26,6 +27,7 @@ func (my *Transfer) PascalToCamel() string {
 	if unicode.IsUpper(firstRune) {
 		firstRune = unicode.ToLower(firstRune)
 	}
+
 	// 拼接第一个字符和剩余部分
 	return string(firstRune) + my.original[1:]
 }
@@ -67,6 +69,7 @@ func (my *Transfer) CamelToPascal() string {
 	if unicode.IsLower(firstRune) {
 		firstRune = unicode.ToUpper(firstRune)
 	}
+
 	return string(firstRune) + my.original[1:]
 }
 
@@ -154,6 +157,7 @@ func (my *Transfer) BabelToPascal() string {
 		}
 	}
 	pascal := strings.Join(words, "")
+
 	return pascal
 }
 
@@ -185,9 +189,7 @@ func (my *Transfer) KebabToCamel() string {
 }
 
 // BabelToSnake babel -> 下划线
-func (my *Transfer) BabelToSnake() string {
-	return strings.ReplaceAll(my.original, "_", "-")
-}
+func (my *Transfer) BabelToSnake() string { return strings.ReplaceAll(my.original, "_", "-") }
 
 // Pluralize 单数变复数
 func (my *Transfer) Pluralize() string {

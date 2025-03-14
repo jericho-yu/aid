@@ -1,6 +1,7 @@
 package array
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"reflect"
@@ -11,40 +12,84 @@ import (
 	"github.com/jericho-yu/aid/operation"
 )
 
-type AnyArray[T any] struct {
-	data []T
-	mu   sync.RWMutex
-}
-
-// NewAnyArray 实例化
-func NewAnyArray[T any](list []T) *AnyArray[T] {
-	return &AnyArray[T]{
-		data: list,
-		mu:   sync.RWMutex{},
+type (
+	AnyArray[T any] struct {
+		data []T
+		mu   sync.RWMutex
 	}
+)
+
+// New 实例化
+func New[T any](list []T) *AnyArray[T] { return &AnyArray[T]{data: list, mu: sync.RWMutex{}} }
+
+// Make 初始化
+func Make[T any](size int) *AnyArray[T] {
+	return &AnyArray[T]{data: make([]T, size), mu: sync.RWMutex{}}
 }
 
-// MakeAnyArray 初始化
-func MakeAnyArray[T any](size int) *AnyArray[T] {
-	return &AnyArray[T]{
-		data: make([]T, size),
-		mu:   sync.RWMutex{},
-	}
+// Lock 加锁：写锁
+func (my *AnyArray[T]) Lock() *AnyArray[T] {
+	my.mu.Lock()
+	return my
 }
 
-// IsEmpty 是否为空
+// Unlock 解锁：写锁
+func (my *AnyArray[T]) Unlock() *AnyArray[T] {
+	my.mu.Unlock()
+	return my
+}
+
+// RLock 加锁：读锁
+func (my *AnyArray[T]) RLock() *AnyArray[T] {
+	my.mu.RLock()
+	return my
+}
+
+// RUnlock 解锁：读锁
+func (my *AnyArray[T]) RUnlock() *AnyArray[T] {
+	my.mu.RUnlock()
+	return my
+}
+
+// isEmpty 判断是否为空
+func (my *AnyArray[T]) isEmpty() bool { return len(my.data) == 0 }
+
+// IsEpt 判断是否为空
+func (my *AnyArray[T]) IsEpt() bool { return my.IsEmpty() }
+
+// IsEmpty 判断是否为空
 func (my *AnyArray[T]) IsEmpty() bool {
-	return len(my.data) == 0
+	my.mu.RLock()
+	defer my.mu.RUnlock()
+
+	return my.isEmpty()
 }
 
-// IsNotEmpty 是否不为空
+// ISNotEpt 判断是否不为空
+func (my *AnyArray[T]) ISNotEpt() bool { return my.IsNotEmpty() }
+
+// IsNotEmpty 判断是否不为空
 func (my *AnyArray[T]) IsNotEmpty() bool {
-	return len(my.data) > 0
+	my.mu.RLock()
+	defer my.mu.RUnlock()
+
+	return !my.isEmpty()
 }
+
+// has 检查key是否存在
+func (my *AnyArray[T]) has(k int) bool { return k >= 0 && k < len(my.data) }
 
 // Has 检查是否存在
 func (my *AnyArray[T]) Has(k int) bool {
-	return k >= 0 && k < len(my.data)
+	my.mu.RLock()
+	defer my.mu.RUnlock()
+
+	return my.has(k)
+}
+
+func (my *AnyArray[T]) set(k int, v T) *AnyArray[T] {
+	my.data[k] = v
+	return my
 }
 
 // Set 设置值
@@ -52,16 +97,41 @@ func (my *AnyArray[T]) Set(k int, v T) *AnyArray[T] {
 	my.mu.Lock()
 	defer my.mu.Unlock()
 
-	my.data[k] = v
-	return my
+	return my.set(k, v)
 }
+
+func (my *AnyArray[T]) get(idx int) T { return my.data[idx] }
 
 // Get 获取值
 func (my *AnyArray[T]) Get(idx int) T {
 	my.mu.RLock()
 	defer my.mu.RUnlock()
 
-	return my.data[idx]
+	return my.get(idx)
+}
+
+func (my *AnyArray[T]) getByIndexes(indexes ...int) []T {
+	res := make([]T, len(indexes))
+
+	for k, idx := range indexes {
+		res[k] = my.data[idx]
+	}
+
+	return res
+}
+
+// GetByIndexes 通过多索引获取内容
+func (my *AnyArray[T]) GetByIndexes(indexes ...int) *AnyArray[T] {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
+
+	return New(my.getByIndexes(indexes...))
+}
+
+func (my *AnyArray[T]) append(v ...T) *AnyArray[T] {
+	my.data = append(my.data, v...)
+
+	return my
 }
 
 // Append 追加
@@ -69,61 +139,137 @@ func (my *AnyArray[T]) Append(v ...T) *AnyArray[T] {
 	my.mu.Lock()
 	defer my.mu.Unlock()
 
-	my.data = append(my.data, v...)
-	return my
+	return my.append(v...)
 }
+
+func (my *AnyArray[T]) first() T { return my.data[0] }
+
+// Fst 获取第一个值
+func (my *AnyArray[T]) Fst() T { return my.First() }
 
 // First 获取第一个值
 func (my *AnyArray[T]) First() T {
 	my.mu.RLock()
 	defer my.mu.RUnlock()
 
-	return my.data[0]
+	return my.first()
 }
+
+func (my *AnyArray[T]) last() T {
+	var t T
+
+	return operation.Ternary(my.Len() > 1, my.data[len(my.data)-1], operation.Ternary(my.Len() == 0, t, my.data[0]))
+}
+
+// Lst 获取最后一个值
+func (my *AnyArray[T]) Lst() T { return my.Last() }
 
 // Last 获取最后一个值
 func (my *AnyArray[T]) Last() T {
 	my.mu.RLock()
 	defer my.mu.RUnlock()
 
-	var t T
-
-	return operation.Ternary[T](my.Len() > 1, my.data[len(my.data)-1], operation.Ternary[T](my.Len() == 0, t, my.data[0]))
+	return my.last()
 }
 
-// All 获取全部值
-func (my *AnyArray[T]) All() []T {
-	my.mu.RLock()
-	defer my.mu.RUnlock()
-
+func (my *AnyArray[T]) toSlice() []T {
 	var ret = make([]T, len(my.data))
 	copy(ret, my.data)
+
 	return ret
 }
 
-// GetIndexByValue 根据值获取索引下标
-func (my *AnyArray[T]) GetIndexByValue(value T) int {
+// ToSlc 获取全部值：到切片
+func (my *AnyArray[T]) ToSlc() []T { return my.ToSlice() }
+
+// ToSlice 获取全部值：到切片
+func (my *AnyArray[T]) ToSlice() []T {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
+
+	return my.toSlice()
+}
+
+func (my *AnyArray[T]) getIndexes() []int {
+	var indexes = make([]int, len(my.data))
+	for i := range my.data {
+		indexes[i] = i
+	}
+
+	return indexes
+}
+
+// GetIndexes 获取所有索引
+func (my *AnyArray[T]) GetIndexes() []int {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
+
+	return my.getIndexes()
+}
+
+func (my *AnyArray[T]) getIndexByValue(value T) int {
 	for idx, val := range my.data {
 		if reflect.DeepEqual(val, value) {
 			return idx
 		}
 	}
+
 	return -1
 }
+
+// GetIdxByVal 根据值获取索引下标
+func (my *AnyArray[T]) GetIdxByVal(val T) int { return my.GetIndexByValue(val) }
+
+// GetIndexByValue 根据值获取索引下标
+func (my *AnyArray[T]) GetIndexByValue(value T) int {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
+
+	return my.getIndexByValue(value)
+}
+
+func (my *AnyArray[T]) getIndexesByValues(values ...T) []int {
+	var indexes []int
+	for _, value := range values {
+		for idx, val := range my.data {
+			if reflect.DeepEqual(val, value) {
+				indexes = append(indexes, idx)
+			}
+		}
+	}
+
+	return indexes
+}
+
+// GetIndexesByVals 通过值获取索引下标
+func (my *AnyArray[T]) GetIndexesByVals(vals ...T) *AnyArray[int] {
+	return my.GetIndexesByValues(vals...)
+}
+
+// GetIndexesByValues 通过值获取索引下标
+func (my *AnyArray[T]) GetIndexesByValues(values ...T) *AnyArray[int] {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
+
+	return New(my.getIndexesByValues(values...))
+}
+
+func (my *AnyArray[T]) copy() *AnyArray[T] {
+	return New(my.data)
+}
+
+// Cp 复制自己
+func (my *AnyArray[T]) Cp() *AnyArray[T] { return my.Copy() }
 
 // Copy 复制自己
 func (my *AnyArray[T]) Copy() *AnyArray[T] {
 	my.mu.RLock()
 	defer my.mu.RUnlock()
 
-	return NewAnyArray(my.data)
+	return my.copy()
 }
 
-// Shuffle 函数用于打乱切片中的元素顺序
-func (my *AnyArray[T]) Shuffle() *AnyArray[T] {
-	my.mu.Lock()
-	defer my.mu.Unlock()
-
+func (my *AnyArray[T]) shuffle() *AnyArray[T] {
 	randStr := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	for i := range my.data {
@@ -134,19 +280,43 @@ func (my *AnyArray[T]) Shuffle() *AnyArray[T] {
 	return my
 }
 
+// Shf 打乱切片中的元素顺序
+func (my *AnyArray[T]) Shf() *AnyArray[T] { return my.Shuffle() }
+
+// Shuffle 打乱切片中的元素顺序
+func (my *AnyArray[T]) Shuffle() *AnyArray[T] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
+
+	return my.shuffle()
+}
+
+func (my *AnyArray[T]) len() int {
+	return len(my.data)
+}
+
 // Len 获取数组长度
 func (my *AnyArray[T]) Len() int {
 	my.mu.RLock()
 	defer my.mu.RUnlock()
 
-	return len(my.data)
+	return my.len()
 }
 
-// Filter 过滤数组值
-func (my *AnyArray[T]) Filter(fn func(v T) bool) *AnyArray[T] {
-	my.mu.Lock()
-	defer my.mu.Unlock()
+func (my *AnyArray[T]) lenWithoutEmpty() int { return my.copy().removeEmpty().len() }
 
+// LenNoEpt 获取非0值长度
+func (my *AnyArray[T]) LenNoEpt() int { return my.LenWithoutEmpty() }
+
+// LenWithoutEmpty 获取非0值长度
+func (my *AnyArray[T]) LenWithoutEmpty() int {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
+
+	return my.lenWithoutEmpty()
+}
+
+func (my *AnyArray[T]) filter(fn func(v T) bool) *AnyArray[T] {
 	j := 0
 	ret := make([]T, len(my.data))
 	for i := 0; i < len(my.data); i++ {
@@ -160,13 +330,19 @@ func (my *AnyArray[T]) Filter(fn func(v T) bool) *AnyArray[T] {
 	return my
 }
 
-// RemoveEmpty 清除空值元素
-func (my *AnyArray[T]) RemoveEmpty() *AnyArray[T] {
+// Flt 过滤数组值
+func (my *AnyArray[T]) Flt(fn func(v T) bool) *AnyArray[T] { return my.Filter(fn) }
+
+// Filter 过滤数组值
+func (my *AnyArray[T]) Filter(fn func(v T) bool) *AnyArray[T] {
 	my.mu.Lock()
-	defer my.Clean()
 	defer my.mu.Unlock()
 
-	var data []T = make([]T, 0)
+	return my.filter(fn)
+}
+
+func (my *AnyArray[T]) removeEmpty() *AnyArray[T] {
+	var data = make([]T, 0)
 
 	for _, item := range my.data {
 		ref := reflect.ValueOf(item)
@@ -187,7 +363,26 @@ func (my *AnyArray[T]) RemoveEmpty() *AnyArray[T] {
 		data = append(data, item)
 	}
 
-	return NewAnyArray[T](data)
+	return New(data)
+}
+
+// RmEpt 清除0值元素
+func (my *AnyArray[T]) RmEpt() *AnyArray[T] { return my.RemoveEmpty() }
+
+// RemoveEmpty 清除0值元素
+func (my *AnyArray[T]) RemoveEmpty() *AnyArray[T] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
+
+	return my.removeEmpty()
+}
+
+func (my *AnyArray[T]) join(sep string) string {
+	values := make([]string, my.len())
+	for idx, datum := range my.data {
+		values[idx] = fmt.Sprintf("%v", datum)
+	}
+	return strings.Join(values, sep)
 }
 
 // Join 拼接字符串
@@ -195,26 +390,43 @@ func (my *AnyArray[T]) Join(sep string) string {
 	my.mu.RLock()
 	defer my.mu.RUnlock()
 
-	values := make([]string, my.Len())
-	for idx, datum := range my.data {
-		values[idx] = fmt.Sprintf("%v", datum)
+	return my.join(sep)
+}
+
+func (my *AnyArray[T]) joinWithoutEmpty(sep string) string {
+	values := make([]string, my.copy().removeEmpty().len())
+	j := 0
+	for _, datum := range my.copy().removeEmpty().toSlice() {
+		values[j] = fmt.Sprintf("%v", datum)
+		j++
 	}
 
 	return strings.Join(values, sep)
 }
 
+func (my *AnyArray[T]) JoinNoEpt(sep string) string { return my.JoinWithoutEmpty(sep) }
+
 // JoinWithoutEmpty 拼接非空元素
-func (my *AnyArray[T]) JoinWithoutEmpty(sep string) string {
+func (my *AnyArray[T]) JoinWithoutEmpty(seps ...string) string {
 	my.mu.Lock()
 	defer my.mu.Unlock()
 
-	values := make([]string, my.Copy().RemoveEmpty().Len())
-	j := 0
-	for _, datum := range my.Copy().RemoveEmpty().All() {
-		values[j] = fmt.Sprintf("%v", datum)
-		j++
+	var sep = " "
+	if len(seps) > 0 {
+		sep = seps[0]
 	}
-	return strings.Join(values, sep)
+
+	return my.joinWithoutEmpty(sep)
+}
+
+func (my *AnyArray[T]) in(target T) bool {
+	for _, element := range my.data {
+		if reflect.DeepEqual(target, element) {
+			return true
+		}
+	}
+
+	return false
 }
 
 // In 检查值是否存在
@@ -222,43 +434,49 @@ func (my *AnyArray[T]) In(target T) bool {
 	my.mu.RLock()
 	defer my.mu.RUnlock()
 
-	for _, element := range my.data {
-		if reflect.DeepEqual(target, element) {
-			return true
-		}
-	}
-	return false
+	return my.in(target)
 }
+
+func (my *AnyArray[T]) notIn(target T) bool { return !my.in(target) }
 
 // NotIn 检查值是否不存在
 func (my *AnyArray[T]) NotIn(target T) bool {
-	return !my.In(target)
+	my.mu.RLock()
+	defer my.mu.RUnlock()
+
+	return my.notIn(target)
 }
 
-// AllEmpty 判断当前数组是否全空
+func (my *AnyArray[T]) allEmpty() bool { return my.copy().removeEmpty().len() == 0 }
+
+// AllEpt 判断当前数组是否0空
+func (my *AnyArray[T]) AllEpt() bool { return my.AllEmpty() }
+
+// AllEmpty 判断当前数组是否0空
 func (my *AnyArray[T]) AllEmpty() bool {
 	my.mu.RLock()
 	defer my.mu.RUnlock()
 
-	return my.Copy().RemoveEmpty().Len() == 0
+	return my.allEmpty()
 }
 
-// AnyEmpty 判断当前数组中是否存在空值
+func (my *AnyArray[T]) anyEmpty() bool { return my.copy().removeEmpty().len() != len(my.data) }
+
+// AnyEmp 判断当前数组中是否存在0值
+func (my *AnyArray[T]) AnyEmp() bool { return my.AnyEmpty() }
+
+// AnyEmpty 判断当前数组中是否存在0值
 func (my *AnyArray[T]) AnyEmpty() bool {
 	my.mu.RLock()
 	defer my.mu.RUnlock()
 
-	return my.Copy().RemoveEmpty().Len() != len(my.data)
+	return my.anyEmpty()
 }
 
-// Chunk 分块
-func (my *AnyArray[T]) Chunk(chunkSize int) [][]T {
-	my.mu.RLock()
-	defer my.mu.RUnlock()
-
+func (my *AnyArray[T]) chunk(size int) [][]T {
 	var chunks [][]T
-	for i := 0; i < len(my.data); i += chunkSize {
-		end := i + chunkSize
+	for i := 0; i < len(my.data); i += size {
+		end := i + size
 		if end > len(my.data) {
 			end = len(my.data)
 		}
@@ -268,24 +486,32 @@ func (my *AnyArray[T]) Chunk(chunkSize int) [][]T {
 	return chunks
 }
 
-// Pluck 获取数组中指定字段的值
-func (my *AnyArray[T]) Pluck(fn func(item T) any) *AnyArray[any] {
+// Chunk 分块
+func (my *AnyArray[T]) Chunk(size int) [][]T {
 	my.mu.RLock()
 	defer my.mu.RUnlock()
 
+	return my.chunk(size)
+}
+
+func (my *AnyArray[T]) pluck(fn func(item T) any) *AnyArray[any] {
 	var ret = make([]any, 0)
 	for _, v := range my.data {
 		ret = append(ret, fn(v))
 	}
 
-	return NewAnyArray(ret)
+	return New(ret)
 }
 
-// Unique 切片去重
-func (my *AnyArray[T]) Unique() *AnyArray[T] {
-	my.mu.Lock()
-	defer my.mu.Unlock()
+// Pluck 获取数组中指定字段的值
+func (my *AnyArray[T]) Pluck(fn func(item T) any) *AnyArray[any] {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
 
+	return my.pluck(fn)
+}
+
+func (my *AnyArray[T]) unique() *AnyArray[T] {
 	seen := make(map[string]struct{}) // 使用空结构体作为值，因为我们只关心键
 	result := make([]T, 0)
 
@@ -298,7 +524,49 @@ func (my *AnyArray[T]) Unique() *AnyArray[T] {
 	}
 
 	my.data = result
+
 	return my
+}
+
+// Unique 切片去重
+func (my *AnyArray[T]) Unique() *AnyArray[T] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
+
+	return my.unique()
+}
+
+func (my *AnyArray[T]) removeByIndex(index int) *AnyArray[T] {
+	if index < 0 || index >= len(my.data) {
+		return my
+	}
+
+	my.data = append(my.data[:index], my.data[index+1:]...)
+	return my
+}
+
+// RmByIdx 根据索引删除元素
+func (my *AnyArray[T]) RmByIdx(idx int) *AnyArray[T] { return my.RemoveByIndex(idx) }
+
+// RemoveByIndex 根据索引删除元素
+func (my *AnyArray[T]) RemoveByIndex(index int) *AnyArray[T] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
+
+	return my.removeByIndex(index)
+}
+
+func (my *AnyArray[T]) removeByIndexes(indexes ...int) *AnyArray[T] {
+	for _, index := range indexes {
+		my.removeByIndex(index)
+	}
+
+	return my
+}
+
+// RmByIndexes 根据索引删除元素
+func (my *AnyArray[T]) RmByIndexes(indexes ...int) *AnyArray[T] {
+	return my.RemoveByIndexes(indexes...)
 }
 
 // RemoveByIndexes 根据索引删除元素
@@ -306,23 +574,10 @@ func (my *AnyArray[T]) RemoveByIndexes(indexes ...int) *AnyArray[T] {
 	my.mu.Lock()
 	defer my.mu.Unlock()
 
-	newData := make([]T, len(my.data)-len(indexes))
-	idx := 0
-	for i, v := range my.data {
-		if !In(i, indexes) {
-			newData[idx] = v
-			idx++
-		}
-	}
-
-	return NewAnyArray[T](newData)
+	return my.removeByIndexes(indexes...)
 }
 
-// RemoveByValue 删除数组中对应的目标
-func (my *AnyArray[T]) RemoveByValue(target T) *AnyArray[T] {
-	my.mu.Lock()
-	defer my.mu.Unlock()
-
+func (my *AnyArray[T]) removeByValue(target T) *AnyArray[T] {
 	var ret = make([]T, len(my.data))
 	j := 0
 	for _, value := range my.data {
@@ -332,27 +587,63 @@ func (my *AnyArray[T]) RemoveByValue(target T) *AnyArray[T] {
 		}
 	}
 	my.data = ret[:j]
+
 	return my
 }
+
+// RmByVal 删除数组中对应的目标
+func (my *AnyArray[T]) RmByVal(tar T) *AnyArray[T] { return my.RemoveByValue(tar) }
+
+// RemoveByValue 删除数组中对应的目标
+func (my *AnyArray[T]) RemoveByValue(target T) *AnyArray[T] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
+
+	return my.removeByValue(target)
+}
+
+func (my *AnyArray[T]) removeByValues(targets ...T) *AnyArray[T] {
+	for _, target := range targets {
+		my.removeByValue(target)
+	}
+
+	return my
+}
+
+// RmByVals 删除数组中对应的多个目标
+func (my *AnyArray[T]) RmByVals(targets ...T) *AnyArray[T] { return my.RemoveByValues(targets...) }
 
 // RemoveByValues 删除数组中对应的多个目标
 func (my *AnyArray[T]) RemoveByValues(targets ...T) *AnyArray[T] {
 	my.mu.Lock()
 	defer my.mu.Unlock()
 
-	for _, target := range targets {
-		my.RemoveByValue(target)
+	return my.removeByValues(targets...)
+}
+
+func (my *AnyArray[T]) every(fn func(item T) T) *AnyArray[T] {
+	for idx := range my.data {
+		v := fn(my.data[idx])
+		my.data[idx] = v
 	}
+
 	return my
 }
+
+// Ev 循环处理每一个
+func (my *AnyArray[T]) Ev(fn func(item T) T) *AnyArray[T] { return my.Every(fn) }
 
 // Every 循环处理每一个
 func (my *AnyArray[T]) Every(fn func(item T) T) *AnyArray[T] {
 	my.mu.Lock()
 	defer my.mu.Unlock()
 
+	return my.every(fn)
+}
+
+func (my *AnyArray[T]) each(fn func(idx int, item T)) *AnyArray[T] {
 	for idx := range my.data {
-		my.data[idx] = fn(my.data[idx])
+		fn(idx, my.data[idx])
 	}
 
 	return my
@@ -363,19 +654,91 @@ func (my *AnyArray[T]) Each(fn func(idx int, item T)) *AnyArray[T] {
 	my.mu.Lock()
 	defer my.mu.Unlock()
 
-	for idx := range my.data {
-		fn(idx, my.data[idx])
-	}
+	return my.each(fn)
+}
+
+func (my *AnyArray[T]) clean() *AnyArray[T] {
+	my.data = make([]T, 0)
 
 	return my
 }
+
+// Cln 清理数据
+func (my *AnyArray[T]) Cln() *AnyArray[T] { return my.Clean() }
 
 // Clean 清理数据
 func (my *AnyArray[T]) Clean() *AnyArray[T] {
 	my.mu.Lock()
 	defer my.mu.Unlock()
 
-	my.data = make([]T, 0)
+	return my.clean()
+}
 
-	return my
+func (my *AnyArray[T]) marshalJson() ([]byte, error) {
+	return json.Marshal(&my.data)
+}
+
+// MarshalJSON 实现接口：json序列化
+func (my *AnyArray[T]) MarshalJSON() ([]byte, error) {
+	my.mu.Lock()
+	defer my.mu.Unlock()
+
+	return my.marshalJson()
+}
+
+func (my *AnyArray[T]) unmarshalJson(data []byte) error {
+	return json.Unmarshal(data, &my.data)
+}
+
+// UnmarshalJSON 实现接口：json反序列化
+func (my *AnyArray[T]) UnmarshalJSON(data []byte) error {
+	my.mu.Lock()
+	defer my.mu.Unlock()
+
+	return my.unmarshalJson(data)
+}
+
+// ToStr 导出string
+func (my *AnyArray[T]) ToStr(formats ...string) string { return my.ToString(formats...) }
+
+// ToString 导出string
+func (my *AnyArray[T]) ToString(formats ...string) string {
+	var format = "%v"
+	if len(formats) > 0 {
+		format = formats[0]
+	}
+
+	return fmt.Sprintf(format, my.data)
+}
+
+// Cast 转换值类型
+func Cast[SRC, DST any](aa *AnyArray[SRC], fn func(value SRC) DST) *AnyArray[DST] {
+	if aa == nil {
+		return nil
+	}
+
+	aa.mu.Lock()
+	defer aa.mu.Unlock()
+
+	data := make([]DST, len(aa.data))
+	for i, v := range aa.data {
+		data[i] = fn(v)
+	}
+
+	return New(data)
+}
+
+// ToAny converts any slice to []any
+func ToAny(slice any) []any {
+	v := reflect.ValueOf(slice)
+	if v.Kind() != reflect.Slice {
+		return nil
+	}
+
+	result := make([]any, v.Len())
+	for i := range v.Len() {
+		result[i] = v.Index(i).Interface()
+	}
+
+	return result
 }

@@ -13,6 +13,8 @@ import (
 
 type Cbc struct{}
 
+var CbcApp Cbc
+
 func (Cbc) padPKCS7(src []byte, blockSize int) []byte {
 	padding := blockSize - len(src)%blockSize
 	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
@@ -98,21 +100,21 @@ func (Cbc) Demo() {
 
 	encrypted, err := Cbc{}.Encrypt([]byte("abcdefghijklmnopqrstuvwxyz"), []byte(key), []byte(iv))
 	if err != nil {
-		str.NewTerminalLog("[CBC] encrypt: %v").Error(err)
+		str.TerminalLogApp.New("[CBC] encrypt: %v").Error(err)
 	}
 
 	base64Encoded := base64.StdEncoding.EncodeToString(encrypted)
-	str.NewTerminalLog("[CBC] base64 encoded: %s").Success(base64Encoded)
+	str.TerminalLogApp.New("[CBC] base64 encoded: %s").Success(base64Encoded)
 
 	base64Decoded, base64DecodeErr := base64.StdEncoding.DecodeString(base64Encoded)
 	if base64DecodeErr != nil {
-		str.NewTerminalLog("[CBC] base64 decode %v").Error(base64DecodeErr)
+		str.TerminalLogApp.New("[CBC] base64 decode %v").Error(base64DecodeErr)
 	}
 
 	decryptCBC, err := Cbc{}.Decrypt(base64Decoded, []byte(key), []byte(iv))
 	if err != nil {
-		str.NewTerminalLog("[CBC] decrypt: %v").Error(err)
+		str.TerminalLogApp.New("[CBC] decrypt: %v").Error(err)
 	}
 
-	str.NewTerminalLog("[CBC] decrypted: %s").Success(string(decryptCBC))
+	str.TerminalLogApp.New("[CBC] decrypted: %s").Success(string(decryptCBC))
 }

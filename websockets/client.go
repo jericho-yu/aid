@@ -32,14 +32,27 @@ type (
 	}
 )
 
+var ClientApp Client
+
+// New 实例化：链接
+func (*Client) New(
+	groupName, name, addr string,
+	clientCallbackConfig ClientCallbackConfig,
+	options ...any,
+) (*Client, error) {
+	return NewClient(groupName, name, addr, clientCallbackConfig, options...)
+}
+
 // NewClient 实例化：链接
+//
+//go:fix 推荐使用：New方法
 func NewClient(
 	groupName, name, addr string,
 	clientCallbackConfig ClientCallbackConfig,
 	options ...any,
 ) (client *Client, err error) {
 	if name == "" || addr == "" {
-		return nil, WebsocketConnOptionErr
+		return nil, WebsocketConnOptionErr.New("名称或地址不能为空")
 	}
 
 	client = &Client{
@@ -50,7 +63,7 @@ func NewClient(
 		status:                          Offline,
 		closeChan:                       make(chan struct{}, 1),
 		receiveMessageChan:              make(chan []byte, 1),
-		asyncReceiveCallbackDict:        dict.MakeAnyDict[string, clientCallbackFn](),
+		asyncReceiveCallbackDict:        dict.Make[string, clientCallbackFn](),
 		syncMessageTimeout:              5 * time.Second,
 		onConnSuccessCallback:           clientCallbackConfig.OnConnSuccessCallback,
 		onConnFailCallback:              clientCallbackConfig.OnConnFailCallback,
@@ -81,17 +94,32 @@ func (my *Client) GetName() string { return my.name }
 // GetAddr 获取链接地址
 func (my *Client) GetAddr() string { return my.addr }
 
+// GetAddress 获取链接地址
+func (my *Client) GetAddress() string { return my.addr }
+
 // GetConn 获取链接本体
 func (my *Client) GetConn() *websocket.Conn { return my.conn }
 
+// GetConnection 获取链接本体
+func (my *Client) GetConnection() *websocket.Conn { return my.conn }
+
+// GetReqHdr 获取请求头
+func (my *Client) GetReqHdr() http.Header { return my.requestHeader }
+
 // GetRequestHeaders 获取请求头
 func (my *Client) GetRequestHeaders() http.Header { return my.requestHeader }
+
+// SetReqHdr 设置请求头
+func (my *Client) SetReqHdr(hdr http.Header) *Client { return my.SetRequestHeaders(hdr) }
 
 // SetRequestHeaders 设置请求头
 func (my *Client) SetRequestHeaders(header http.Header) *Client {
 	my.requestHeader = header
 	return my
 }
+
+// AppendReqHdr 新增请求头
+func (my *Client) AppendReqHdr(hdr http.Header) *Client { return my.AppendRequestHeader(hdr) }
 
 // AppendRequestHeader 新增请求头
 func (my *Client) AppendRequestHeader(header http.Header) *Client {
@@ -114,6 +142,7 @@ func (my *Client) Boot() *Client {
 		if my.onConnFailCallback != nil {
 			my.onConnFailCallback(my.groupName, my.name, my.conn, my.err)
 		}
+
 		return my
 	}
 
@@ -129,6 +158,7 @@ func (my *Client) Boot() *Client {
 				if client.onReceiveMessageFailCallback != nil {
 					client.onReceiveMessageFailCallback(client.groupName, client.name, client.conn, client.err)
 				}
+
 				return
 			}
 
@@ -159,17 +189,24 @@ func (my *Client) Boot() *Client {
 	return my
 }
 
+// AsyncMsg 发送消息：异步
+func (my *Client) AsyncMsg(msg []byte, fn clientCallbackFn, to time.Duration) *Client {
+	return my.AsyncMessage(msg, fn, to)
+}
+
 // AsyncMessage 发送消息：异步
 func (my *Client) AsyncMessage(message []byte, fn clientCallbackFn, timeout time.Duration) *Client {
 	msg := NewMessage(true, message)
 
 	if fn == nil {
-		my.err = AsyncMessageCallbackEmptyErr
+		my.err = AsyncMessageCallbackEmptyErr.New("")
+
 		return my
 	}
 
 	if timeout <= 0 {
-		my.err = AsyncMessageCallbackEmptyErr
+		my.err = AsyncMessageCallbackEmptyErr.New("")
+
 		return my
 	}
 
@@ -177,6 +214,7 @@ func (my *Client) AsyncMessage(message []byte, fn clientCallbackFn, timeout time
 	if my.err != nil {
 		if my.onSendMessageFailCallback != nil {
 			my.onSendMessageFailCallback(my.groupName, my.name, my.conn, my.err) // 执行发送失败回调
+
 			return my
 		}
 	}
@@ -187,10 +225,15 @@ func (my *Client) AsyncMessage(message []byte, fn clientCallbackFn, timeout time
 	go func(messageId string) {
 		<-timer // 超时删除异步回调方法
 		my.asyncReceiveCallbackDict.RemoveByKey(messageId)
-		my.onSendMessageFailCallback(my.groupName, my.name, my.conn, AsyncMessageTimeoutErr) // 执行发送消息回调
+		my.onSendMessageFailCallback(my.groupName, my.name, my.conn, AsyncMessageTimeoutErr.New("")) // 执行发送消息回调
 	}(msg.GetMessageId())
 
 	return my
+}
+
+// SyncMsg 发送消息：同步
+func (my *Client) SyncMsg(msg []byte, options ...any) ([]byte, error) {
+	return my.SyncMessage(msg, options...)
 }
 
 // SyncMessage 发送消息：同步
@@ -203,9 +246,10 @@ func (my *Client) SyncMessage(message []byte, options ...any) ([]byte, error) {
 
 	if my.conn == nil || my.status == Offline {
 		if my.onSendMessageFailCallback != nil {
-			my.onSendMessageFailCallback(my.groupName, my.name, my.conn, WebsocketOfflineErr)
+			my.onSendMessageFailCallback(my.groupName, my.name, my.conn, WebsocketOfflineErr.New(""))
 		}
-		return nil, WebsocketOfflineErr
+
+		return nil, WebsocketOfflineErr.New("")
 	}
 
 	err = my.conn.WriteMessage(websocket.TextMessage, msg.GetMessage()) // 发送消息
@@ -213,10 +257,11 @@ func (my *Client) SyncMessage(message []byte, options ...any) ([]byte, error) {
 		if my.onSendMessageFailCallback != nil {
 			my.onSendMessageFailCallback(my.groupName, my.name, my.conn, err)
 		}
+
 		return nil, err
 	}
 
-	for i := 0; i < len(options); i++ {
+	for i := range options {
 		if v, ok := options[i].(time.Duration); ok && v > 0 {
 			timeout = v
 		}
@@ -229,23 +274,19 @@ func (my *Client) SyncMessage(message []byte, options ...any) ([]byte, error) {
 		return receiveMessage, nil
 	case <-timeoutTimer:
 		if my.onSendMessageFailCallback != nil {
-			my.onSendMessageFailCallback(my.groupName, my.name, my.conn, SyncMessageTimeoutErr)
+			my.onSendMessageFailCallback(my.groupName, my.name, my.conn, SyncMessageTimeoutErr.New(""))
 		}
 
-		return nil, SyncMessageTimeoutErr
+		return nil, SyncMessageTimeoutErr.New("")
 	}
 }
+
+// Cls 关闭链接
+func (my *Client) Cls() *Client { return my.Close() }
 
 // Close 关闭链接
 func (my *Client) Close() *Client {
 	if my.conn != nil && my.status == Online {
-		// my.err = my.conn.WriteMessage(websocket.CloseMessage, []byte{})
-		// if my.err != nil {
-		// 	if my.onCloseFailCallback != nil {
-		// 		my.onCloseFailCallback(my.groupName, my.name, my.conn, my.err)
-		// 	}
-		// 	my.status = Online
-		// } else {
 		my.err = my.conn.Close()
 		if my.err != nil {
 			if my.onCloseFailCallback != nil {
@@ -257,7 +298,6 @@ func (my *Client) Close() *Client {
 			my.status = Offline
 			close(my.receiveMessageChan) // 关闭同步消息通道
 		}
-		// }
 	} else {
 		my.conn = nil
 		my.status = Offline
@@ -272,6 +312,9 @@ func (my *Client) Close() *Client {
 
 	return my
 }
+
+// Err 获取错误
+func (my *Client) Err() error { return my.Error() }
 
 // Error 获取错误
 func (my *Client) Error() error {

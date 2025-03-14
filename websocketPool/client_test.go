@@ -22,7 +22,7 @@ func online() {
 		log.Fatalf("链接失败：%v", err)
 	}
 
-	client.SendMsg(websocket.TextMessage, []byte("hello world"))
+	_, _ = client.SendMsg(websocket.TextMessage, []byte("hello world"))
 }
 
 func Test1(t *testing.T) {

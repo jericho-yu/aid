@@ -16,15 +16,17 @@ type Row struct {
 	rowNumber uint64
 }
 
+var RowApp Row
+
+func (*Row) New() *Row { return NewRow() }
+
 // NewRow 构造函数
-func NewRow() *Row {
-	return &Row{}
-}
+//
+//go:fix 推荐使用New方法
+func NewRow() *Row { return &Row{} }
 
 // GetCells 获取单元格组
-func (my *Row) GetCells() *array.AnyArray[*Cell] {
-	return my.cells
-}
+func (my *Row) GetCells() *array.AnyArray[*Cell] { return my.cells }
 
 // SetCells 设置单元格组
 func (my *Row) SetCells(cells []*Cell) *Row {
@@ -40,18 +42,17 @@ func (my *Row) SetCells(cells []*Cell) *Row {
 			cell.SetCoordinate(fmt.Sprintf("%s%d", colText, my.GetRowNumber()))
 		}
 	}
-	my.cells = array.NewAnyArray[*Cell](cells)
+	my.cells = array.New(cells)
 
 	return my
 }
 
 // GetRowNumber 获取行标
-func (my *Row) GetRowNumber() uint64 {
-	return my.rowNumber
-}
+func (my *Row) GetRowNumber() uint64 { return my.rowNumber }
 
 // SetRowNumber 设置行标
 func (my *Row) SetRowNumber(rowNumber uint64) *Row {
 	my.rowNumber = rowNumber
+
 	return my
 }

@@ -14,6 +14,7 @@ func GetKeys[T1 comparable, T2 any | ~struct{} | string | int |
 	for idx := range sources {
 		keys = append(keys, idx)
 	}
+
 	return keys
 }
 
@@ -82,8 +83,8 @@ func Filter[TVal any, TKey comparable](fn func(v TVal) (bool, TVal), values map[
 		if !b {
 			delete(values, idx)
 		}
-
 	}
+
 	return
 }
 
@@ -102,6 +103,7 @@ func Zip[TKey ~struct{} | string | int |
 	for idx, key := range keys {
 		zip[key] = values[idx]
 	}
+
 	return zip, nil
 }
 
@@ -114,5 +116,6 @@ func Pluck[V any, R any](slice []V, key, val string) ([]map[string]R, error) {
 		m[ref.FieldByName(key).String()] = ref.FieldByName(val).Interface().(R)
 		ret = append(ret, m)
 	}
+
 	return ret, nil
 }

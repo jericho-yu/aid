@@ -9,15 +9,22 @@ type ClientInstance struct {
 	connections *dict.AnyDict[string, *Client]
 }
 
+var ClientInstanceApp ClientInstance
+
+// New 实例化：websocket客户端实例
+func (*ClientInstance) New(name string) *ClientInstance { return NewClientInstance(name) }
+
 // NewClientInstance 实例化：websocket客户端实例
+//
+//go:fix 推荐使用：New方法
 func NewClientInstance(name string) *ClientInstance {
-	return &ClientInstance{name: name, connections: dict.MakeAnyDict[string, *Client]()}
+	return &ClientInstance{name: name, connections: dict.Make[string, *Client]()}
 }
 
 // Append 增加客户端
 func (my *ClientInstance) Append(client *Client) error {
-	if my.connections.Has(client.name) {
-		return WebsocketClientExistErr
+	if my.connections.HasKey(client.name) {
+		return WebsocketClientExistErr.New(client.name)
 	}
 
 	my.connections.Set(client.name, client)
@@ -27,8 +34,8 @@ func (my *ClientInstance) Append(client *Client) error {
 
 // Remove 删除客户端
 func (my *ClientInstance) Remove(name string) error {
-	if !my.connections.Has(name) {
-		return WebsocketClientNotExistErr
+	if !my.connections.HasKey(name) {
+		return WebsocketClientNotExistErr.New(name)
 	}
 
 	my.connections.RemoveByKey(name)
@@ -38,8 +45,8 @@ func (my *ClientInstance) Remove(name string) error {
 
 // Get 获取客户端
 func (my *ClientInstance) Get(name string) (*Client, error) {
-	if !my.connections.Has(name) {
-		return nil, WebsocketClientNotExistErr
+	if !my.connections.HasKey(name) {
+		return nil, WebsocketClientNotExistErr.New(name)
 	}
 
 	client, _ := my.connections.Get(name)
@@ -49,7 +56,7 @@ func (my *ClientInstance) Get(name string) (*Client, error) {
 
 // Has 检查客户端是否存在
 func (my *ClientInstance) Has(name string) bool {
-	return my.connections.Has(name)
+	return my.connections.HasKey(name)
 }
 
 // Close 关闭客户端
@@ -59,6 +66,7 @@ func (my *ClientInstance) Close(name string) error {
 	} else {
 		err = client.Close().Error()
 		my.connections.RemoveByKey(client.name)
+
 		return err
 	}
 }
@@ -66,13 +74,13 @@ func (my *ClientInstance) Close(name string) error {
 // Clean 清空客户端
 func (my *ClientInstance) Clean() []error {
 	var errorList []error
-	for _, client := range my.connections.All() {
+	my.connections.Each(func(key string, client *Client) {
 		if err := client.Close().Error(); err != nil {
 			errorList = append(errorList, err)
 		} else {
 			my.connections.RemoveByKey(client.name)
 		}
-	}
+	})
 
 	return errorList
 }

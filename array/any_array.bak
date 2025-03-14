@@ -22,6 +22,7 @@ func RemoveEmpty[T comparable](slice []T) []T {
 			j++
 		}
 	}
+
 	return slice[:j]
 }
 
@@ -32,6 +33,7 @@ func In[T comparable](target T, elements []T) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -44,19 +46,18 @@ func Filter[T any](fn func(v T) bool, values []T) (ret []T) {
 		}
 
 	}
+
 	return
 }
 
 func FilterDemo() {
-	type A struct {
-		Name string
-	}
+	type A struct{ Name string }
 	a := []*A{
 		{Name: "1"},
 		{Name: "2"},
 		{Name: "3"},
 	}
-	b := Filter[*A](func(a *A) bool {
+	b := Filter(func(a *A) bool {
 		return a.Name != "1"
 	}, a)
 
@@ -67,42 +68,45 @@ func FilterDemo() {
 
 // Max 判断数组中最大值
 func Max[T int | int8 | int16 | int32 | int64 |
-	uint | uint8 | uint16 | uint32 | uint64 |
-	float32 | float64](values []T) (max T) {
+uint | uint8 | uint16 | uint32 | uint64 |
+float32 | float64](values []T) (max T) {
 	for _, value := range values {
 		if value > max {
 			max = value
 		}
 	}
+
 	return
 }
 
 // Min 判断数组中最小值
 func Min[T int | int8 | int16 | int32 | int64 |
-	uint | uint8 | uint16 | uint32 | uint64 |
-	float32 | float64](values []T) (min T) {
+uint | uint8 | uint16 | uint32 | uint64 |
+float32 | float64](values []T) (min T) {
 	for _, value := range values {
 		if value < min {
 			min = value
 		}
 	}
+
 	return
 }
 
 // Sum 获取总和
 func Sum[T int | int8 | int16 | int32 | int64 |
-	uint | uint8 | uint16 | uint32 | uint64 |
-	float32 | float64](numbers []T) (sum T) {
+uint | uint8 | uint16 | uint32 | uint64 |
+float32 | float64](numbers []T) (sum T) {
 	for _, num := range numbers {
 		sum += num
 	}
+
 	return sum
 }
 
 // Avg 计算平均值
 func Avg[T int | int8 | int16 | int32 | int64 |
-	uint | uint8 | uint16 | uint32 | uint64 |
-	float32 | float64](numbers []T) (avg float64) {
+uint | uint8 | uint16 | uint32 | uint64 |
+float32 | float64](numbers []T) (avg float64) {
 	return float64(Sum(numbers)) / float64(len(numbers))
 }
 
@@ -114,6 +118,7 @@ func All[T comparable](values []T) bool {
 			return false
 		}
 	}
+
 	return true
 }
 
@@ -125,6 +130,7 @@ func Any[T comparable](values []T) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -159,6 +165,7 @@ func Chunk[T any](slice []T, chunkSize int) ([][]T, error) {
 		}
 		chunks = append(chunks, slice[i:end])
 	}
+
 	return chunks, nil
 }
 
@@ -168,6 +175,7 @@ func Pluck[V any, R any](slice []V, key string) ([]R, error) {
 	for _, value := range slice {
 		ret = append(ret, reflect.ValueOf(value).FieldByName(key).Interface().(R))
 	}
+
 	return ret, nil
 }
 
@@ -191,9 +199,7 @@ func Unique[V any](slice []V) ([]V, error) {
 }
 
 // NotEmptyLen 判断切片非零值的长度
-func NotEmptyLen[T comparable](values []T) int {
-	return len(RemoveEmpty(values))
-}
+func NotEmptyLen[T comparable](values []T) int { return len(RemoveEmpty(values)) }
 
 // RemoveTarget 删除数组中对应的目标
 func RemoveTarget[T comparable](values []T, target T) (ret []T) {
@@ -202,28 +208,30 @@ func RemoveTarget[T comparable](values []T, target T) (ret []T) {
 			ret = append(ret, value)
 		}
 	}
+
 	return ret
 }
 
 // RemoveTargets 删除数组中对应的多个目标
 func RemoveTargets[T comparable](values []T, targets ...T) (ret []T) {
 	for _, value := range values {
-		if !In[T](value, targets) {
+		if !In(value, targets) {
 			ret = append(ret, value)
 		}
 	}
+
 	return ret
 }
 
 // FromAnyArray 从anyArray转入
 func FromAnyArray[T any](anyArray *AnyArray[any]) []T {
-	l := MakeAnyArray[T](anyArray.Len())
+	l := Make[T](anyArray.Len())
 
-	for k, v := range anyArray.All() {
+	for k, v := range anyArray.ToSlice() {
 		l.Set(k, v.(T))
 	}
 
-	return l.All()
+	return l.ToSlice()
 }
 
 // ToAny converts any slice to []any
@@ -237,12 +245,13 @@ func ToAny(slice interface{}) []any {
 	for i := 0; i < v.Len(); i++ {
 		result[i] = v.Index(i).Interface()
 	}
+
 	return result
 }
 
 // CopyFromAnyArray 从AnyArray复制并处理转换内容
 func CopyFromAnyArray[S any, D any](src *AnyArray[S], processFn func(idx int, item S) D) *AnyArray[D] {
-	var dst *AnyArray[D] = MakeAnyArray[D](src.Len())
+	var dst *AnyArray[D] = Make[D](src.Len())
 
 	if src.IsEmpty() {
 		return dst

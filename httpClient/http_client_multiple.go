@@ -5,21 +5,29 @@ import (
 )
 
 type Multiple struct {
-	clients []*Client
+	clients []*HttpClient
 }
 
-// NewHttpClientMultiple 实例化：批量请求对象
-func NewHttpClientMultiple() *Multiple { return &Multiple{} }
+var MultipleApp Multiple
 
-// Add 添加httpClient对象
-func (my *Multiple) Add(hc *Client) *Multiple {
+func (*Multiple) New() *Multiple { return NewMultiple() }
+
+// NewMultiple 实例化：批量请求对象
+//
+//go:fix 推荐使用New方法
+func NewMultiple() *Multiple { return &MultipleApp }
+
+// Append 添加httpClient对象
+func (my *Multiple) Append(hc *HttpClient) *Multiple {
 	my.clients = append(my.clients, hc)
+
 	return my
 }
 
 // SetClients 设置httpClient对象
-func (my *Multiple) SetClients(clients []*Client) *Multiple {
+func (my *Multiple) SetClients(clients []*HttpClient) *Multiple {
 	my.clients = clients
+
 	return my
 }
 
@@ -30,7 +38,7 @@ func (my *Multiple) Send() *Multiple {
 		wg.Add(len(my.clients))
 
 		for _, client := range my.clients {
-			go func(client *Client) {
+			go func(client *HttpClient) {
 				defer wg.Done()
 
 				client.Send()
@@ -44,6 +52,4 @@ func (my *Multiple) Send() *Multiple {
 }
 
 // GetClients 获取链接池
-func (my *Multiple) GetClients() []*Client {
-	return my.clients
-}
+func (my *Multiple) GetClients() []*HttpClient { return my.clients }

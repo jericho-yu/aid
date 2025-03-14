@@ -30,44 +30,68 @@ type (
 
 var FileSystemApp FileSystem
 
+func (*FileSystem) NewByRel(dir string) *FileSystem { return FileSystemApp.NewByRelative(dir) }
+func (*FileSystem) NewByAbs(dir string) *FileSystem { return FileSystemApp.NewByAbsolute(dir) }
+
 // NewByRelative 实例化：文件系统（相对路径）
-func (FileSystem) NewByRelative(dir string) *FileSystem {
-	ins := &FileSystem{dir: filepath.Clean(filepath.Join(FileSystem{}.GetRootPath(), dir))}
+func (*FileSystem) NewByRelative(dir string) *FileSystem {
+	ins := &FileSystem{dir: filepath.Clean(filepath.Join(getRootPath(), dir))}
+
 	return ins.init()
 }
 
-// NewByAbs 实例化：文件系统（绝对路径）
-func (FileSystem) NewByAbs(dir string) *FileSystem {
+// NewByAbsolute 实例化：文件系统（绝对路径）
+func (*FileSystem) NewByAbsolute(dir string) *FileSystem {
 	ins := &FileSystem{dir: dir}
+
+	return ins.init()
+}
+
+// NewFileSystemByRelative 实例化：文件系统（相对路径）
+//
+//go:fix 推荐使用NewByRelative方法
+func NewFileSystemByRelative(dir string) *FileSystem {
+	ins := &FileSystem{dir: filepath.Clean(filepath.Join(getRootPath(), dir))}
+
+	return ins.init()
+}
+
+// NewFileSystemByAbsolute 实例化：文件系统（绝对路径）
+//
+//go:fix 推荐使用NewByAbsolute方法
+func NewFileSystemByAbsolute(dir string) *FileSystem {
+	ins := &FileSystem{dir: dir}
+
 	return ins.init()
 }
 
 // Copy 复制一个新的对象
 func (my *FileSystem) Copy() *FileSystem {
 	copied := *my
+
 	return &copied
 }
 
 // SetDirByRelative 设置路径：相对路径
 func (my *FileSystem) SetDirByRelative(dir string) *FileSystem {
-	my.dir = filepath.Clean(filepath.Join(FileSystem{}.GetRootPath(), dir))
-
+	my.dir = filepath.Clean(filepath.Join(getRootPath(), dir))
 	my.init()
+
 	return my
 }
 
 // SetDirByAbs 设置路径：绝对路径
 func (my *FileSystem) SetDirByAbs(dir string) *FileSystem {
 	my.dir = dir
-
 	my.init()
+
 	return my
 }
 
 func (my *FileSystem) Join(dir string) *FileSystem {
 	my.dir = filepath.Join(my.dir, dir)
-
 	my.init()
+
 	return my
 }
 
@@ -78,40 +102,48 @@ func (my *FileSystem) Joins(dir ...string) *FileSystem {
 	}
 
 	my.init()
+
 	return my
 }
 
-func (FileSystem) GetRootPath() string {
+func getRootPath() string {
 	rootPath, _ := filepath.Abs(".")
+
 	return rootPath
 }
 
-// GetCurrentPath 最终方案-全兼容
-func (FileSystem) GetCurrentPath(paths ...string) string {
+// getCurrentPath 最终方案-全兼容
+func getCurrentPath(paths ...string) string {
 	dir := getGoBuildPath()
+
 	if strings.Contains(dir, getTmpDir()) {
 		return getGoRunPath()
 	}
+
 	return dir
 }
 
 // 获取系统临时目录，兼容go run
 func getTmpDir() string {
 	dir := os.Getenv("TEMP")
+
 	if dir == "" {
 		dir = os.Getenv("TMP")
 	}
 	res, _ := filepath.EvalSymlinks(dir)
+
 	return res
 }
 
 // 获取当前执行文件绝对路径
 func getGoBuildPath() string {
 	exePath, err := os.Executable()
+
 	if err != nil {
 		log.Fatal(err)
 	}
 	res, _ := filepath.EvalSymlinks(filepath.Dir(exePath))
+
 	return res
 }
 
@@ -119,9 +151,11 @@ func getGoBuildPath() string {
 func getGoRunPath() string {
 	var abPath string
 	_, filename, _, ok := runtime.Caller(0)
+
 	if ok {
 		abPath = path.Dir(filename)
 	}
+
 	return abPath
 }
 
@@ -132,12 +166,14 @@ func (my *FileSystem) init() *FileSystem {
 	if e != nil {
 		panic(fmt.Errorf("检查路径错误：%s", e.Error()))
 	}
+
 	if my.IsExist {
 		e = my.CheckPathType() // 检查路径类型
 		if e != nil {
 			panic(fmt.Errorf("检查路径类型错误：%s", e.Error()))
 		}
 	}
+
 	return my
 }
 
@@ -147,9 +183,11 @@ func (my *FileSystem) Exist() (bool, error) {
 	if err == nil {
 		return true, nil
 	}
+
 	if os.IsNotExist(err) {
 		return false, nil
 	}
+
 	return false, err
 }
 
@@ -195,9 +233,7 @@ func (my *FileSystem) MkDir() error {
 }
 
 // GetDir 获取当前路径
-func (my *FileSystem) GetDir() string {
-	return my.dir
-}
+func (my *FileSystem) GetDir() string { return my.dir }
 
 // CheckPathType 判断一个路径是文件还是文件夹
 func (my *FileSystem) CheckPathType() error {
@@ -227,6 +263,7 @@ func (my *FileSystem) Delete() error {
 			return my.DelFile()
 		}
 	}
+
 	return nil
 }
 
@@ -236,6 +273,7 @@ func (my *FileSystem) DelDir() error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -245,22 +283,23 @@ func (my *FileSystem) DelFile() error {
 	if e != nil {
 		return e
 	}
+
 	return nil
 }
 
 // Read 读取文件
-func (my *FileSystem) Read() ([]byte, error) {
-	return os.ReadFile(my.dir)
-}
+func (my *FileSystem) Read() ([]byte, error) { return os.ReadFile(my.dir) }
 
 // RenameFile 修改文件名并获取新的文件对象
 func (my *FileSystem) RenameFile(newFilename string, deleteRepetition bool) (*FileSystem, error) {
 	dir, _ := filepath.Split(my.GetDir())
-	dst := FileSystemApp.NewByAbs(path.Join(dir, newFilename))
+	dst := FileSystemApp.NewByAbsolute(path.Join(dir, newFilename))
 
 	if deleteRepetition {
 		if dst.IsExist {
-			dst.DelFile()
+			if err := dst.DelFile(); err != nil {
+				return nil, err
+			}
 		}
 	}
 
@@ -284,11 +323,13 @@ func (my *FileSystem) CopyFile(dstDir, dstFilename string, abs bool) (string, er
 	if !abs {
 		dst = FileSystemApp.NewByRelative(dstDir)
 	} else {
-		dst = FileSystemApp.NewByAbs(dstDir)
+		dst = FileSystemApp.NewByAbsolute(dstDir)
 	}
 	// 创建目标文件夹
 	if !dst.IsDir {
-		dst.MkDir()
+		if err = dst.MkDir(); err != nil {
+			return "", err
+		}
 	}
 
 	// 判断源是否是文件
@@ -333,20 +374,22 @@ func (my *FileSystem) CopyFile(dstDir, dstFilename string, abs bool) (string, er
 }
 
 // CopyFiles 拷贝多个文件
-func (FileSystem) CopyFiles(srcFiles []*FileSystemCopyFilesTarget, dstDir string, abs bool) error {
+func copyFiles(srcFiles []*FileSystemCopyFilesTarget, dstDir string, abs bool) error {
 	var (
 		err error
 		dst *FileSystem
 	)
 
 	if abs {
-		dst = FileSystemApp.NewByAbs(dstDir)
+		dst = FileSystemApp.NewByAbsolute(dstDir)
 	} else {
 		dst = FileSystemApp.NewByRelative(dstDir)
 	}
 
 	if !dst.IsDir {
-		dst.MkDir()
+		if err = dst.MkDir(); err != nil {
+			return err
+		}
 	}
 
 	for _, srcFile := range srcFiles {
@@ -375,7 +418,7 @@ func (my *FileSystem) CopyDir(dstDir string, abs bool) error {
 	}
 
 	// 遍历源目录
-	err := filepath.Walk(my.GetDir(), func(srcPath string, info os.FileInfo, err error) error {
+	if err := filepath.Walk(my.GetDir(), func(srcPath string, info os.FileInfo, err error) error {
 		var (
 			src         *FileSystem
 			dst         *FileSystem
@@ -383,13 +426,15 @@ func (my *FileSystem) CopyDir(dstDir string, abs bool) error {
 		)
 
 		if abs {
-			dst = FileSystemApp.NewByAbs(dstDir)
+			dst = FileSystemApp.NewByAbsolute(dstDir)
 		} else {
 			dst = FileSystemApp.NewByRelative(dstDir)
 		}
 
 		if !dst.IsDir {
-			dst.MkDir()
+			if err = dst.MkDir(); err != nil {
+				return err
+			}
 		}
 
 		if err != nil {
@@ -397,18 +442,16 @@ func (my *FileSystem) CopyDir(dstDir string, abs bool) error {
 		}
 
 		srcFilename = filepath.Base(srcPath)
-		src = FileSystemApp.NewByAbs(srcPath)
+		src = FileSystemApp.NewByAbsolute(srcPath)
 
 		if src.IsFile {
 			if _, err = src.CopyFile(dst.GetDir(), srcFilename, true); err != nil {
 				return err
 			}
-
 		}
 
 		return nil
-	})
-	if err != nil {
+	}); err != nil {
 		return err
 	}
 
@@ -423,7 +466,7 @@ func (my *FileSystem) WriteBytes(content []byte) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-	defer file.Close()
+	defer func(file *os.File) { _ = file.Close() }(file)
 
 	// 写入内容
 	written, err = file.Write(content)
@@ -445,7 +488,7 @@ func (my *FileSystem) WriteIoReader(content io.Reader) (written int64, err error
 	if err != nil {
 		return 0, err
 	}
-	defer dst.Close()
+	defer func(dst *os.File) { _ = dst.Close() }(dst)
 
 	return io.Copy(dst, content)
 }
@@ -458,7 +501,7 @@ func (my *FileSystem) WriteBytesAppend(content []byte) (int64, error) {
 	if e != nil {
 		return 0, e
 	}
-	defer file.Close()
+	defer func(file *os.File) { _ = file.Close() }(file)
 
 	// 追加写入内容
 	written, e = file.Write(content)
@@ -481,7 +524,7 @@ func (my *FileSystem) WriteIoReaderAppend(content io.Reader) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-	defer dst.Close()
+	defer func(dst *os.File) { _ = dst.Close() }(dst)
 
 	c, err := io.ReadAll(content)
 	if err != nil {

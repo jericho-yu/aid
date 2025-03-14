@@ -25,6 +25,8 @@ type (
 	AnyType        string
 )
 
+var ReflectionApp Reflection
+
 const (
 	Int               ReflectionType = "I"
 	Int8              ReflectionType = "I8"
@@ -58,7 +60,12 @@ const (
 	UnKnowType        ReflectionType = "UKT"
 )
 
+func (*Reflection) New(object any) *Reflection                    { return New(object) }
+func (*Reflection) NewByValue(refValue reflect.Value) *Reflection { return NewByReflectValue(refValue) }
+
 // New 实例化：反射帮助
+//
+//go:fix 推荐使用：ReflectionApp.New方法
 func New(object any) *Reflection {
 	var (
 		ins      *Reflection = &Reflection{original: object}
@@ -111,9 +118,9 @@ func New(object any) *Reflection {
 }
 
 // NewByReflectValue 实例化：通过reflect.Value
-func NewByReflectValue(refValue reflect.Value) *Reflection {
-	return New(refValue.Interface())
-}
+//
+//go:fix 推荐使用：ReflectionApp.NewByValue方法
+func NewByReflectValue(refValue reflect.Value) *Reflection { return New(refValue.Interface()) }
 
 // GetValue 获取reflect.Value
 func (my *Reflection) GetValue() reflect.Value { return my.refValue }
@@ -123,7 +130,11 @@ func (my *Reflection) GetType() reflect.Type { return my.refType }
 
 // GetReflectionType 获取Reflection类型
 func (my *Reflection) GetReflectionType() ReflectionType {
-	var ref = reflect.ValueOf(my.original)
+	var (
+		ref      = reflect.ValueOf(my.original)
+		elem     reflect.Value
+		elemType reflect.Type
+	)
 
 	if ref.Kind() != reflect.Ptr {
 		var is64 bool = unsafe.Sizeof(uintptr(0)) == 8
@@ -134,7 +145,7 @@ func (my *Reflection) GetReflectionType() ReflectionType {
 
 		switch my.GetType().Kind() {
 		case reflect.Int:
-			return operation.Ternary[ReflectionType](is64, Int64, Int32)
+			return operation.Ternary(is64, Int64, Int32)
 		case reflect.Int8:
 			return Int8
 		case reflect.Int16:
@@ -144,7 +155,7 @@ func (my *Reflection) GetReflectionType() ReflectionType {
 		case reflect.Int64:
 			return Int64
 		case reflect.Uint:
-			return operation.Ternary[ReflectionType](is64, Uint64, Uint32)
+			return operation.Ternary(is64, Uint64, Uint32)
 		case reflect.Uint8:
 			return Uint8
 		case reflect.Uint16:
@@ -171,11 +182,6 @@ func (my *Reflection) GetReflectionType() ReflectionType {
 			return Nil
 		}
 	}
-
-	var (
-		elem     reflect.Value
-		elemType reflect.Type
-	)
 
 	elem = ref.Elem()
 
@@ -213,13 +219,12 @@ func (my *Reflection) GetReflectionType() ReflectionType {
 			return Any
 		}
 	}
+
 	return UnKnowType
 }
 
 // IsSame 判断两个类型是否相等
-func (my *Reflection) IsSame(value any) bool {
-	return my.refType == reflect.TypeOf(value)
-}
+func (my *Reflection) IsSame(value any) bool { return my.refType == reflect.TypeOf(value) }
 
 // IsSameDeepEqual 判断两个值是否相等
 func (my *Reflection) IsSameDeepEqual(value any) bool {
@@ -231,17 +236,14 @@ func (my *Reflection) CallMethodByName(
 	methodName string,
 	values ...reflect.Value,
 ) []reflect.Value {
-	str.NewTerminalLog("OK1 -> %#v").Info(my.original)
 	refVal := reflect.ValueOf(my.original)
 	if refVal.Kind() != reflect.Ptr {
-		str.NewTerminalLog("OK2 -> %#v").Info(refVal.Type())
 		ptr := reflect.New(refVal.Type())
 		ptr.Elem().Set(refVal)
 		refVal = ptr
 	}
 
 	method := refVal.MethodByName(methodName)
-	str.NewTerminalLog("OK3 -> %#v").Info(method)
 	if method.IsValid() {
 		return method.Call(values)
 	}
@@ -311,10 +313,10 @@ func compareTagAndTarget(
 	}
 
 	if tagField != "" {
-		return array.NewAnyArray[string](strings.Split(tagValue, ";")).
+		return array.New(strings.Split(tagValue, ";")).
 			Every(func(s string) string {
-				t := array.NewAnyArray[string](strings.Split(s, ":"))
-				return operation.Ternary[string](t.First() == tagField, t.Last(), "")
+				t := array.New(strings.Split(s, ":"))
+				return operation.Ternary(t.First() == tagField, t.Last(), "")
 			}).
 			In(target)
 	} else {
@@ -323,20 +325,21 @@ func compareTagAndTarget(
 }
 
 // HasField 判断结构体是否有某个字段
-func (my *Reflection) HasField(fieldName string) bool {
-	return my.hasField(my.original, fieldName)
-}
+func (my *Reflection) HasField(fieldName string) bool { return my.hasField(my.original, fieldName) }
 
 // hasField 判断结构体是否有某个字段
-func (my *Reflection) hasField(v interface{}, fieldName string) bool {
+func (my *Reflection) hasField(v any, fieldName string) bool {
 	val := reflect.ValueOf(v)
+
 	if val.Kind() == reflect.Ptr {
 		val = val.Elem()
 		return my.hasField(val.Interface(), fieldName)
 	}
+
 	if val.Kind() != reflect.Struct {
 		return false
 	}
 	field := val.FieldByName(fieldName)
+
 	return field.IsValid()
 }

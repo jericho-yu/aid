@@ -3,6 +3,8 @@ package excel
 import (
 	"time"
 
+	"github.com/jericho-yu/aid/dict"
+
 	"github.com/jericho-yu/aid/str"
 	"github.com/xuri/excelize/v2"
 )
@@ -18,6 +20,7 @@ func ColumnTextToNumber(columnText string) int {
 	for i, char := range columnText {
 		result += (int(char - 'A' + 1)) * pow(26, len(columnText)-i-1)
 	}
+
 	return result
 }
 
@@ -27,6 +30,7 @@ func pow(base, exponent int) int {
 	for i := 0; i < exponent; i++ {
 		result *= base
 	}
+
 	return result
 }
 
@@ -76,7 +80,7 @@ func WriteDemo(filename string) {
 					NewCellAny("王五"),
 					NewCellAny(80).
 						SetFontRgbFunc(func() (string, bool) {
-							if 80 > 80 {
+							if 80 > 90 {
 								return "FF0000", true
 							} else {
 								return "", false
@@ -125,10 +129,11 @@ func ReadDemo(filename string) {
 		str.NewTerminalLog("err: %v").Error(err)
 	}
 
-	for _, value := range excelData.All() {
-		username, _ := value.Value.Get("username")
-		nickname, _ := value.Value.Get("nickname")
-		score, _ := value.Value.Get("score")
-		str.NewTerminalLog("%d行: 姓名[%s]，昵称[%s]，分数[%s]").Success(value.Key, username, nickname, score)
-	}
+	excelData.Each(func(key uint64, value *dict.AnyDict[string, string]) {
+		username := value.GetValueByKey("username")
+		nickname := value.GetValueByKey("nickname")
+		score := value.GetValueByKey("score")
+
+		str.NewTerminalLog("%d行: 姓名[%s]，昵称[%s]，分数[%s]").Success(key, username, nickname, score)
+	})
 }

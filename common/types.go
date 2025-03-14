@@ -22,107 +22,67 @@ var (
 	}
 )
 
-type iVal interface {
-	Val() any
-}
+type iVal interface{ Val() any }
 
 // iString is used for type assert api for String().
-type iString interface {
-	String() string
-}
+type iString interface{ String() string }
 
 // iBool is used for type assert api for Bool().
-type iBool interface {
-	Bool() bool
-}
+type iBool interface{ Bool() bool }
 
 // iInt64 is used for type assert api for Int64().
-type iInt64 interface {
-	Int64() int64
-}
+type iInt64 interface{ Int64() int64 }
 
 // iUint64 is used for type assert api for Uint64().
-type iUint64 interface {
-	Uint64() uint64
-}
+type iUint64 interface{ Uint64() uint64 }
 
 // iFloat32 is used for type assert api for Float32().
-type iFloat32 interface {
-	Float32() float32
-}
+type iFloat32 interface{ Float32() float32 }
 
 // iFloat64 is used for type assert api for Float64().
-type iFloat64 interface {
-	Float64() float64
-}
+type iFloat64 interface{ Float64() float64 }
 
 // iError is used for type assert api for Error().
-type iError interface {
-	Error() string
-}
+type iError interface{ Error() string }
 
 // iBytes is used for type assert api for Bytes().
-type iBytes interface {
-	Bytes() []byte
-}
+type iBytes interface{ Bytes() []byte }
 
 // iInterface is used for type assert api for Interface().
-type iInterface interface {
-	Interface() any
-}
+type iInterface interface{ Interface() any }
 
 // iInterfaces is used for type assert api for Interfaces().
-type iInterfaces interface {
-	Interfaces() []any
-}
+type iInterfaces interface{ Interfaces() []any }
 
 // iFloats is used for type assert api for Floats().
-type iFloats interface {
-	Floats() []float64
-}
+type iFloats interface{ Floats() []float64 }
 
 // iInts is used for type assert api for Ints().
-type iInts interface {
-	Ints() []int
-}
+type iInts interface{ Ints() []int }
 
 // iStrings is used for type assert api for Strings().
-type iStrings interface {
-	Strings() []string
-}
+type iStrings interface{ Strings() []string }
 
 // iUints is used for type assert api for Uints().
-type iUints interface {
-	Uints() []uint
-}
+type iUints interface{ Uints() []uint }
 
 // iMapStrAny is the interface support for converting struct parameter to map.
-type iMapStrAny interface {
-	MapStrAny() map[string]any
-}
+type iMapStrAny interface{ MapStrAny() map[string]any }
 
 // iUnmarshalValue is the interface for custom defined types customizing value assignment.
 // Note that only pointer can implement interface iUnmarshalValue.
-type iUnmarshalValue interface {
-	UnmarshalValue(any) error
-}
+type iUnmarshalValue interface{ UnmarshalValue(any) error }
 
 // iUnmarshalText is the interface for custom defined types customizing value assignment.
 // Note that only pointer can implement interface iUnmarshalText.
-type iUnmarshalText interface {
-	UnmarshalText(text []byte) error
-}
+type iUnmarshalText interface{ UnmarshalText(text []byte) error }
 
 // iUnmarshalText is the interface for custom defined types customizing value assignment.
 // Note that only pointer can implement interface iUnmarshalJSON.
-type iUnmarshalJSON interface {
-	UnmarshalJSON(b []byte) error
-}
+type iUnmarshalJSON interface{ UnmarshalJSON(b []byte) error }
 
 // iSet is the interface for custom value assignment.
-type iSet interface {
-	Set(value any) (old any)
-}
+type iSet interface{ Set(value any) (old any) }
 
 // FloatFormat 浮点精度控制
 func FloatFormat(f float64, length int) (float64, error) {
@@ -133,6 +93,7 @@ func ToBytes(original any) []byte {
 	if original == nil {
 		return nil
 	}
+
 	switch value := original.(type) {
 	case string:
 		return []byte(value)
@@ -144,8 +105,10 @@ func ToBytes(original any) []byte {
 		if f, ok := value.(iBytes); ok {
 			return f.Bytes()
 		}
+
 		refType := reflect.TypeOf(original)
 		refValue := reflect.ValueOf(original)
+
 		switch refType.Kind() {
 		case reflect.Map:
 			bytes, err := json.Marshal(original)
@@ -159,6 +122,7 @@ func ToBytes(original any) []byte {
 				ok    = true
 				bytes = make([]byte, refValue.Len())
 			)
+
 			for i := range bytes {
 				int32Value := ToInt32(refValue.Index(i).Interface())
 				if int32Value < 0 || int32Value > math.MaxUint8 {
@@ -167,10 +131,12 @@ func ToBytes(original any) []byte {
 				}
 				bytes[i] = byte(int32Value)
 			}
+
 			if ok {
 				return bytes
 			}
 		}
+
 		return LeEncode(original)
 	}
 }
@@ -182,6 +148,7 @@ func ToUint(original any) uint {
 	if v, ok := original.(uint); ok {
 		return v
 	}
+
 	return uint(ToInt64(original))
 }
 
@@ -192,6 +159,7 @@ func ToUint8(original any) uint8 {
 	if v, ok := original.(uint8); ok {
 		return v
 	}
+
 	return uint8(ToInt64(original))
 }
 
@@ -202,6 +170,7 @@ func ToUint16(original any) uint16 {
 	if v, ok := original.(uint16); ok {
 		return v
 	}
+
 	return uint16(ToInt64(original))
 }
 
@@ -212,6 +181,7 @@ func ToUint32(original any) uint32 {
 	if v, ok := original.(uint32); ok {
 		return v
 	}
+
 	return uint32(ToInt64(original))
 }
 
@@ -289,6 +259,7 @@ func ToInt(original any) int {
 	if v, ok := original.(int); ok {
 		return v
 	}
+
 	return int(ToInt64(original))
 }
 
@@ -299,6 +270,7 @@ func ToInt8(original any) int8 {
 	if v, ok := original.(int8); ok {
 		return v
 	}
+
 	return int8(ToInt64(original))
 }
 
@@ -309,6 +281,7 @@ func ToInt16(original any) int16 {
 	if v, ok := original.(int16); ok {
 		return v
 	}
+
 	return int16(ToInt64(original))
 }
 
@@ -319,6 +292,7 @@ func ToInt32(original any) int32 {
 	if v, ok := original.(int32); ok {
 		return v
 	}
+
 	return int32(ToInt64(original))
 }
 
@@ -399,9 +373,7 @@ func ToInt64(original any) int64 {
 	}
 }
 
-func ToDatetimeUnixMilli(original any) time.Time {
-	return time.UnixMilli(ToInt64(original))
-}
+func ToDatetimeUnixMilli(original any) time.Time { return time.UnixMilli(ToInt64(original)) }
 
 // ToFloat32 converts `any` to float32.
 func ToFloat32(original any) float32 {
@@ -492,9 +464,9 @@ func ToString(original any) string {
 		return value.String()
 	default:
 		// Empty checks.
-		if value == nil {
-			return ""
-		}
+		// if value == nil {
+		// 	return ""
+		// }
 		if f, ok := value.(iString); ok {
 			// If the variable implements the String() interface,
 			// then use that interface to perform the conversion
@@ -637,6 +609,7 @@ func LeEncode(values ...any) []byte {
 			}
 		}
 	}
+
 	return buf.Bytes()
 }
 
@@ -647,6 +620,7 @@ func LeEncodeByLength(length int, values ...any) []byte {
 	} else if len(b) > length {
 		b = b[0:length]
 	}
+
 	return b
 }
 
@@ -660,16 +634,13 @@ func LeDecode(b []byte, values ...any) error {
 			return err
 		}
 	}
+
 	return nil
 }
 
-func LeEncodeString(s string) []byte {
-	return []byte(s)
-}
+func LeEncodeString(s string) []byte { return []byte(s) }
 
-func LeDecodeToString(b []byte) string {
-	return string(b)
-}
+func LeDecodeToString(b []byte) string { return string(b) }
 
 func LeEncodeBool(b bool) []byte {
 	if b {
@@ -703,47 +674,49 @@ func LeEncodeUint(i uint) []byte {
 	}
 }
 
-func LeEncodeInt8(i int8) []byte {
-	return []byte{byte(i)}
-}
+func LeEncodeInt8(i int8) []byte { return []byte{byte(i)} }
 
-func LeEncodeUint8(i uint8) []byte {
-	return []byte{i}
-}
+func LeEncodeUint8(i uint8) []byte { return []byte{i} }
 
 func LeEncodeInt16(i int16) []byte {
 	b := make([]byte, 2)
 	binary.LittleEndian.PutUint16(b, uint16(i))
+
 	return b
 }
 
 func LeEncodeUint16(i uint16) []byte {
 	b := make([]byte, 2)
 	binary.LittleEndian.PutUint16(b, i)
+
 	return b
 }
 
 func LeEncodeInt32(i int32) []byte {
 	b := make([]byte, 4)
 	binary.LittleEndian.PutUint32(b, uint32(i))
+
 	return b
 }
 
 func LeEncodeUint32(i uint32) []byte {
 	b := make([]byte, 4)
 	binary.LittleEndian.PutUint32(b, i)
+
 	return b
 }
 
 func LeEncodeInt64(i int64) []byte {
 	b := make([]byte, 8)
 	binary.LittleEndian.PutUint64(b, uint64(i))
+
 	return b
 }
 
 func LeEncodeUint64(i uint64) []byte {
 	b := make([]byte, 8)
 	binary.LittleEndian.PutUint64(b, i)
+
 	return b
 }
 
@@ -751,6 +724,7 @@ func LeEncodeFloat32(f float32) []byte {
 	bits := math.Float32bits(f)
 	b := make([]byte, 4)
 	binary.LittleEndian.PutUint32(b, bits)
+
 	return b
 }
 
@@ -758,6 +732,7 @@ func LeEncodeFloat64(f float64) []byte {
 	bits := math.Float64bits(f)
 	b := make([]byte, 8)
 	binary.LittleEndian.PutUint64(b, bits)
+
 	return b
 }
 
@@ -792,6 +767,7 @@ func LeDecodeToBool(b []byte) bool {
 	if bytes.Equal(b, make([]byte, len(b))) {
 		return false
 	}
+
 	return true
 }
 
@@ -799,6 +775,7 @@ func LeDecodeToInt8(b []byte) int8 {
 	if len(b) == 0 {
 		panic(`empty slice given`)
 	}
+
 	return int8(b[0])
 }
 
@@ -806,6 +783,7 @@ func LeDecodeToUint8(b []byte) uint8 {
 	if len(b) == 0 {
 		panic(`empty slice given`)
 	}
+
 	return b[0]
 }
 
@@ -851,5 +829,6 @@ func LeFillUpSize(b []byte, l int) []byte {
 	}
 	c := make([]byte, l)
 	copy(c, b)
+
 	return c
 }

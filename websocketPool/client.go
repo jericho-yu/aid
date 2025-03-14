@@ -33,7 +33,18 @@ type (
 	}
 )
 
+var ClientApp Client
+
+func (*Client) New(
+	instanceName, name, host, path string,
+	receiveMessageFunc func(instanceName, clientName string, prototypeMsg []byte) ([]byte, error),
+) (*Client, error) {
+	return NewClient(instanceName, name, host, path, receiveMessageFunc)
+}
+
 // NewClient 实例化：websocket 客户端链接
+//
+//go:fix 推荐使用：推荐使用New方法
 func NewClient(
 	instanceName, name, host, path string,
 	receiveMessageFunc func(instanceName, clientName string, prototypeMsg []byte) ([]byte, error),
@@ -66,7 +77,7 @@ func NewClient(
 func (my *Client) SendMsg(msgType int, msg []byte) ([]byte, error) {
 	var (
 		err error
-		res = make([]byte, 0)
+		res []byte
 	)
 
 	if my.timeout == nil || my.timeout.interval == 0 {

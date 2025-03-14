@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/jericho-yu/aid/dict"
-	redis "github.com/redis/go-redis/v9"
+	rds "github.com/redis/go-redis/v9"
 )
 
 type (
@@ -18,26 +18,31 @@ type (
 
 	redisConn struct {
 		prefix string
-		conn   *redis.Client
+		conn   *rds.Client
 	}
 )
 
 var (
 	redisPoolIns  *RedisPool
 	redisPoolOnce sync.Once
+	RedisPoolApp  RedisPool
 )
 
+func (*RedisPool) Once(redisSetting *RedisSetting) *RedisPool { return OnceRedisPool(redisSetting) }
+
 // OnceRedisPool 单例化：redis 链接
+//
+//go:fix 推荐使用：Once方法
 func OnceRedisPool(redisSetting *RedisSetting) *RedisPool {
 	redisPoolOnce.Do(func() {
 		redisPoolIns = &RedisPool{}
-		redisPoolIns.connections = dict.MakeAnyDict[string, *redisConn]()
+		redisPoolIns.connections = dict.Make[string, *redisConn]()
 
 		if len(redisSetting.Pool) > 0 {
 			for _, pool := range redisSetting.Pool {
 				redisPoolIns.connections.Set(pool.Key, &redisConn{
 					prefix: fmt.Sprintf("%s:%s", redisSetting.Prefix, pool.Prefix),
-					conn: redis.NewClient(&redis.Options{
+					conn: rds.NewClient(&rds.Options{
 						Addr:     fmt.Sprintf("%s:%d", redisSetting.Host, redisSetting.Port),
 						Password: redisSetting.Password,
 						DB:       pool.DbNum,
@@ -51,10 +56,11 @@ func OnceRedisPool(redisSetting *RedisSetting) *RedisPool {
 }
 
 // GetClient 获取链接和链接前缀
-func (*RedisPool) GetClient(key string) (string, *redis.Client) {
+func (*RedisPool) GetClient(key string) (string, *rds.Client) {
 	if client, exist := redisPoolIns.connections.Get(key); exist {
 		return client.prefix, client.conn
 	}
+
 	return "", nil
 }
 
@@ -63,7 +69,7 @@ func (*RedisPool) Get(clientName, key string) (string, error) {
 	var (
 		err         error
 		prefix, ret string
-		client      *redis.Client
+		client      *rds.Client
 	)
 
 	prefix, client = redisPoolIns.GetClient(clientName)
@@ -73,12 +79,13 @@ func (*RedisPool) Get(clientName, key string) (string, error) {
 
 	ret, err = client.Get(context.Background(), fmt.Sprintf("%s:%s", prefix, key)).Result()
 	if err != nil {
-		if errors.Is(err, redis.Nil) {
+		if errors.Is(err, rds.Nil) {
 			return "", nil
 		} else {
 			return "", err
 		}
 	}
+
 	return ret, nil
 }
 
@@ -86,7 +93,7 @@ func (*RedisPool) Get(clientName, key string) (string, error) {
 func (*RedisPool) Set(clientName, key string, val any, exp time.Duration) (string, error) {
 	var (
 		prefix string
-		client *redis.Client
+		client *rds.Client
 	)
 
 	prefix, client = redisPoolIns.GetClient(clientName)
@@ -102,12 +109,13 @@ func (my *RedisPool) Close(key string) error {
 	if client, exist := redisPoolIns.connections.Get(key); exist {
 		return client.conn.Close()
 	}
+
 	return nil
 }
 
 // Clean 清理链接
 func (*RedisPool) Clean() {
-	for key, val := range redisPoolIns.connections.All() {
+	for key, val := range redisPoolIns.connections.ToMap() {
 		_ = val.conn.Close()
 		redisPoolIns.connections.RemoveByKey(key)
 	}

@@ -14,7 +14,7 @@ import (
 // Reader Excel读取器
 type Reader struct {
 	Err         error
-	data        *dict.AnyOrderlyDict[uint64, *array.AnyArray[string]]
+	data        *dict.AnyDict[uint64, *array.AnyArray[string]]
 	excel       *excelize.File
 	sheetName   string
 	originalRow int
@@ -23,9 +23,15 @@ type Reader struct {
 	titles      *array.AnyArray[string]
 }
 
+var ReaderApp Reader
+
+func (*Reader) New() *Reader { return NewReader() }
+
 // NewReader 构造函数
+//
+//go:fix 推荐使用New方法
 func NewReader() *Reader {
-	return &Reader{data: dict.MakeAnyOrderlyDict[uint64, *array.AnyArray[string]](0)}
+	return &Reader{data: dict.Make[uint64, *array.AnyArray[string]]()}
 }
 
 // AutoRead 自动读取（默认第一行是表头，从第二行开始，默认Sheet名称为：Sheet1）
@@ -51,20 +57,14 @@ func (my *Reader) AutoReadBySheetName(sheetName string, filename ...any) *Reader
 }
 
 // Data 获取数据：有序字典
-func (my *Reader) Data() *dict.AnyOrderlyDict[uint64, *array.AnyArray[string]] {
-	return my.data
-}
+func (my *Reader) Data() *dict.AnyDict[uint64, *array.AnyArray[string]] { return my.data }
 
 // DataWithTitle 获取数据：带有title的有序字典
-func (my *Reader) DataWithTitle() (*dict.AnyOrderlyDict[uint64, *dict.AnyDict[string, string]], error) {
-	newDict := dict.MakeAnyOrderlyDict[uint64, *dict.AnyDict[string, string]](0)
+func (my *Reader) DataWithTitle() (*dict.AnyDict[uint64, *dict.AnyDict[string, string]], error) {
+	newDict := dict.Make[uint64, *dict.AnyDict[string, string]]()
 
-	for idx, value := range my.data.All() {
-		newMap, err := dict.Zip[string, string](my.titles.All(), value.Value.All())
-		if err != nil {
-			return nil, err
-		}
-		newDict.SetByKey(uint64(idx), dict.NewAnyDict[string, string](newMap))
+	for idx, value := range my.data.ToMap() {
+		newDict.Set(idx, dict.Zip(my.titles.ToSlice(), value.ToSlice()))
 	}
 
 	return newDict, nil
@@ -72,58 +72,53 @@ func (my *Reader) DataWithTitle() (*dict.AnyOrderlyDict[uint64, *dict.AnyDict[st
 
 // SetDataByRow 设置单行数据
 func (my *Reader) SetDataByRow(rowNumber uint64, data []string) *Reader {
-	my.data.SetByKey(rowNumber, array.NewAnyArray(data))
+	my.data.Set(rowNumber, array.New(data))
+
 	return my
 }
 
 // GetSheetName 获取工作表名称
-func (my *Reader) GetSheetName() string {
-	return my.sheetName
-}
+func (my *Reader) GetSheetName() string { return my.sheetName }
 
 // SetSheetName 设置工作表名称
 func (my *Reader) SetSheetName(sheetName string) *Reader {
 	my.sheetName = sheetName
+
 	return my
 }
 
 // GetOriginalRow 获取读取起始行
-func (my *Reader) GetOriginalRow() int {
-	return my.originalRow
-}
+func (my *Reader) GetOriginalRow() int { return my.originalRow }
 
 // SetOriginalRow 设置读取起始行
 func (my *Reader) SetOriginalRow(originalRow int) *Reader {
 	my.originalRow = originalRow - 1
+
 	return my
 }
 
 // GetFinishedRow 获取读取终止行
-func (my *Reader) GetFinishedRow() int {
-	return my.finishedRow
-}
+func (my *Reader) GetFinishedRow() int { return my.finishedRow }
 
 // SetFinishedRow 设置读取终止行
 func (my *Reader) SetFinishedRow(finishedRow int) *Reader {
 	my.finishedRow = finishedRow - 1
+
 	return my
 }
 
 // GetTitleRow 获取表头行
-func (my *Reader) GetTitleRow() int {
-	return my.titleRow
-}
+func (my *Reader) GetTitleRow() int { return my.titleRow }
 
 // SetTitleRow 设置表头行
 func (my *Reader) SetTitleRow(titleRow int) *Reader {
 	my.titleRow = titleRow - 1
+
 	return my
 }
 
 // GetTitle 获取表头
-func (my *Reader) GetTitle() *array.AnyArray[string] {
-	return my.titles
-}
+func (my *Reader) GetTitle() *array.AnyArray[string] { return my.titles }
 
 // SetTitle 设置表头
 func (my *Reader) SetTitle(titles []string) *Reader {
@@ -131,7 +126,8 @@ func (my *Reader) SetTitle(titles []string) *Reader {
 		my.Err = errors.New("表头不能为空")
 		return my
 	}
-	my.titles = array.NewAnyArray[string](titles)
+	my.titles = array.New(titles)
+
 	return my
 }
 
@@ -156,7 +152,7 @@ func (my *Reader) OpenFile(filename ...any) *Reader {
 
 	my.SetTitleRow(1)
 	my.SetOriginalRow(2)
-	my.data = dict.MakeAnyOrderlyDict[uint64, *array.AnyArray[string]](0)
+	my.data = dict.Make[uint64, *array.AnyArray[string]]()
 
 	return my
 }
@@ -205,7 +201,7 @@ func (my *Reader) Read() *Reader {
 // ToDataFrameDefaultType 获取DataFrame类型数据 通过Excel表头自定义数据类型
 func (my *Reader) ToDataFrameDefaultType() dataframe.DataFrame {
 	titleWithType := make(map[string]series.Type)
-	for _, title := range my.GetTitle().All() {
+	for _, title := range my.GetTitle().ToSlice() {
 		titleWithType[title] = series.String
 	}
 

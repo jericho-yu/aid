@@ -27,16 +27,24 @@ type (
 var (
 	onceMapLock sync.Once
 	mapLockIns  *MapLock
+	MapLockApp  MapLock
 )
 
+func (*MapLock) New() *MapLock { return NewMapLock() }
+
+func (*MapLock) Once() *MapLock { return OnceMapLock() }
+
 // NewMapLock 实例化：字典锁
-func NewMapLock() *MapLock {
-	return &MapLock{locks: dict.MakeAnyDict[string, *itemLock]()}
-}
+//
+//go:fix 推荐使用：New方法
+func NewMapLock() *MapLock { return &MapLock{locks: dict.Make[string, *itemLock]()} }
 
 // OnceMapLock 单例化：字典锁
+//
+//go:fix 推荐使用：Once方法
 func OnceMapLock() *MapLock {
-	onceMapLock.Do(func() { mapLockIns = &MapLock{locks: dict.MakeAnyDict[string, *itemLock]()} })
+	onceMapLock.Do(func() { mapLockIns = &MapLock{locks: dict.Make[string, *itemLock]()} })
+
 	return mapLockIns
 }
 
@@ -61,6 +69,7 @@ func (my *MapLock) SetMany(items map[string]any) error {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -83,9 +92,9 @@ func (my *MapLock) Destroy(key string) {
 
 // DestroyAll 删除所有锁
 func (my *MapLock) DestroyAll() {
-	for key := range my.locks.All() {
+	my.locks.Each(func(key string, value *itemLock) {
 		my.Destroy(key)
-	}
+	})
 }
 
 // Lock 获取锁
