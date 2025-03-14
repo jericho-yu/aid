@@ -1,12 +1,24 @@
 package main
 
 import (
-	"github.com/jericho-yu/aid/str"
+	"crypto/sha256"
+	"encoding/binary"
+	"fmt"
 )
 
-type Os struct{}
+// hashString 生成字符串的 SHA-256 哈希值
+func hashString(s string) int {
+	hash := sha256.New()
+	hash.Write([]byte(s))
+	hashBytes := hash.Sum(nil)
+	return int(binary.BigEndian.Uint32(hashBytes[:4]))
+}
 
-func (*Os) TableName() string { return "t_os" }
 func main() {
-	str.NewTerminalLog("哈哈", "%s").Info("呵呵")
+	str := "AinfinitCabinetExtendedDevices-com.jz.autobooth!"
+	hashedInt := hashString(str)
+	hashedHex := fmt.Sprintf("%x", hashedInt)
+	fmt.Println("Original String:", str)
+	fmt.Println("Hashed Int:", hashedInt)
+	fmt.Println("Hashed Hex:", hashedHex)
 }
