@@ -20,6 +20,7 @@ type (
 	SetFormBodyError     struct{ myError.MyError }
 	SetXmlBodyError      struct{ myError.MyError }
 	SetJsonBodyError     struct{ myError.MyError }
+	WriteResponseError   struct{ myError.MyError }
 )
 
 var (
@@ -33,6 +34,7 @@ var (
 	SetFormBodyErr     SetFormBodyError
 	SetXmlBodyErr      SetXmlBodyError
 	SetJsonBodyErr     SetJsonBodyError
+	WriteResponseErr   WriteResponseError
 )
 
 func (*ReadResponseError) New(msg string) myError.IMyError {
@@ -173,4 +175,18 @@ func (my *SetJsonBodyError) Error() string { return my.MyError.Msg }
 
 func (my *SetJsonBodyError) Is(target error) bool {
 	return reflect.DeepEqual(target, &SetJsonBodyErr)
+}
+
+func (*WriteResponseError) New(msg string) myError.IMyError {
+	return &WriteResponseError{MyError: myError.MyError{Msg: array.New([]string{"写入响应失败", msg}).JoinWithoutEmpty("：")}}
+}
+
+func (*WriteResponseError) Wrap(err error) myError.IMyError {
+	return &WriteResponseError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "写入响应失败", fmt.Errorf("写入响应失败：%w", err).Error())}}
+}
+
+func (my *WriteResponseError) Error() string { return my.MyError.Msg }
+
+func (my *WriteResponseError) Is(target error) bool {
+	return reflect.DeepEqual(target, &WriteResponseErr)
 }

@@ -71,6 +71,10 @@ func (my *HttpClientDownload) SendResponse(w http.ResponseWriter, filename strin
 		w.Header().Set("Content-Disposition", "attachment; filename="+filename)
 		w.Header().Set("Content-Type", my.httpClient.response.Header.Get("Content-Type"))
 
+		if _, my.httpClient.Err = io.Copy(w, my.httpClient.response.Body); my.httpClient.Err != nil {
+			my.httpClient.Err = WriteResponseErr.Wrap(my.httpClient.Err)
+		}
+
 		return my.httpClient
 	}
 }
