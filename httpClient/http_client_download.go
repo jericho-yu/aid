@@ -10,15 +10,14 @@ import (
 
 type HttpClientDownload struct {
 	httpClient     *HttpClient
-	filename       string
 	processContent string
 }
 
 var HttpClientDownloadApp HttpClientDownload
 
 // New 实例化http客户端下载器
-func (*HttpClientDownload) New(httpClient *HttpClient, filename string) *HttpClientDownload {
-	return &HttpClientDownload{httpClient: httpClient, filename: filename}
+func (*HttpClientDownload) New(httpClient *HttpClient) *HttpClientDownload {
+	return &HttpClientDownload{httpClient: httpClient}
 }
 
 // SetProcessContent 设置终端进度条标题
@@ -29,7 +28,7 @@ func (my *HttpClientDownload) SetProcessContent(processContent string) *HttpClie
 }
 
 // Save 保存到本地
-func (my *HttpClientDownload) SaveLocal() *HttpClient {
+func (my *HttpClientDownload) SaveLocal(filename string) *HttpClient {
 	defer func() { my.httpClient.isReady = false }()
 
 	client := my.httpClient.beforeSend()
@@ -42,7 +41,7 @@ func (my *HttpClientDownload) SaveLocal() *HttpClient {
 	} else {
 		defer my.httpClient.response.Body.Close()
 
-		f, _ := os.OpenFile(my.filename, os.O_RDWR|os.O_CREATE, 0644)
+		f, _ := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0644)
 		defer f.Close()
 
 		if my.processContent != "" {

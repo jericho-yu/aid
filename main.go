@@ -10,7 +10,7 @@ import (
 func f1() {
 	fs := filesystem.FileApp.NewByRel("./abc.txt")
 
-	client := httpClient.App.NewGet("http://127.0.0.1:8080/download2").Download(fs.GetFullPath()).SaveLocal()
+	client := httpClient.App.NewGet("http://127.0.0.1:8080/download2").Download().SaveLocal(fs.GetFullPath())
 	if client.Err != nil {
 		log.Fatalf("save local: %v", client.Err)
 	}
