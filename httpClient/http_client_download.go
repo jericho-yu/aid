@@ -74,11 +74,10 @@ func (my *HttpClientDownload) SendResponse(w http.ResponseWriter, headers ...map
 		w.Header().Set("Content-Disposition", "attachment; filename="+my.filename)
 		w.Header().Set("Content-Type", my.httpClient.response.Header.Get("Content-Type"))
 
-		array.New(headers).Each(func(_ int, header map[string][]string) {
-			dict.New(header).Each(func(key string, values []string) {
-				array.New(values).Each(func(_ int, value string) { w.Header().Set(key, value) })
-			})
-		})
+		fn := func(key string, values []string) {
+			array.New(values).Each(func(_ int, value string) { w.Header().Set(key, value) })
+		}
+		array.New(headers).Each(func(_ int, header map[string][]string) { dict.New(header).Each(fn) })
 
 		if _, my.httpClient.Err = io.Copy(w, my.httpClient.response.Body); my.httpClient.Err != nil {
 			my.httpClient.Err = WriteResponseErr.Wrap(my.httpClient.Err)
