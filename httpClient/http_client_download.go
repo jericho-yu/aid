@@ -2,6 +2,7 @@ package httpClient
 
 import (
 	"io"
+	"net/http"
 	"os"
 
 	processBar "github.com/schollz/progressbar/v3"
@@ -55,7 +56,7 @@ func (my *HttpClientDownload) SaveLocal() *HttpClient {
 }
 
 // Send 发送到客户端
-func (my *HttpClientDownload) SendResponse() io.ReadCloser {
+func (my *HttpClientDownload) SendResponse() *http.Response {
 	defer func() { my.httpClient.isReady = false }()
 
 	client := my.httpClient.beforeSend()
@@ -66,8 +67,6 @@ func (my *HttpClientDownload) SendResponse() io.ReadCloser {
 	if my.httpClient.response, my.httpClient.Err = client.Do(my.httpClient.request); my.httpClient.Err != nil {
 		return nil
 	} else {
-		defer my.httpClient.response.Body.Close()
-
-		return my.httpClient.request.Body
+		return my.httpClient.response
 	}
 }
