@@ -7,7 +7,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"encoding/xml"
-	"errors"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -155,6 +154,9 @@ func (my *HttpClient) SetBody(body []byte) *HttpClient {
 func (my *HttpClient) SetJsonBody(body any) *HttpClient {
 	my.SetHeaderContentType(ContentTypeJson)
 	my.requestBody, my.Err = json.Marshal(body)
+	if my.Err != nil {
+		my.Err = SetJsonBodyErr.Wrap(my.Err)
+	}
 
 	return my
 }
@@ -163,6 +165,9 @@ func (my *HttpClient) SetJsonBody(body any) *HttpClient {
 func (my *HttpClient) SetXmlBody(body any) *HttpClient {
 	my.SetHeaderContentType(ContentTypeXml)
 	my.requestBody, my.Err = xml.Marshal(body)
+	if my.Err != nil {
+		my.Err = SetXmlBodyErr.Wrap(my.Err)
+	}
 
 	return my
 }
@@ -192,7 +197,7 @@ func (my *HttpClient) SetFormDataBody(texts map[string]string, files map[string]
 		for k, v := range texts {
 			e = writer.WriteField(k, v)
 			if e != nil {
-				my.Err = e
+				my.Err = SetFormBodyErr.Wrap(e)
 				return my
 			}
 		}
@@ -203,12 +208,12 @@ func (my *HttpClient) SetFormDataBody(texts map[string]string, files map[string]
 			fileWriter, _ := writer.CreateFormFile("fileField", k)
 			file, e := os.Open(v)
 			if e != nil {
-				my.Err = e
+				my.Err = SetFormBodyErr.Wrap(e)
 				return my
 			}
 			_, e = io.Copy(fileWriter, file)
 			if e != nil {
-				my.Err = e
+				my.Err = SetFormBodyErr.Wrap(e)
 				return my
 			}
 
@@ -240,7 +245,6 @@ func (my *HttpClient) SetHtmlBody(text string) *HttpClient {
 // SetCssBody 设置Css请求体
 func (my *HttpClient) SetCssBody(text string) *HttpClient {
 	my.SetHeaderContentType(ContentTypeCss)
-
 	my.requestBody = []byte(text)
 
 	return my
@@ -249,7 +253,6 @@ func (my *HttpClient) SetCssBody(text string) *HttpClient {
 // SetJavascriptBody 设置Javascript请求体
 func (my *HttpClient) SetJavascriptBody(text string) *HttpClient {
 	my.SetHeaderContentType(ContentTypeJavascript)
-
 	my.requestBody = []byte(text)
 
 	return my
@@ -266,7 +269,7 @@ func (my *HttpClient) SetSteamBody(filename string) *HttpClient {
 
 	file, err = os.Open(filename)
 	if err != nil {
-		my.Err = err
+		my.Err = SetSteamBodyErr.Wrap(err)
 		return my
 	}
 	defer func(file *os.File) {
@@ -283,13 +286,14 @@ func (my *HttpClient) SetSteamBody(filename string) *HttpClient {
 	if size > 1*1024*1024 {
 		_, my.Err = io.Copy(my.responseBodyBuffer, file)
 		if my.Err != nil {
+			my.Err = ReadResponseErr.Wrap(my.Err)
 			return my
 		}
 		my.requestBody = my.responseBodyBuffer.Bytes()
 	} else {
 		my.requestBody, err = io.ReadAll(file)
 		if err != nil {
-			my.Err = err
+			my.Err = ReadResponseErr.Wrap(err)
 			return my
 		}
 	}
@@ -381,7 +385,7 @@ func (my *HttpClient) GetResponseRawBody() []byte { return my.responseBody }
 // GetResponseJsonBody 获取json格式响应体
 func (my *HttpClient) GetResponseJsonBody(target any) *HttpClient {
 	if e := json.Unmarshal(my.responseBody, &target); e != nil {
-		my.Err = e
+		my.Err = UnmarshalJsonErr.Wrap(e)
 	}
 
 	return my
@@ -390,8 +394,9 @@ func (my *HttpClient) GetResponseJsonBody(target any) *HttpClient {
 // GetResponseXmlBody 获取xml格式响应体
 func (my *HttpClient) GetResponseXmlBody(target any) *HttpClient {
 	if e := xml.Unmarshal(my.responseBody, &target); e != nil {
-		my.Err = e
+		my.Err = UnmarshalXmlErr.Wrap(e)
 	}
+
 	return my
 }
 
@@ -419,9 +424,7 @@ func (my *HttpClient) SaveResponseSteamFile(filename string) *HttpClient {
 }
 
 // GetRequest 获取请求
-func (my *HttpClient) GetRequest() *http.Request {
-	return my.request
-}
+func (my *HttpClient) GetRequest() *http.Request { return my.request }
 
 // GenerateRequest 生成请求对象
 func (my *HttpClient) GenerateRequest() *HttpClient {
@@ -429,7 +432,7 @@ func (my *HttpClient) GenerateRequest() *HttpClient {
 
 	my.request, e = http.NewRequest(my.requestMethod, my.requestUrl, bytes.NewReader(my.requestBody))
 	if e != nil {
-		my.Err = fmt.Errorf("生成请求对象失败：%s", e.Error())
+		my.Err = GenerateRequestErr.Wrap(e)
 		return my
 	}
 
@@ -447,7 +450,7 @@ func (my *HttpClient) GenerateRequest() *HttpClient {
 	// 创建一个新的证书池，并将证书添加到池中
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(my.cert) {
-		my.Err = errors.New("生成证书失败")
+		my.Err = GenerateCertErr.New("")
 		return my
 	}
 
@@ -516,6 +519,8 @@ func (my *HttpClient) Download(filename string) *HttpClientDownload {
 
 // Send 发送请求
 func (my *HttpClient) Send() *HttpClient {
+	defer func() { my.isReady = false }()
+
 	client := my.beforeSend()
 	if my.Err != nil {
 		return my
@@ -530,19 +535,17 @@ func (my *HttpClient) Send() *HttpClient {
 	// 读取新的响应的主体
 	if my.response.ContentLength > 1*1024*1024 { // 1MB
 		if _, my.Err = io.Copy(my.responseBodyBuffer, my.response.Body); my.Err != nil {
-			my.Err = fmt.Errorf("读取响应体失败：%s", my.Err.Error())
+			my.Err = ReadResponseErr.Wrap(my.Err)
 			return my
 		}
 		my.responseBody = my.responseBodyBuffer.Bytes()
 	} else {
 		my.responseBody, my.Err = io.ReadAll(my.response.Body)
 		if my.Err != nil {
-			my.Err = fmt.Errorf("读取响应体失败：%s", my.Err.Error())
+			my.Err = ReadResponseErr.Wrap(my.Err)
 			return my
 		}
 	}
-
-	my.isReady = false
 
 	return my
 }
@@ -550,7 +553,7 @@ func (my *HttpClient) Send() *HttpClient {
 // 检查条件是否满足
 func (my *HttpClient) check() error {
 	if my.requestUrl == "" {
-		return errors.New("url不能为空")
+		return UrlEmptyErr.New("")
 	}
 
 	if my.requestMethod == "" {

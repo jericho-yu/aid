@@ -4,6 +4,7 @@ import (
 	"io"
 	"os"
 
+	"github.com/gin-gonic/gin"
 	processBar "github.com/schollz/progressbar/v3"
 )
 
@@ -28,7 +29,9 @@ func (my *HttpClientDownload) SetProcessContent(processContent string) *HttpClie
 }
 
 // Save 保存到本地
-func (my *HttpClientDownload) Save() *HttpClient {
+func (my *HttpClientDownload) SaveLocal() *HttpClient {
+	defer func() { my.httpClient.isReady = false }()
+
 	client := my.httpClient.beforeSend()
 	if my.httpClient.Err != nil {
 		return my.httpClient
@@ -53,6 +56,22 @@ func (my *HttpClientDownload) Save() *HttpClient {
 }
 
 // Send 发送到客户端
-func (my *HttpClientDownload) Send() *HttpClient {
-	return my.httpClient
+func (my *HttpClientDownload) SendResponse(ctx *gin.Context, filename string) io.ReadCloser {
+	defer func() { my.httpClient.isReady = false }()
+
+	client := my.httpClient.beforeSend()
+	if my.httpClient.Err != nil {
+		return nil
+	}
+
+	if my.httpClient.response, my.httpClient.Err = client.Do(my.httpClient.request); my.httpClient.Err != nil {
+		return nil
+	} else {
+		defer my.httpClient.response.Body.Close()
+
+		ctx.Header("Content-Disposition", "attachment; filename="+filename)
+		ctx.Header("Content-Type", my.httpClient.response.Header.Get("Content-Type"))
+
+		return my.httpClient.request.Body
+	}
 }
