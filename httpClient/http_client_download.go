@@ -55,7 +55,7 @@ func (my *HttpClientDownload) SaveLocal(filename string) *HttpClient {
 }
 
 // Send 发送到客户端
-func (my *HttpClientDownload) SendResponse() *http.Response {
+func (my *HttpClientDownload) SendResponse(w http.ResponseWriter, filename string) *HttpClient {
 	defer func() { my.httpClient.isReady = false }()
 
 	client := my.httpClient.beforeSend()
@@ -66,6 +66,11 @@ func (my *HttpClientDownload) SendResponse() *http.Response {
 	if my.httpClient.response, my.httpClient.Err = client.Do(my.httpClient.request); my.httpClient.Err != nil {
 		return nil
 	} else {
-		return my.httpClient.response
+		defer my.httpClient.response.Body.Close()
+
+		w.Header().Set("Content-Disposition", "attachment; filename="+filename)
+		w.Header().Set("Content-Type", my.httpClient.response.Header.Get("Content-Type"))
+
+		return my.httpClient
 	}
 }
