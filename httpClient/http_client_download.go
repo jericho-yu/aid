@@ -10,14 +10,15 @@ import (
 
 type HttpClientDownload struct {
 	httpClient     *HttpClient
+	filename       string
 	processContent string
 }
 
 var HttpClientDownloadApp HttpClientDownload
 
 // New 实例化http客户端下载器
-func (*HttpClientDownload) New(httpClient *HttpClient) *HttpClientDownload {
-	return &HttpClientDownload{httpClient: httpClient}
+func (*HttpClientDownload) New(httpClient *HttpClient, filename string) *HttpClientDownload {
+	return &HttpClientDownload{httpClient: httpClient, filename: filename}
 }
 
 // SetProcessContent 设置终端进度条标题
@@ -28,7 +29,7 @@ func (my *HttpClientDownload) SetProcessContent(processContent string) *HttpClie
 }
 
 // Save 保存到本地
-func (my *HttpClientDownload) SaveLocal(filename string) *HttpClient {
+func (my *HttpClientDownload) SaveLocal() *HttpClient {
 	defer func() { my.httpClient.isReady = false }()
 
 	client := my.httpClient.beforeSend()
@@ -41,7 +42,7 @@ func (my *HttpClientDownload) SaveLocal(filename string) *HttpClient {
 	} else {
 		defer my.httpClient.response.Body.Close()
 
-		f, _ := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0644)
+		f, _ := os.OpenFile(my.filename, os.O_RDWR|os.O_CREATE, 0644)
 		defer f.Close()
 
 		if my.processContent != "" {
@@ -55,7 +56,7 @@ func (my *HttpClientDownload) SaveLocal(filename string) *HttpClient {
 }
 
 // Send 发送到客户端
-func (my *HttpClientDownload) SendResponse(w http.ResponseWriter, filename string) *HttpClient {
+func (my *HttpClientDownload) SendResponse(w http.ResponseWriter) *HttpClient {
 	defer func() { my.httpClient.isReady = false }()
 
 	client := my.httpClient.beforeSend()
@@ -68,7 +69,7 @@ func (my *HttpClientDownload) SendResponse(w http.ResponseWriter, filename strin
 	} else {
 		defer my.httpClient.response.Body.Close()
 
-		w.Header().Set("Content-Disposition", "attachment; filename="+filename)
+		w.Header().Set("Content-Disposition", "attachment; filename="+my.filename)
 		w.Header().Set("Content-Type", my.httpClient.response.Header.Get("Content-Type"))
 
 		if _, my.httpClient.Err = io.Copy(w, my.httpClient.response.Body); my.httpClient.Err != nil {

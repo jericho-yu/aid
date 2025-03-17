@@ -494,8 +494,8 @@ func (my *HttpClient) beforeSend() *http.Client {
 }
 
 // Download 使用下载器下载文件
-func (my *HttpClient) Download() *HttpClientDownload {
-	return HttpClientDownloadApp.New(my)
+func (my *HttpClient) Download(filename string) *HttpClientDownload {
+	return HttpClientDownloadApp.New(my, filename)
 }
 
 // Download 下载文件
