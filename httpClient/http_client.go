@@ -478,8 +478,12 @@ func (my *HttpClient) beforeSend() *http.Client {
 
 	my.responseBodyBuffer.Reset() // 重置响应体缓存
 
+	client := &http.Client{}
+
 	// 发送新的请求
-	client := &http.Client{Transport: my.transport}
+	if my.transport != nil {
+		client.Transport = my.transport
+	}
 
 	// 设置超时
 	if my.timeoutSecond > 0 {
