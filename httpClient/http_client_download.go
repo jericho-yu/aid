@@ -4,7 +4,6 @@ import (
 	"io"
 	"os"
 
-	"github.com/gin-gonic/gin"
 	processBar "github.com/schollz/progressbar/v3"
 )
 
@@ -56,7 +55,7 @@ func (my *HttpClientDownload) SaveLocal() *HttpClient {
 }
 
 // Send 发送到客户端
-func (my *HttpClientDownload) SendResponse(ctx *gin.Context) io.ReadCloser {
+func (my *HttpClientDownload) SendResponse() io.ReadCloser {
 	defer func() { my.httpClient.isReady = false }()
 
 	client := my.httpClient.beforeSend()
@@ -68,9 +67,6 @@ func (my *HttpClientDownload) SendResponse(ctx *gin.Context) io.ReadCloser {
 		return nil
 	} else {
 		defer my.httpClient.response.Body.Close()
-
-		ctx.Header("Content-Disposition", "attachment; filename="+my.filename)
-		ctx.Header("Content-Type", my.httpClient.response.Header.Get("Content-Type"))
 
 		return my.httpClient.request.Body
 	}
