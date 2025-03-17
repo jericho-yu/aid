@@ -448,17 +448,19 @@ func (my *HttpClient) GenerateRequest() *HttpClient {
 	}
 
 	// 创建一个新的证书池，并将证书添加到池中
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(my.cert) {
-		my.Err = GenerateCertErr.New("")
-		return my
+	if len(my.cert) > 0 {
+		certPool := x509.NewCertPool()
+		if !certPool.AppendCertsFromPEM(my.cert) {
+			my.Err = GenerateCertErr.New("")
+			return my
+		}
+
+		// 创建一个新的TLS配置
+		tlsConfig := &tls.Config{RootCAs: certPool}
+
+		// 创建一个新的Transport
+		my.transport = &http.Transport{TLSClientConfig: tlsConfig}
 	}
-
-	// 创建一个新的TLS配置
-	tlsConfig := &tls.Config{RootCAs: certPool}
-
-	// 创建一个新的Transport
-	my.transport = &http.Transport{TLSClientConfig: tlsConfig}
 
 	my.isReady = true
 
