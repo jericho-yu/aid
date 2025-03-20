@@ -58,7 +58,7 @@ func (my *HttpClientDownload) SaveLocal() *HttpClient {
 }
 
 // Send 发送到客户端
-func (my *HttpClientDownload) SendResponse(w http.ResponseWriter, headers ...map[string][]string) *HttpClient {
+func (my *HttpClientDownload) SendResponse(w http.ResponseWriter, headers map[string][]string) *HttpClient {
 	defer func() { my.httpClient.isReady = false }()
 
 	client := my.httpClient.beforeSend()
@@ -74,10 +74,11 @@ func (my *HttpClientDownload) SendResponse(w http.ResponseWriter, headers ...map
 		w.Header().Set("Content-Disposition", "attachment; filename="+my.filename)
 		w.Header().Set("Content-Type", my.httpClient.response.Header.Get("Content-Type"))
 
-		fn := func(key string, values []string) {
-			array.New(values).Each(func(_ int, value string) { w.Header().Set(key, value) })
+		if headers != nil {
+			dict.New(headers).Each(func(key string, values []string) {
+				array.New(values).Each(func(idx int, item string) { w.Header().Add(key, item) })
+			})
 		}
-		array.New(headers).Each(func(_ int, header map[string][]string) { dict.New(header).Each(fn) })
 
 		if _, my.httpClient.Err = io.Copy(w, my.httpClient.response.Body); my.httpClient.Err != nil {
 			my.httpClient.Err = WriteResponseErr.Wrap(my.httpClient.Err)
