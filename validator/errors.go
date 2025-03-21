@@ -121,9 +121,7 @@ func (*RuleError) Wrap(err error) myError.IMyError {
 	return &RuleError{myError.MyError{Msg: fmt.Errorf("[%w]规则错误", err).Error()}}
 }
 
-func (*RuleError) Panic() myError.IMyError {
-	return &RuleError{myError.MyError{Msg: "规则错误"}}
-}
+func (*RuleError) Panic() myError.IMyError { return &RuleError{myError.MyError{Msg: "规则错误"}} }
 
 func (my *RuleError) Error() string { return my.MyError.Msg }
 
