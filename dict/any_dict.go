@@ -73,9 +73,6 @@ func (my *AnyDict[K, V]) RUnlock() *AnyDict[K, V] {
 
 func (my *AnyDict[K, V]) getKeyByIndex(idx int) K { return my.keys[idx] }
 
-// GetKeyByIdx 通过索引获取键
-func (my *AnyDict[K, V]) GetKeyByIdx(idx int) K { return my.GetKeyByIndex(idx) }
-
 // GetKeyByIndex 通过索引获取键
 func (my *AnyDict[K, V]) GetKeyByIndex(idx int) K {
 	my.mu.RLock()
@@ -114,9 +111,6 @@ func (my *AnyDict[K, V]) getKeyByValue(value V) K {
 	return zero
 }
 
-// GetKeyByVal 通过值获取键
-func (my *AnyDict[K, V]) GetKeyByVal(val V) K { return my.GetKeyByValue(val) }
-
 // GetKeyByValue 通过值获取键
 func (my *AnyDict[K, V]) GetKeyByValue(value V) K {
 	my.mu.RLock()
@@ -144,9 +138,6 @@ func (my *AnyDict[K, V]) GetKeysByValues(values ...V) *array.AnyArray[K] {
 }
 
 func (my *AnyDict[K, V]) getValueByIndex(index int) V { return my.values[index] }
-
-// GetValByIdx 通过索引获取值
-func (my *AnyDict[K, V]) GetValByIdx(idx int) V { return my.GetValueByIndex(idx) }
 
 // GetValueByIndex 通过索引获取值
 func (my *AnyDict[K, V]) GetValueByIndex(index int) V {
@@ -181,9 +172,6 @@ func (my *AnyDict[K, V]) GetValuesByIndexes(indexes ...int) *array.AnyArray[V] {
 
 func (my *AnyDict[K, V]) getValueByKey(key K) V { return my.data[key] }
 
-// GetValByKey 通过键获取值
-func (my *AnyDict[K, V]) GetValByKey(key K) V { return my.GetValueByKey(key) }
-
 // GetValueByKey 通过键获取值
 func (my *AnyDict[K, V]) GetValueByKey(key K) V {
 	my.mu.RLock()
@@ -200,11 +188,6 @@ func (my *AnyDict[K, V]) getValuesByKeys(keys ...K) *array.AnyArray[V] {
 	}
 
 	return array.New(values)
-}
-
-// GetValsByKeys 通过值获取多个键
-func (my *AnyDict[K, V]) GetValsByKeys(keys ...K) *array.AnyArray[V] {
-	return my.GetValuesByKeys(keys...)
 }
 
 // GetValuesByKeys 通过值获取多个键
@@ -224,9 +207,6 @@ func (my *AnyDict[K, V]) getIndexByKey(key K) int {
 
 	return -1
 }
-
-// GetIdxByKey 通过键获取索引
-func (my *AnyDict[K, V]) GetIdxByKey(key K) int { return my.GetIndexByKey(key) }
 
 // GetIndexByKey 通过键获取索引
 func (my *AnyDict[K, V]) GetIndexByKey(key K) int {
@@ -267,9 +247,6 @@ func (my *AnyDict[K, V]) getIndexByValue(value V) int {
 
 	return -1
 }
-
-// GetIdxByVal 通过值获取索引
-func (my *AnyDict[K, V]) GetIdxByVal(val V) int { return my.GetIndexByValue(val) }
 
 // GetIndexByValue 通过值获取索引
 func (my *AnyDict[K, V]) GetIndexByValue(value V) int {
@@ -322,9 +299,6 @@ func (my *AnyDict[K, V]) HasKeys(keys ...K) bool {
 	return my.getIndexesByKeys(keys...).Len() == len(keys)
 }
 
-// HasVal 检查值是否存在
-func (my *AnyDict[K, V]) HasVal(val V) bool { return my.HasValue(val) }
-
 // HasValue 检查值是否存在
 func (my *AnyDict[K, V]) HasValue(value V) bool {
 	my.mu.RLock()
@@ -333,9 +307,6 @@ func (my *AnyDict[K, V]) HasValue(value V) bool {
 	return my.getIndexByValue(value) > -1
 }
 
-// HasVals 检查多个值是否全部存在
-func (my *AnyDict[K, V]) HasVals(vals ...V) bool { return my.HasValues(vals...) }
-
 // HasValues 检查多个值是否全部存在
 func (my *AnyDict[K, V]) HasValues(values ...V) bool {
 	my.mu.RLock()
@@ -343,9 +314,6 @@ func (my *AnyDict[K, V]) HasValues(values ...V) bool {
 
 	return my.getIndexesByValues(values...).Len() == len(values)
 }
-
-// HasIdx 检查索引是否存在
-func (my *AnyDict[K, V]) HasIdx(idx int) bool { return my.HasIndex(idx) }
 
 // HasIndex 检查索引是否存在
 func (my *AnyDict[K, V]) HasIndex(index int) bool {
@@ -377,9 +345,6 @@ func (my *AnyDict[K, V]) Len() int {
 
 func (my *AnyDict[K, V]) lenWithoutEmpty() int { return my.copy().removeEmpty().len() }
 
-// LenNoEpt 判断非0值的长度
-func (my *AnyDict[K, V]) LenNoEpt() int { return my.LenWithoutEmpty() }
-
 // LenWithoutEmpty 判断非0值的长度
 func (my *AnyDict[K, V]) LenWithoutEmpty() int {
 	my.mu.RLock()
@@ -389,9 +354,6 @@ func (my *AnyDict[K, V]) LenWithoutEmpty() int {
 }
 
 func (my *AnyDict[K, V]) isEmpty() bool { return my.len() == 0 }
-
-// IsEpt 判断是否为空map
-func (my *AnyDict[K, V]) IsEpt() bool { return my.IsEmpty() }
 
 // IsEmpty 判断是否为空map
 func (my *AnyDict[K, V]) IsEmpty() bool {
@@ -438,9 +400,6 @@ func (my *AnyDict[K, V]) copy() *AnyDict[K, V] {
 
 	return d
 }
-
-// Cp 复制一个新的map
-func (my *AnyDict[K, V]) Cp() *AnyDict[K, V] { return my.Copy() }
 
 // Copy 复制一个新的map
 func (my *AnyDict[K, V]) Copy() *AnyDict[K, V] {
@@ -500,9 +459,6 @@ func (my *AnyDict[K, V]) GetKeys() *array.AnyArray[K] {
 
 func (my *AnyDict[K, V]) getValues() *array.AnyArray[V] { return array.New(my.values) }
 
-// GetVals 获取所有值：*array.AnyArray[V]
-func (my *AnyDict[K, V]) GetVals() *array.AnyArray[V] { return my.GetValues() }
-
 // GetValues 获取所有值：*array.AnyArray[V]
 func (my *AnyDict[K, V]) GetValues() *array.AnyArray[V] {
 	my.mu.RLock()
@@ -531,9 +487,6 @@ func (my *AnyDict[K, V]) GetIndexes() *array.AnyArray[int] {
 
 func (my *AnyDict[K, V]) firstKey() K { return my.keys[0] }
 
-// FrtKey 获取第一个键
-func (my *AnyDict[K, V]) FrtKey() K { return my.FirstKey() }
-
 // FirstKey 获取第一个键
 func (my *AnyDict[K, V]) FirstKey() K {
 	my.mu.RLock()
@@ -543,9 +496,6 @@ func (my *AnyDict[K, V]) FirstKey() K {
 }
 
 func (my *AnyDict[K, V]) firstValue() V { return my.values[0] }
-
-// FrtValue 获取第一个值
-func (my *AnyDict[K, V]) FrtValue() V { return my.FirstValue() }
 
 // FirstValue 获取第一个值
 func (my *AnyDict[K, V]) FirstValue() V {
@@ -559,9 +509,6 @@ func (my *AnyDict[K, V]) lastKey() K {
 	return my.keys[len(my.keys)-1]
 }
 
-// LstKey 获取最后一个键
-func (my *AnyDict[K, V]) LstKey() K { return my.LastKey() }
-
 // LastKey 获取最后一个键
 func (my *AnyDict[K, V]) LastKey() K {
 	my.mu.RLock()
@@ -573,9 +520,6 @@ func (my *AnyDict[K, V]) LastKey() K {
 func (my *AnyDict[K, V]) lastValue() V {
 	return my.values[len(my.values)-1]
 }
-
-// LstVal 获取最后一个值
-func (my *AnyDict[K, V]) LstVal() V { return my.LastValue() }
 
 // LastValue 获取最后一个值
 func (my *AnyDict[K, V]) LastValue() V {
@@ -623,9 +567,6 @@ func (my *AnyDict[K, V]) removeByKey(key K) *AnyDict[K, V] {
 	return d
 }
 
-// RmByKey 通过键移除元素
-func (my *AnyDict[K, V]) RmByKey(key K) *AnyDict[K, V] { return my.RemoveByKey(key) }
-
 // RemoveByKey 通过键移除元素
 func (my *AnyDict[K, V]) RemoveByKey(key K) *AnyDict[K, V] {
 	my.mu.Lock()
@@ -651,9 +592,6 @@ func (my *AnyDict[K, V]) removeByValue(value V) *AnyDict[K, V] {
 
 	return d
 }
-
-// RmByVal 通过值移除元素
-func (my *AnyDict[K, V]) RmByVal(value V) *AnyDict[K, V] { return my.RemoveByValue(value) }
 
 // RemoveByValue 通过值移除元素
 func (my *AnyDict[K, V]) RemoveByValue(value V) *AnyDict[K, V] {
@@ -691,9 +629,6 @@ func (my *AnyDict[K, V]) removeEmpty() *AnyDict[K, V] {
 
 	return d
 }
-
-// RmEpt 移除0值元素
-func (my *AnyDict[K, V]) RmEpt() *AnyDict[K, V] { return my.RemoveEmpty() }
 
 // RemoveEmpty 移除0值元素
 func (my *AnyDict[K, V]) RemoveEmpty() *AnyDict[K, V] {
@@ -733,9 +668,6 @@ func (my *AnyDict[K, V]) joinWithoutEmpty(sep string) string {
 	return my.copy().removeEmpty().join(sep)
 }
 
-// JoinNoEpt 将去掉0值后转为字符串并拼接
-func (my *AnyDict[K, V]) JoinNoEpt(seps ...string) string { return my.JoinWithoutEmpty(seps...) }
-
 // JoinWithoutEmpty 将去掉0值后转为字符串并拼接
 func (my *AnyDict[K, V]) JoinWithoutEmpty(seps ...string) string {
 	my.mu.RLock()
@@ -772,9 +704,6 @@ func (my *AnyDict[K, V]) inValues(values ...V) bool {
 	return my.getIndexesByValues(values...).Len() == len(values)
 }
 
-// InVals 检查多个值是否存在
-func (my *AnyDict[K, V]) InVals(vals ...V) bool { return my.InValues(vals...) }
-
 // InValues 检查多个值是否存在
 func (my *AnyDict[K, V]) InValues(values ...V) bool {
 	my.mu.RLock()
@@ -801,9 +730,6 @@ func (my *AnyDict[K, V]) every(fn func(key K, value V) (K, V)) *AnyDict[K, V] {
 
 	return d
 }
-
-// Ev 遍历所有元素并回填
-func (my *AnyDict[K, V]) Ev(fn func(key K, value V) (K, V)) *AnyDict[K, V] { return my.Every(fn) }
 
 // Every 遍历所有元素并回填
 func (my *AnyDict[K, V]) Every(fn func(key K, value V) (K, V)) *AnyDict[K, V] {
@@ -838,9 +764,6 @@ func (my *AnyDict[K, V]) clean() *AnyDict[K, V] {
 	my.values = make([]V, 0)
 	return my
 }
-
-// Cln 清空
-func (my *AnyDict[K, V]) Cln() *AnyDict[K, V] { return my.Clean() }
 
 // Clean 清空
 func (my *AnyDict[K, V]) Clean() *AnyDict[K, V] {

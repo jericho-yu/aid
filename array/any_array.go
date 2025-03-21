@@ -22,6 +22,11 @@ type (
 // New 实例化
 func New[T any](list []T) *AnyArray[T] { return &AnyArray[T]{data: list, mu: sync.RWMutex{}} }
 
+// NewDestruction 通过解构参数实例化
+func NewDestruction[T any](list ...T) *AnyArray[T] {
+	return &AnyArray[T]{data: list, mu: sync.RWMutex{}}
+}
+
 // Make 初始化
 func Make[T any](size int) *AnyArray[T] {
 	return &AnyArray[T]{data: make([]T, size), mu: sync.RWMutex{}}
@@ -54,9 +59,6 @@ func (my *AnyArray[T]) RUnlock() *AnyArray[T] {
 // isEmpty 判断是否为空
 func (my *AnyArray[T]) isEmpty() bool { return len(my.data) == 0 }
 
-// IsEpt 判断是否为空
-func (my *AnyArray[T]) IsEpt() bool { return my.IsEmpty() }
-
 // IsEmpty 判断是否为空
 func (my *AnyArray[T]) IsEmpty() bool {
 	my.mu.RLock()
@@ -64,9 +66,6 @@ func (my *AnyArray[T]) IsEmpty() bool {
 
 	return my.isEmpty()
 }
-
-// ISNotEpt 判断是否不为空
-func (my *AnyArray[T]) ISNotEpt() bool { return my.IsNotEmpty() }
 
 // IsNotEmpty 判断是否不为空
 func (my *AnyArray[T]) IsNotEmpty() bool {
@@ -144,9 +143,6 @@ func (my *AnyArray[T]) Append(v ...T) *AnyArray[T] {
 
 func (my *AnyArray[T]) first() T { return my.data[0] }
 
-// Fst 获取第一个值
-func (my *AnyArray[T]) Fst() T { return my.First() }
-
 // First 获取第一个值
 func (my *AnyArray[T]) First() T {
 	my.mu.RLock()
@@ -160,9 +156,6 @@ func (my *AnyArray[T]) last() T {
 
 	return operation.Ternary(my.Len() > 1, my.data[len(my.data)-1], operation.Ternary(my.Len() == 0, t, my.data[0]))
 }
-
-// Lst 获取最后一个值
-func (my *AnyArray[T]) Lst() T { return my.Last() }
 
 // Last 获取最后一个值
 func (my *AnyArray[T]) Last() T {
@@ -178,9 +171,6 @@ func (my *AnyArray[T]) toSlice() []T {
 
 	return ret
 }
-
-// ToSlc 获取全部值：到切片
-func (my *AnyArray[T]) ToSlc() []T { return my.ToSlice() }
 
 // ToSlice 获取全部值：到切片
 func (my *AnyArray[T]) ToSlice() []T {
@@ -258,9 +248,6 @@ func (my *AnyArray[T]) copy() *AnyArray[T] {
 	return New(my.data)
 }
 
-// Cp 复制自己
-func (my *AnyArray[T]) Cp() *AnyArray[T] { return my.Copy() }
-
 // Copy 复制自己
 func (my *AnyArray[T]) Copy() *AnyArray[T] {
 	my.mu.RLock()
@@ -279,9 +266,6 @@ func (my *AnyArray[T]) shuffle() *AnyArray[T] {
 
 	return my
 }
-
-// Shf 打乱切片中的元素顺序
-func (my *AnyArray[T]) Shf() *AnyArray[T] { return my.Shuffle() }
 
 // Shuffle 打乱切片中的元素顺序
 func (my *AnyArray[T]) Shuffle() *AnyArray[T] {
@@ -305,9 +289,6 @@ func (my *AnyArray[T]) Len() int {
 
 func (my *AnyArray[T]) lenWithoutEmpty() int { return my.copy().removeEmpty().len() }
 
-// LenNoEpt 获取非0值长度
-func (my *AnyArray[T]) LenNoEpt() int { return my.LenWithoutEmpty() }
-
 // LenWithoutEmpty 获取非0值长度
 func (my *AnyArray[T]) LenWithoutEmpty() int {
 	my.mu.RLock()
@@ -329,9 +310,6 @@ func (my *AnyArray[T]) filter(fn func(v T) bool) *AnyArray[T] {
 	my.data = ret[:j]
 	return my
 }
-
-// Flt 过滤数组值
-func (my *AnyArray[T]) Flt(fn func(v T) bool) *AnyArray[T] { return my.Filter(fn) }
 
 // Filter 过滤数组值
 func (my *AnyArray[T]) Filter(fn func(v T) bool) *AnyArray[T] {
@@ -365,9 +343,6 @@ func (my *AnyArray[T]) removeEmpty() *AnyArray[T] {
 
 	return New(data)
 }
-
-// RmEpt 清除0值元素
-func (my *AnyArray[T]) RmEpt() *AnyArray[T] { return my.RemoveEmpty() }
 
 // RemoveEmpty 清除0值元素
 func (my *AnyArray[T]) RemoveEmpty() *AnyArray[T] {
@@ -403,8 +378,6 @@ func (my *AnyArray[T]) joinWithoutEmpty(sep string) string {
 
 	return strings.Join(values, sep)
 }
-
-func (my *AnyArray[T]) JoinNoEpt(sep string) string { return my.JoinWithoutEmpty(sep) }
 
 // JoinWithoutEmpty 拼接非空元素
 func (my *AnyArray[T]) JoinWithoutEmpty(seps ...string) string {
@@ -449,9 +422,6 @@ func (my *AnyArray[T]) NotIn(target T) bool {
 
 func (my *AnyArray[T]) allEmpty() bool { return my.copy().removeEmpty().len() == 0 }
 
-// AllEpt 判断当前数组是否0空
-func (my *AnyArray[T]) AllEpt() bool { return my.AllEmpty() }
-
 // AllEmpty 判断当前数组是否0空
 func (my *AnyArray[T]) AllEmpty() bool {
 	my.mu.RLock()
@@ -461,9 +431,6 @@ func (my *AnyArray[T]) AllEmpty() bool {
 }
 
 func (my *AnyArray[T]) anyEmpty() bool { return my.copy().removeEmpty().len() != len(my.data) }
-
-// AnyEmp 判断当前数组中是否存在0值
-func (my *AnyArray[T]) AnyEmp() bool { return my.AnyEmpty() }
 
 // AnyEmpty 判断当前数组中是否存在0值
 func (my *AnyArray[T]) AnyEmpty() bool {
@@ -545,9 +512,6 @@ func (my *AnyArray[T]) removeByIndex(index int) *AnyArray[T] {
 	return my
 }
 
-// RmByIdx 根据索引删除元素
-func (my *AnyArray[T]) RmByIdx(idx int) *AnyArray[T] { return my.RemoveByIndex(idx) }
-
 // RemoveByIndex 根据索引删除元素
 func (my *AnyArray[T]) RemoveByIndex(index int) *AnyArray[T] {
 	my.mu.Lock()
@@ -562,11 +526,6 @@ func (my *AnyArray[T]) removeByIndexes(indexes ...int) *AnyArray[T] {
 	}
 
 	return my
-}
-
-// RmByIndexes 根据索引删除元素
-func (my *AnyArray[T]) RmByIndexes(indexes ...int) *AnyArray[T] {
-	return my.RemoveByIndexes(indexes...)
 }
 
 // RemoveByIndexes 根据索引删除元素
@@ -591,9 +550,6 @@ func (my *AnyArray[T]) removeByValue(target T) *AnyArray[T] {
 	return my
 }
 
-// RmByVal 删除数组中对应的目标
-func (my *AnyArray[T]) RmByVal(tar T) *AnyArray[T] { return my.RemoveByValue(tar) }
-
 // RemoveByValue 删除数组中对应的目标
 func (my *AnyArray[T]) RemoveByValue(target T) *AnyArray[T] {
 	my.mu.Lock()
@@ -609,9 +565,6 @@ func (my *AnyArray[T]) removeByValues(targets ...T) *AnyArray[T] {
 
 	return my
 }
-
-// RmByVals 删除数组中对应的多个目标
-func (my *AnyArray[T]) RmByVals(targets ...T) *AnyArray[T] { return my.RemoveByValues(targets...) }
 
 // RemoveByValues 删除数组中对应的多个目标
 func (my *AnyArray[T]) RemoveByValues(targets ...T) *AnyArray[T] {
@@ -629,9 +582,6 @@ func (my *AnyArray[T]) every(fn func(item T) T) *AnyArray[T] {
 
 	return my
 }
-
-// Ev 循环处理每一个
-func (my *AnyArray[T]) Ev(fn func(item T) T) *AnyArray[T] { return my.Every(fn) }
 
 // Every 循环处理每一个
 func (my *AnyArray[T]) Every(fn func(item T) T) *AnyArray[T] {
@@ -662,9 +612,6 @@ func (my *AnyArray[T]) clean() *AnyArray[T] {
 
 	return my
 }
-
-// Cln 清理数据
-func (my *AnyArray[T]) Cln() *AnyArray[T] { return my.Clean() }
 
 // Clean 清理数据
 func (my *AnyArray[T]) Clean() *AnyArray[T] {
@@ -697,9 +644,6 @@ func (my *AnyArray[T]) UnmarshalJSON(data []byte) error {
 
 	return my.unmarshalJson(data)
 }
-
-// ToStr 导出string
-func (my *AnyArray[T]) ToStr(formats ...string) string { return my.ToString(formats...) }
 
 // ToString 导出string
 func (my *AnyArray[T]) ToString(formats ...string) string {
