@@ -451,7 +451,7 @@ func (my *HttpClient) GenerateRequest() *HttpClient {
 	if len(my.cert) > 0 {
 		certPool := x509.NewCertPool()
 		if !certPool.AppendCertsFromPEM(my.cert) {
-			my.Err = GenerateCertErr.New("")
+			my.Err = GenerateCertErr.Panic()
 			return my
 		}
 
@@ -559,7 +559,7 @@ func (my *HttpClient) Send() *HttpClient {
 // 检查条件是否满足
 func (my *HttpClient) check() error {
 	if my.requestUrl == "" {
-		return UrlEmptyErr.New("")
+		return UrlEmptyErr.Panic()
 	}
 
 	if my.requestMethod == "" {

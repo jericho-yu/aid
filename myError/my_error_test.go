@@ -17,20 +17,28 @@ var (
 	MyErr2 MyError2
 )
 
-func (my *MyError1) New(msg string) IMyError { return &MyError1{MyError{Msg: msg}} }
+func (*MyError1) New(msg string) IMyError { return &MyError1{MyError{Msg: msg}} }
 
-func (my *MyError1) Wrap(err error) IMyError {
+func (*MyError1) Wrap(err error) IMyError {
 	return &MyError1{MyError{Msg: fmt.Errorf("%w", err).Error()}}
+}
+
+func (*MyError1) Panic() IMyError {
+	return &MyError1{MyError{Msg: "Some error occurred"}}
 }
 
 func (my *MyError1) Error() string { return my.Msg }
 
 func (my *MyError1) Is(target error) bool { return reflect.DeepEqual(target, &MyError1{}) }
 
-func (my *MyError2) New(msg string) IMyError { return &MyError2{MyError{Msg: msg}} }
+func (*MyError2) New(msg string) IMyError { return &MyError2{MyError{Msg: msg}} }
 
-func (my *MyError2) Wrap(err error) IMyError {
+func (*MyError2) Wrap(err error) IMyError {
 	return &MyError2{MyError{Msg: fmt.Errorf("%w", err).Error()}}
+}
+
+func (my *MyError2) Panic() IMyError {
+	return &MyError2{MyError{Msg: "Some error occurred"}}
 }
 
 func (my *MyError2) Error() string { return my.Msg }
