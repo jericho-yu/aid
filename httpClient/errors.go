@@ -177,9 +177,7 @@ func (*SetFormBodyError) Panic() myError.IMyError {
 
 func (my *SetFormBodyError) Error() string { return my.MyError.Msg }
 
-func (my *SetFormBodyError) Is(target error) bool {
-	return reflect.DeepEqual(target, &SetFormBodyErr)
-}
+func (my *SetFormBodyError) Is(target error) bool { return reflect.DeepEqual(target, &SetFormBodyErr) }
 
 func (*SetXmlBodyError) New(msg string) myError.IMyError {
 	return &SetXmlBodyError{MyError: myError.MyError{Msg: array.New([]string{"设置xml请求体失败", msg}).JoinWithoutEmpty("：")}}
@@ -195,9 +193,7 @@ func (*SetXmlBodyError) Panic() myError.IMyError {
 
 func (my *SetXmlBodyError) Error() string { return my.MyError.Msg }
 
-func (my *SetXmlBodyError) Is(target error) bool {
-	return reflect.DeepEqual(target, &SetXmlBodyErr)
-}
+func (my *SetXmlBodyError) Is(target error) bool { return reflect.DeepEqual(target, &SetXmlBodyErr) }
 
 func (*SetJsonBodyError) New(msg string) myError.IMyError {
 	return &SetJsonBodyError{MyError: myError.MyError{Msg: array.New([]string{"设置json请求体失败", msg}).JoinWithoutEmpty("：")}}
@@ -213,9 +209,7 @@ func (*SetJsonBodyError) Panic() myError.IMyError {
 
 func (my *SetJsonBodyError) Error() string { return my.MyError.Msg }
 
-func (my *SetJsonBodyError) Is(target error) bool {
-	return reflect.DeepEqual(target, &SetJsonBodyErr)
-}
+func (my *SetJsonBodyError) Is(target error) bool { return reflect.DeepEqual(target, &SetJsonBodyErr) }
 
 func (*WriteResponseError) New(msg string) myError.IMyError {
 	return &WriteResponseError{MyError: myError.MyError{Msg: array.New([]string{"写入响应失败", msg}).JoinWithoutEmpty("：")}}
