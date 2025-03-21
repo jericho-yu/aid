@@ -341,9 +341,7 @@ func (*CreateDirError) Panic() myError.IMyError {
 
 func (my *CreateDirError) Error() string { return my.Msg }
 
-func (*CreateDirError) Is(target error) bool {
-	return reflect.DeepEqual(target, &CreateDirErr)
-}
+func (*CreateDirError) Is(target error) bool { return reflect.DeepEqual(target, &CreateDirErr) }
 
 func (*RenameDirError) New(msg string) myError.IMyError {
 	return &RenameDirError{MyError: myError.MyError{Msg: array.NewDestruction("修改目录名失败", msg).JoinWithoutEmpty("：")}}
@@ -359,9 +357,7 @@ func (*RenameDirError) Panic() myError.IMyError {
 
 func (my *RenameDirError) Error() string { return my.Msg }
 
-func (*RenameDirError) Is(target error) bool {
-	return reflect.DeepEqual(target, &RenameDirErr)
-}
+func (*RenameDirError) Is(target error) bool { return reflect.DeepEqual(target, &RenameDirErr) }
 
 func (*RemoveDirError) New(msg string) myError.IMyError {
 	return &RemoveDirError{MyError: myError.MyError{Msg: array.NewDestruction("删除目录失败", msg).JoinWithoutEmpty("：")}}
@@ -377,9 +373,7 @@ func (*RemoveDirError) Panic() myError.IMyError {
 
 func (my *RemoveDirError) Error() string { return my.Msg }
 
-func (*RemoveDirError) Is(target error) bool {
-	return reflect.DeepEqual(target, &RemoveDirErr)
-}
+func (*RemoveDirError) Is(target error) bool { return reflect.DeepEqual(target, &RemoveDirErr) }
 
 func (*PermissionDirError) New(msg string) myError.IMyError {
 	return &PermissionDirError{MyError: myError.MyError{Msg: array.NewDestruction("目录权限错误", msg).JoinWithoutEmpty("：")}}
@@ -395,9 +389,7 @@ func (*PermissionDirError) Panic() myError.IMyError {
 
 func (my *PermissionDirError) Error() string { return my.Msg }
 
-func (*PermissionDirError) Is(target error) bool {
-	return reflect.DeepEqual(target, &PermissionDirErr)
-}
+func (*PermissionDirError) Is(target error) bool { return reflect.DeepEqual(target, &PermissionDirErr) }
 
 func (*CopyDirSrcError) New(msg string) myError.IMyError {
 	return &CopyDirSrcError{MyError: myError.MyError{Msg: array.NewDestruction("复制目录时打开源目录错误", msg).JoinWithoutEmpty("：")}}
@@ -413,9 +405,7 @@ func (*CopyDirSrcError) Panic() myError.IMyError {
 
 func (my *CopyDirSrcError) Error() string { return my.Msg }
 
-func (*CopyDirSrcError) Is(target error) bool {
-	return reflect.DeepEqual(target, &CopyDirSrcErr)
-}
+func (*CopyDirSrcError) Is(target error) bool { return reflect.DeepEqual(target, &CopyDirSrcErr) }
 
 func (*CopyDirDstError) New(msg string) myError.IMyError {
 	return &CopyDirDstError{MyError: myError.MyError{Msg: array.NewDestruction("复制目录时打开目标目录错误", msg).JoinWithoutEmpty("：")}}
@@ -431,9 +421,7 @@ func (*CopyDirDstError) Panic() myError.IMyError {
 
 func (my *CopyDirDstError) Error() string { return my.Msg }
 
-func (*CopyDirDstError) Is(target error) bool {
-	return reflect.DeepEqual(target, &CopyDirDstErr)
-}
+func (*CopyDirDstError) Is(target error) bool { return reflect.DeepEqual(target, &CopyDirDstErr) }
 
 func (*CopyDirError) New(msg string) myError.IMyError {
 	return &CopyDirError{MyError: myError.MyError{Msg: array.NewDestruction("复制目录错误", msg).JoinWithoutEmpty("：")}}
@@ -449,9 +437,7 @@ func (*CopyDirError) Panic() myError.IMyError {
 
 func (my *CopyDirError) Error() string { return my.Msg }
 
-func (*CopyDirError) Is(target error) bool {
-	return reflect.DeepEqual(target, &CopyDirErr)
-}
+func (*CopyDirError) Is(target error) bool { return reflect.DeepEqual(target, &CopyDirErr) }
 
 func (*WriteDirError) New(msg string) myError.IMyError {
 	return &WriteDirError{MyError: myError.MyError{Msg: array.NewDestruction("写入目录错误", msg).JoinWithoutEmpty("：")}}
@@ -467,9 +453,7 @@ func (*WriteDirError) Panic() myError.IMyError {
 
 func (my *WriteDirError) Error() string { return my.Msg }
 
-func (*WriteDirError) Is(target error) bool {
-	return reflect.DeepEqual(target, &WriteDirErr)
-}
+func (*WriteDirError) Is(target error) bool { return reflect.DeepEqual(target, &WriteDirErr) }
 
 func (*ReadDirError) New(msg string) myError.IMyError {
 	return &ReadDirError{MyError: myError.MyError{Msg: array.NewDestruction("读取目录错误", msg).JoinWithoutEmpty("：")}}
@@ -485,6 +469,4 @@ func (*ReadDirError) Panic() myError.IMyError {
 
 func (my *ReadDirError) Error() string { return my.Msg }
 
-func (*ReadDirError) Is(target error) bool {
-	return reflect.DeepEqual(target, &ReadDirErr)
-}
+func (*ReadDirError) Is(target error) bool { return reflect.DeepEqual(target, &ReadDirErr) }
