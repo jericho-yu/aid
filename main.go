@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/jericho-yu/aid/httpClient"
@@ -13,11 +12,17 @@ var (
 	token    = "11a7b66b7ca8894611ca2b7654ae6d7fe9"
 )
 
+func getHttpClient(url string) *httpClient.HttpClient {
+	return httpClient.NewGet(rootUrl+url).SetTimeoutSecond(5).SetAuthorization(username, token, "Basic")
+}
+
+func postHttpClient(url string) *httpClient.HttpClient {
+	return httpClient.NewPost(rootUrl+url).SetTimeoutSecond(5).SetAuthorization(username, token, "Basic")
+}
+
 // getAllRoles 获取所有角色
 func getAllRoles() {
-	client := httpClient.NewGet(fmt.Sprintf("%s/getAllRoles?type=projectRoles", rootUrl)).
-		SetTimeoutSecond(5).
-		SetAuthorization(username, token, "Basic")
+	client := getHttpClient("/getAllRoles?type=projectRoles")
 	if client.Send().Err != nil {
 		log.Fatalf("get all roles fail: %v", client.Err)
 	}
@@ -27,9 +32,7 @@ func getAllRoles() {
 
 // addRole 增加角色
 func addRole(role, pattern string) {
-	client := httpClient.NewPost(fmt.Sprintf("%s/addRole", rootUrl)).
-		SetTimeoutSecond(5).
-		SetAuthorization(username, token, "Basic").
+	client := postHttpClient("/addRole").
 		SetFormBody(map[string]string{
 			"type":          "projectRoles",
 			"roleName":      role,
@@ -46,9 +49,7 @@ func addRole(role, pattern string) {
 
 // assignUserRole 分配用户到角色
 func assignUserRole(role, user string) {
-	client := httpClient.NewPost(fmt.Sprintf("%s/assignUserRole", rootUrl)).
-		SetTimeoutSecond(5).
-		SetAuthorization(username, token, "Basic").
+	client := postHttpClient("/assignUserRole").
 		SetFormBody(map[string]string{
 			"type":     "projectRoles",
 			"roleName": role,
@@ -63,9 +64,7 @@ func assignUserRole(role, user string) {
 
 // unassignUserRole 取消用户分配到角色
 func unassignUserRole(user string) {
-	client := httpClient.NewPost(fmt.Sprintf("%s/unassignUserRole", rootUrl)).
-		SetTimeoutSecond(5).
-		SetAuthorization(username, token, "Basic").
+	client := postHttpClient("/unassignUserRole").
 		SetFormBody(map[string]string{
 			"type":     "projectRoles",
 			"roleName": "AMD",
@@ -79,10 +78,8 @@ func unassignUserRole(user string) {
 }
 
 // getRole 获取角色
-func getRole() {
-	client := httpClient.NewGet(fmt.Sprintf("%s/getRole?type=projectRoles&roleName=AMD", rootUrl)).
-		SetTimeoutSecond(5).
-		SetAuthorization(username, token, "Basic")
+func getRole(role string) {
+	client := getHttpClient("/getRole?type=projectRoles&roleName=" + role)
 	if client.Send().Err != nil {
 		log.Fatalf("get all roles fail: %v", client.Err)
 	}
@@ -92,13 +89,8 @@ func getRole() {
 
 // removeRoles 删除角色
 func removeRoles(roles string) {
-	client := httpClient.NewPost(fmt.Sprintf("%s/removeRoles", rootUrl)).
-		SetTimeoutSecond(5).
-		SetAuthorization(username, token, "Basic").
-		SetFormBody(map[string]string{
-			"type":      "projectRoles",
-			"roleNames": roles,
-		})
+	client := postHttpClient("/removeRoles").
+		SetFormBody(map[string]string{"type": "projectRoles", "roleNames": roles})
 	if client.Send().Err != nil {
 		log.Fatalf("assign role fail: %v", client.Err)
 	}
