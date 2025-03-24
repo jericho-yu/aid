@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"net/http"
 
 	"github.com/jericho-yu/aid/httpClient"
 )
@@ -20,9 +21,13 @@ func postHttpClient(url string) *httpClient.HttpClient {
 	return httpClient.NewPost(rootUrl+url).SetTimeoutSecond(5).SetAuthorization(username, token, "Basic")
 }
 
+func getClient(method, url string) *httpClient.HttpClient {
+	return httpClient.App.New(url).SetMethod(method).SetTimeoutSecond(5).SetAuthorization(username, token, "Basic")
+}
+
 // getAllRoles 获取所有角色
 func getAllRoles() {
-	client := getHttpClient("/getAllRoles?type=projectRoles")
+	client := getClient(http.MethodGet, "/getAllRoles?type=projectRoles")
 	if client.Send().Err != nil {
 		log.Fatalf("get all roles fail: %v", client.Err)
 	}
@@ -32,13 +37,20 @@ func getAllRoles() {
 
 // addRole 增加角色
 func addRole(role, pattern string) {
-	client := postHttpClient("/addRole").
+	var (
+		permissions = map[string]string{
+			"developer": "hudson.model.Item.Discover,hudson.model.Item.Read",
+			"tester":    "hudson.model.Item.Discover,hudson.model.Item.Read",
+		}
+	)
+
+	client := getClient(http.MethodGet, "/addRole").
 		SetFormBody(map[string]string{
 			"type":          "projectRoles",
-			"roleName":      role,
-			"permissionIds": "hudson.model.Item.Discover,hudson.model.Item.Read",
+			"roleName":      role + "-dev",
+			"permissionIds": permissions["developer"],
 			"overwrite":     "true",
-			"pattern":       pattern,
+			"pattern":       "^" + pattern + "$",
 		})
 	if client.Send().Err != nil {
 		log.Fatalf("add role fail: %v", client.Err)
@@ -49,7 +61,7 @@ func addRole(role, pattern string) {
 
 // assignUserRole 分配用户到角色
 func assignUserRole(role, user string) {
-	client := postHttpClient("/assignUserRole").
+	client := getClient(http.MethodPost, "/assignUserRole").
 		SetFormBody(map[string]string{
 			"type":     "projectRoles",
 			"roleName": role,
@@ -64,7 +76,7 @@ func assignUserRole(role, user string) {
 
 // unassignUserRole 取消用户分配到角色
 func unassignUserRole(user string) {
-	client := postHttpClient("/unassignUserRole").
+	client := getClient(http.MethodPost, "/unassignUserRole").
 		SetFormBody(map[string]string{
 			"type":     "projectRoles",
 			"roleName": "AMD",
@@ -79,7 +91,7 @@ func unassignUserRole(user string) {
 
 // getRole 获取角色
 func getRole(role string) {
-	client := getHttpClient("/getRole?type=projectRoles&roleName=" + role)
+	client := getClient(http.MethodGet, "/getRole?type=projectRoles&roleName="+role)
 	if client.Send().Err != nil {
 		log.Fatalf("get all roles fail: %v", client.Err)
 	}
@@ -89,7 +101,7 @@ func getRole(role string) {
 
 // removeRoles 删除角色
 func removeRoles(roles string) {
-	client := postHttpClient("/removeRoles").
+	client := getClient(http.MethodPost, "/removeRoles").
 		SetFormBody(map[string]string{"type": "projectRoles", "roleNames": roles})
 	if client.Send().Err != nil {
 		log.Fatalf("assign role fail: %v", client.Err)
