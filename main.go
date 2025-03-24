@@ -13,14 +13,6 @@ var (
 	token    = "11a7b66b7ca8894611ca2b7654ae6d7fe9"
 )
 
-func getHttpClient(url string) *httpClient.HttpClient {
-	return httpClient.NewGet(rootUrl+url).SetTimeoutSecond(5).SetAuthorization(username, token, "Basic")
-}
-
-func postHttpClient(url string) *httpClient.HttpClient {
-	return httpClient.NewPost(rootUrl+url).SetTimeoutSecond(5).SetAuthorization(username, token, "Basic")
-}
-
 func getClient(method, url string) *httpClient.HttpClient {
 	return httpClient.App.New(url).SetMethod(method).SetTimeoutSecond(5).SetAuthorization(username, token, "Basic")
 }
@@ -37,20 +29,13 @@ func getAllRoles() {
 
 // addRole 增加角色
 func addRole(role, pattern string) {
-	var (
-		permissions = map[string]string{
-			"developer": "hudson.model.Item.Discover,hudson.model.Item.Read",
-			"tester":    "hudson.model.Item.Discover,hudson.model.Item.Read",
-		}
-	)
-
 	client := getClient(http.MethodGet, "/addRole").
 		SetFormBody(map[string]string{
 			"type":          "projectRoles",
-			"roleName":      role + "-dev",
-			"permissionIds": permissions["developer"],
+			"roleName":      role,
+			"permissionIds": "hudson.model.Item.Discover,hudson.model.Item.Read",
 			"overwrite":     "true",
-			"pattern":       "^" + pattern + "$",
+			"pattern":       pattern,
 		})
 	if client.Send().Err != nil {
 		log.Fatalf("add role fail: %v", client.Err)
@@ -111,9 +96,9 @@ func removeRoles(roles string) {
 }
 
 func main() {
-	// addRole("AMD1", "^AMD1$")
-	// addRole("AMD2", "^AMD2$")
-	// assignUserRole("AMD1", "demo1")
-	// assignUserRole("AMD2", "demo2")
+	addRole("AMD1", "^AMD1$")
+	addRole("AMD2", "^AMD2$")
+	assignUserRole("AMD1", "demo1")
+	assignUserRole("AMD2", "demo2")
 	removeRoles("AMD1,AMD2")
 }
