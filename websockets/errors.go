@@ -43,7 +43,7 @@ func (*WebsocketConnOption) New(msg string) myError.IMyError {
 }
 
 func (*WebsocketConnOption) Wrap(err error) myError.IMyError {
-	return &WebsocketConnOption{myError.MyError{Msg: operation.Ternary(err != nil, fmt.Errorf("websocket链接参数错误：%w", err).Error(), "websocket链接参数错误")}}
+	return &WebsocketConnOption{myError.MyError{Msg: fmt.Errorf("websocket链接参数错误"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*WebsocketConnOption) Panic() myError.IMyError {
@@ -61,7 +61,7 @@ func (*SyncMessageTimeout) New(msg string) myError.IMyError {
 }
 
 func (*SyncMessageTimeout) Wrap(err error) myError.IMyError {
-	return &SyncMessageTimeout{myError.MyError{Msg: operation.Ternary(err != nil, fmt.Errorf("同步消息超时：%w", err).Error(), "同步消息超时")}}
+	return &SyncMessageTimeout{myError.MyError{Msg: fmt.Errorf("同步消息超时"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*SyncMessageTimeout) Panic() myError.IMyError {
@@ -79,7 +79,7 @@ func (*WebsocketOffline) New(msg string) myError.IMyError {
 }
 
 func (*WebsocketOffline) Wrap(err error) myError.IMyError {
-	return &WebsocketOffline{myError.MyError{Msg: operation.Ternary(err != nil, fmt.Errorf("连接不在线%w", err).Error(), "连接不在线")}}
+	return &WebsocketOffline{myError.MyError{Msg: fmt.Errorf("连接不在线"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*WebsocketOffline) Panic() myError.IMyError {
@@ -97,7 +97,7 @@ func (*AsyncMessageCallbackEmpty) New(msg string) myError.IMyError {
 }
 
 func (*AsyncMessageCallbackEmpty) Wrap(err error) myError.IMyError {
-	return &AsyncMessageCallbackEmpty{myError.MyError{Msg: operation.Ternary(err != nil, fmt.Errorf("异步消息回调不能为空：%w", err).Error(), "异步消息回调不能为空")}}
+	return &AsyncMessageCallbackEmpty{myError.MyError{Msg: fmt.Errorf("异步消息回调不能为空"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*AsyncMessageCallbackEmpty) Panic() myError.IMyError {
@@ -115,7 +115,7 @@ func (*AsyncMessageTimeout) New(msg string) myError.IMyError {
 }
 
 func (*AsyncMessageTimeout) Wrap(err error) myError.IMyError {
-	return &AsyncMessageTimeout{myError.MyError{Msg: operation.Ternary(err != nil, fmt.Errorf("异步消息回调超时必须大于0：%w", err).Error(), "异步消息回调超时必须大于0")}}
+	return &AsyncMessageTimeout{myError.MyError{Msg: fmt.Errorf("异步消息回调超时必须大于0"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*AsyncMessageTimeout) Panic() myError.IMyError {
@@ -133,7 +133,7 @@ func (*WebsocketClientExist) New(msg string) myError.IMyError {
 }
 
 func (*WebsocketClientExist) Wrap(err error) myError.IMyError {
-	return &WebsocketClientExist{myError.MyError{Msg: operation.Ternary(err != nil, fmt.Errorf("websocket客户端已存在：%w", err).Error(), "websocket客户端已存在")}}
+	return &WebsocketClientExist{myError.MyError{Msg: fmt.Errorf("websocket客户端已存在"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*WebsocketClientExist) Panic() myError.IMyError {
@@ -151,7 +151,7 @@ func (*WebsocketClientNotExist) New(msg string) myError.IMyError {
 }
 
 func (*WebsocketClientNotExist) Wrap(err error) myError.IMyError {
-	return &WebsocketClientNotExist{myError.MyError{Msg: operation.Ternary(err != nil, fmt.Errorf("websocket客户端不存在：%w", err).Error(), "websocket客户端不存在")}}
+	return &WebsocketClientNotExist{myError.MyError{Msg: fmt.Errorf("websocket客户端不存在"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*WebsocketClientNotExist) Panic() myError.IMyError {
@@ -169,7 +169,7 @@ func (*WebsocketServerConnConditionFuncEmpty) New(msg string) myError.IMyError {
 }
 
 func (*WebsocketServerConnConditionFuncEmpty) Wrap(err error) myError.IMyError {
-	return &WebsocketServerConnConditionFuncEmpty{myError.MyError{Msg: operation.Ternary(err != nil, fmt.Errorf("websocket服务端连接函数不能为空：%w", err).Error(), "websocket服务端连接函数不能为空")}}
+	return &WebsocketServerConnConditionFuncEmpty{myError.MyError{Msg: fmt.Errorf("websocket服务端连接函数不能为空"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*WebsocketServerConnConditionFuncEmpty) Panic() myError.IMyError {
@@ -187,7 +187,7 @@ func (*WebsocketServerConnTagEmpty) New(msg string) myError.IMyError {
 }
 
 func (*WebsocketServerConnTagEmpty) Wrap(err error) myError.IMyError {
-	return &WebsocketServerConnTagEmpty{myError.MyError{Msg: operation.Ternary(err != nil, fmt.Errorf("websocket服务端连接标识不能为空：%w", err).Error(), "websocket服务端连接标识不能为空")}}
+	return &WebsocketServerConnTagEmpty{myError.MyError{Msg: fmt.Errorf("websocket服务端连接标识不能为空"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*WebsocketServerConnTagEmpty) Panic() myError.IMyError {
@@ -205,7 +205,7 @@ func (*WebsocketServerConnTagExist) New(msg string) myError.IMyError {
 }
 
 func (*WebsocketServerConnTagExist) Wrap(err error) myError.IMyError {
-	return &WebsocketServerConnTagExist{myError.MyError{Msg: operation.Ternary(err != nil, fmt.Errorf("websocket服务端连接标识重复：%w", err).Error(), "websocket服务端连接标识重复")}}
+	return &WebsocketServerConnTagExist{myError.MyError{Msg: fmt.Errorf("websocket服务端连接标识重复"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*WebsocketServerConnTagExist) Panic() myError.IMyError {
@@ -223,7 +223,7 @@ func (*WebsocketServerOnReceiveMessageSuccessCallbackEmpty) New(msg string) myEr
 }
 
 func (*WebsocketServerOnReceiveMessageSuccessCallbackEmpty) Wrap(err error) myError.IMyError {
-	return &WebsocketServerOnReceiveMessageSuccessCallbackEmpty{myError.MyError{Msg: operation.Ternary(err != nil, fmt.Errorf("websocket服务端接收消息成功回调不能为空：%w", err).Error(), "websocket服务端接收消息成功回调不能为空")}}
+	return &WebsocketServerOnReceiveMessageSuccessCallbackEmpty{myError.MyError{Msg: fmt.Errorf("websocket服务端接收消息成功回调不能为空"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*WebsocketServerOnReceiveMessageSuccessCallbackEmpty) Panic() myError.IMyError {

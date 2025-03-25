@@ -2,11 +2,7 @@ package str
 
 import "bytes"
 
-type (
-	Buffer struct {
-		original *bytes.Buffer
-	}
-)
+type Buffer struct{ original *bytes.Buffer }
 
 var BufferApp Buffer
 

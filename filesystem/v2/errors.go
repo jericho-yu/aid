@@ -70,7 +70,7 @@ func (*FileInitError) New(msg string) myError.IMyError {
 }
 
 func (*FileInitError) Wrap(err error) myError.IMyError {
-	return &FileInitError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "文件初始化错误", fmt.Errorf("文件初始化错误：%w", err).Error())}}
+	return &FileInitError{MyError: myError.MyError{Msg: fmt.Errorf("文件初始化错误"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*FileInitError) Panic() myError.IMyError {
@@ -86,7 +86,7 @@ func (*FileNotExistsError) New(msg string) myError.IMyError {
 }
 
 func (*FileNotExistsError) Wrap(err error) myError.IMyError {
-	return &FileNotExistsError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "文件不存在", fmt.Errorf("文件不存在：%w", err).Error())}}
+	return &FileNotExistsError{MyError: myError.MyError{Msg: fmt.Errorf("文件不存在"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*FileNotExistsError) Panic() myError.IMyError {
@@ -120,7 +120,7 @@ func (*CreateFileError) New(msg string) myError.IMyError {
 }
 
 func (*CreateFileError) Wrap(err error) myError.IMyError {
-	return &CreateFileError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "创建文件失败", fmt.Errorf("创建文件失败：%w", err).Error())}}
+	return &CreateFileError{MyError: myError.MyError{Msg: fmt.Errorf("创建文件失败"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*CreateFileError) Panic() myError.IMyError {
@@ -138,7 +138,7 @@ func (*RenameFileError) New(msg string) myError.IMyError {
 }
 
 func (*RenameFileError) Wrap(err error) myError.IMyError {
-	return &RenameFileError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "修改文件名失败", fmt.Errorf("修改文件名失败：%w", err).Error())}}
+	return &RenameFileError{MyError: myError.MyError{Msg: fmt.Errorf("修改文件名失败"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*RenameFileError) Panic() myError.IMyError {
@@ -156,7 +156,7 @@ func (*RemoveFileError) New(msg string) myError.IMyError {
 }
 
 func (*RemoveFileError) Wrap(err error) myError.IMyError {
-	return &RemoveFileError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "删除文件失败", fmt.Errorf("删除文件失败：%w", err).Error())}}
+	return &RemoveFileError{MyError: myError.MyError{Msg: fmt.Errorf("删除文件失败"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*RemoveFileError) Panic() myError.IMyError {
@@ -174,7 +174,7 @@ func (*PermissionFileError) New(msg string) myError.IMyError {
 }
 
 func (*PermissionFileError) Wrap(err error) myError.IMyError {
-	return &PermissionFileError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "文件权限错误", fmt.Errorf("文件权限错误：%w", err).Error())}}
+	return &PermissionFileError{MyError: myError.MyError{Msg: fmt.Errorf("文件权限错误"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*PermissionFileError) Panic() myError.IMyError {
@@ -192,7 +192,7 @@ func (*CopyFileSrcError) New(msg string) myError.IMyError {
 }
 
 func (*CopyFileSrcError) Wrap(err error) myError.IMyError {
-	return &CopyFileSrcError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "复制文件时打开源文件错误", fmt.Errorf("复制文件时打开源文件错误：%w", err).Error())}}
+	return &CopyFileSrcError{MyError: myError.MyError{Msg: fmt.Errorf("复制文件时打开源文件错误"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*CopyFileSrcError) Panic() myError.IMyError {
@@ -210,7 +210,7 @@ func (*CopyFileDstError) New(msg string) myError.IMyError {
 }
 
 func (*CopyFileDstError) Wrap(err error) myError.IMyError {
-	return &CopyFileDstError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "复制文件时打开目标文件错误", fmt.Errorf("复制文件时打开目标文件错误：%w", err).Error())}}
+	return &CopyFileDstError{MyError: myError.MyError{Msg: fmt.Errorf("复制文件时打开目标文件错误"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*CopyFileDstError) Panic() myError.IMyError {
@@ -228,7 +228,7 @@ func (*CopyFileError) New(msg string) myError.IMyError {
 }
 
 func (*CopyFileError) Wrap(err error) myError.IMyError {
-	return &CopyFileError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "复制文件错误", fmt.Errorf("复制文件错误：%w", err).Error())}}
+	return &CopyFileError{MyError: myError.MyError{Msg: fmt.Errorf("复制文件错误"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*CopyFileError) Panic() myError.IMyError {
@@ -246,7 +246,7 @@ func (*WriteFileError) New(msg string) myError.IMyError {
 }
 
 func (*WriteFileError) Wrap(err error) myError.IMyError {
-	return &WriteFileError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "写入文件错误", fmt.Errorf("写入文件错误：%w", err).Error())}}
+	return &WriteFileError{MyError: myError.MyError{Msg: fmt.Errorf("写入文件错误"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*WriteFileError) Panic() myError.IMyError {
@@ -264,7 +264,7 @@ func (*ReadFileError) New(msg string) myError.IMyError {
 }
 
 func (*ReadFileError) Wrap(err error) myError.IMyError {
-	return &ReadFileError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "读取文件错误", fmt.Errorf("读取文件错误：%w", err).Error())}}
+	return &ReadFileError{MyError: myError.MyError{Msg: fmt.Errorf("读取文件错误"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*ReadFileError) Panic() myError.IMyError {
@@ -282,7 +282,7 @@ func (*DirInitError) New(msg string) myError.IMyError {
 }
 
 func (*DirInitError) Wrap(err error) myError.IMyError {
-	return &DirInitError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "目录初始化错误", fmt.Errorf("目录初始化错误：%w", err).Error())}}
+	return &DirInitError{MyError: myError.MyError{Msg: fmt.Errorf("目录初始化错误"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*DirInitError) Panic() myError.IMyError {
@@ -298,7 +298,7 @@ func (*DirNotExistsError) New(msg string) myError.IMyError {
 }
 
 func (*DirNotExistsError) Wrap(err error) myError.IMyError {
-	return &DirNotExistsError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "目录不存在", fmt.Errorf("目录不存在：%w", err).Error())}}
+	return &DirNotExistsError{MyError: myError.MyError{Msg: fmt.Errorf("目录不存在"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*DirNotExistsError) Panic() myError.IMyError {
@@ -332,7 +332,7 @@ func (*CreateDirError) New(msg string) myError.IMyError {
 }
 
 func (*CreateDirError) Wrap(err error) myError.IMyError {
-	return &CreateDirError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "创建目录失败", fmt.Errorf("创建目录失败：%w", err).Error())}}
+	return &CreateDirError{MyError: myError.MyError{Msg: fmt.Errorf("创建目录失败"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*CreateDirError) Panic() myError.IMyError {
@@ -348,7 +348,7 @@ func (*RenameDirError) New(msg string) myError.IMyError {
 }
 
 func (*RenameDirError) Wrap(err error) myError.IMyError {
-	return &RenameDirError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "修改目录名失败", fmt.Errorf("修改目录名失败：%w", err).Error())}}
+	return &RenameDirError{MyError: myError.MyError{Msg: fmt.Errorf("修改目录名失败"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*RenameDirError) Panic() myError.IMyError {
@@ -364,7 +364,7 @@ func (*RemoveDirError) New(msg string) myError.IMyError {
 }
 
 func (*RemoveDirError) Wrap(err error) myError.IMyError {
-	return &RemoveDirError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "删除目录失败", fmt.Errorf("删除目录失败：%w", err).Error())}}
+	return &RemoveDirError{MyError: myError.MyError{Msg: fmt.Errorf("删除目录失败"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*RemoveDirError) Panic() myError.IMyError {
@@ -380,7 +380,7 @@ func (*PermissionDirError) New(msg string) myError.IMyError {
 }
 
 func (*PermissionDirError) Wrap(err error) myError.IMyError {
-	return &PermissionDirError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "目录权限错误", fmt.Errorf("目录权限错误：%w", err).Error())}}
+	return &PermissionDirError{MyError: myError.MyError{Msg: fmt.Errorf("目录权限错误"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*PermissionDirError) Panic() myError.IMyError {
@@ -396,7 +396,7 @@ func (*CopyDirSrcError) New(msg string) myError.IMyError {
 }
 
 func (*CopyDirSrcError) Wrap(err error) myError.IMyError {
-	return &CopyDirSrcError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "复制目录时打开源目录错误", fmt.Errorf("复制目录时打开源目录错误：%w", err).Error())}}
+	return &CopyDirSrcError{MyError: myError.MyError{Msg: fmt.Errorf("复制目录时打开源目录错误"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*CopyDirSrcError) Panic() myError.IMyError {
@@ -412,7 +412,7 @@ func (*CopyDirDstError) New(msg string) myError.IMyError {
 }
 
 func (*CopyDirDstError) Wrap(err error) myError.IMyError {
-	return &CopyDirDstError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "复制目录时打开目标目录错误", fmt.Errorf("复制目录时打开目标目录错误：%w", err).Error())}}
+	return &CopyDirDstError{MyError: myError.MyError{Msg: fmt.Errorf("复制目录时打开目标目录错误"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*CopyDirDstError) Panic() myError.IMyError {
@@ -428,7 +428,7 @@ func (*CopyDirError) New(msg string) myError.IMyError {
 }
 
 func (*CopyDirError) Wrap(err error) myError.IMyError {
-	return &CopyDirError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "复制目录错误", fmt.Errorf("复制目录错误：%w", err).Error())}}
+	return &CopyDirError{MyError: myError.MyError{Msg: fmt.Errorf("复制目录错误"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*CopyDirError) Panic() myError.IMyError {
@@ -444,7 +444,7 @@ func (*WriteDirError) New(msg string) myError.IMyError {
 }
 
 func (*WriteDirError) Wrap(err error) myError.IMyError {
-	return &WriteDirError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "写入目录错误", fmt.Errorf("写入目录错误：%w", err).Error())}}
+	return &WriteDirError{MyError: myError.MyError{Msg: fmt.Errorf("写入目录错误"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*WriteDirError) Panic() myError.IMyError {
@@ -460,7 +460,7 @@ func (*ReadDirError) New(msg string) myError.IMyError {
 }
 
 func (*ReadDirError) Wrap(err error) myError.IMyError {
-	return &ReadDirError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "读取目录错误", fmt.Errorf("读取目录错误：%w", err).Error())}}
+	return &ReadDirError{MyError: myError.MyError{Msg: fmt.Errorf("读取目录错误"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*ReadDirError) Panic() myError.IMyError {

@@ -42,7 +42,7 @@ func (*ReadResponseError) New(msg string) myError.IMyError {
 }
 
 func (*ReadResponseError) Wrap(err error) myError.IMyError {
-	return &ReadResponseError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "读取响应体失败", fmt.Errorf("读取响应体失败：%w", err).Error())}}
+	return &ReadResponseError{MyError: myError.MyError{Msg: fmt.Errorf("读取响应体失败"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*ReadResponseError) Panic() myError.IMyError {
@@ -60,7 +60,7 @@ func (*UrlEmptyError) New(msg string) myError.IMyError {
 }
 
 func (*UrlEmptyError) Wrap(err error) myError.IMyError {
-	return &UrlEmptyError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "url不能为空", fmt.Errorf("url不能为空：%w", err).Error())}}
+	return &UrlEmptyError{MyError: myError.MyError{Msg: fmt.Errorf("url不能为空"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*UrlEmptyError) Panic() myError.IMyError {
@@ -78,7 +78,7 @@ func (*GenerateCertError) New(msg string) myError.IMyError {
 }
 
 func (*GenerateCertError) Wrap(err error) myError.IMyError {
-	return &GenerateCertError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "生成证书失败", fmt.Errorf("生成证书失败：%w", err).Error())}}
+	return &GenerateCertError{MyError: myError.MyError{Msg: fmt.Errorf("生成证书失败"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*GenerateCertError) Panic() myError.IMyError {
@@ -96,7 +96,7 @@ func (*GenerateRequestError) New(msg string) myError.IMyError {
 }
 
 func (*GenerateRequestError) Wrap(err error) myError.IMyError {
-	return &GenerateRequestError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "生成请求对象失败", fmt.Errorf("生成请求对象失败：%w", err).Error())}}
+	return &GenerateRequestError{MyError: myError.MyError{Msg: fmt.Errorf("生成请求对象失败"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*GenerateRequestError) Panic() myError.IMyError {
@@ -114,7 +114,7 @@ func (*UnmarshalXmlError) New(msg string) myError.IMyError {
 }
 
 func (*UnmarshalXmlError) Wrap(err error) myError.IMyError {
-	return &UnmarshalXmlError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "获取xml格式响应体错误", fmt.Errorf("获取xml格式响应体错误：%w", err).Error())}}
+	return &UnmarshalXmlError{MyError: myError.MyError{Msg: fmt.Errorf("获取xml格式响应体错误"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*UnmarshalXmlError) Panic() myError.IMyError {
@@ -132,7 +132,7 @@ func (*UnmarshalJsonError) New(msg string) myError.IMyError {
 }
 
 func (*UnmarshalJsonError) Wrap(err error) myError.IMyError {
-	return &UnmarshalJsonError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "获取json格式响应体错误", fmt.Errorf("获取json格式响应体错误：%w", err).Error())}}
+	return &UnmarshalJsonError{MyError: myError.MyError{Msg: fmt.Errorf("获取json格式响应体错误"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*UnmarshalJsonError) Panic() myError.IMyError {
@@ -150,7 +150,7 @@ func (*SetSteamBodyError) New(msg string) myError.IMyError {
 }
 
 func (*SetSteamBodyError) Wrap(err error) myError.IMyError {
-	return &SetSteamBodyError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "设置二进制请求体失败", fmt.Errorf("设置二进制请求体失败：%w", err).Error())}}
+	return &SetSteamBodyError{MyError: myError.MyError{Msg: fmt.Errorf("设置二进制请求体失败"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*SetSteamBodyError) Panic() myError.IMyError {
@@ -168,7 +168,7 @@ func (*SetFormBodyError) New(msg string) myError.IMyError {
 }
 
 func (*SetFormBodyError) Wrap(err error) myError.IMyError {
-	return &SetFormBodyError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "设置表单数据请求体失败", fmt.Errorf("设置表单数据请求体失败：%w", err).Error())}}
+	return &SetFormBodyError{MyError: myError.MyError{Msg: fmt.Errorf("设置表单数据请求体失败"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*SetFormBodyError) Panic() myError.IMyError {
@@ -184,7 +184,7 @@ func (*SetXmlBodyError) New(msg string) myError.IMyError {
 }
 
 func (*SetXmlBodyError) Wrap(err error) myError.IMyError {
-	return &SetXmlBodyError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "设置xml请求体失败", fmt.Errorf("设置xml请求体失败：%w", err).Error())}}
+	return &SetXmlBodyError{MyError: myError.MyError{Msg: fmt.Errorf("设置xml请求体失败"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*SetXmlBodyError) Panic() myError.IMyError {
@@ -200,7 +200,7 @@ func (*SetJsonBodyError) New(msg string) myError.IMyError {
 }
 
 func (*SetJsonBodyError) Wrap(err error) myError.IMyError {
-	return &SetJsonBodyError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "设置json请求体失败", fmt.Errorf("设置json请求体失败：%w", err).Error())}}
+	return &SetJsonBodyError{MyError: myError.MyError{Msg: fmt.Errorf("设置json请求体失败"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*SetJsonBodyError) Panic() myError.IMyError {
@@ -216,7 +216,7 @@ func (*WriteResponseError) New(msg string) myError.IMyError {
 }
 
 func (*WriteResponseError) Wrap(err error) myError.IMyError {
-	return &WriteResponseError{MyError: myError.MyError{Msg: operation.Ternary(err == nil, "写入响应失败", fmt.Errorf("写入响应失败：%w", err).Error())}}
+	return &WriteResponseError{MyError: myError.MyError{Msg: fmt.Errorf("写入响应失败"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*WriteResponseError) Panic() myError.IMyError {

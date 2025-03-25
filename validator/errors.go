@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/jericho-yu/aid/array"
 	"github.com/jericho-yu/aid/myError"
+	"github.com/jericho-yu/aid/operation"
 )
 
 type (
@@ -26,11 +28,11 @@ var (
 )
 
 func (*ValidateError) New(msg string) myError.IMyError {
-	return &ValidateError{myError.MyError{Msg: msg}}
+	return &ValidateError{myError.MyError{Msg: array.NewDestruction("验证错误", msg).JoinWithoutEmpty("：")}}
 }
 
 func (*ValidateError) Wrap(err error) myError.IMyError {
-	return &ValidateError{myError.MyError{Msg: err.Error()}}
+	return &ValidateError{myError.MyError{Msg: fmt.Errorf("验证错误"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*ValidateError) Panic() myError.IMyError {

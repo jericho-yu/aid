@@ -26,7 +26,7 @@ func (*ReadError) New(msg string) myError.IMyError {
 }
 
 func (*ReadError) Wrap(err error) myError.IMyError {
-	return &ReadError{myError.MyError{Msg: operation.Ternary(err != nil, fmt.Errorf("读取数据错误：%w", err).Error(), "读取数据错误")}}
+	return &ReadError{myError.MyError{Msg: fmt.Errorf("读取数据错误"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*ReadError) Panic() myError.IMyError {
@@ -42,7 +42,7 @@ func (*SetCellError) New(msg string) myError.IMyError {
 }
 
 func (*SetCellError) Wrap(err error) myError.IMyError {
-	return &SetCellError{myError.MyError{Msg: operation.Ternary(err != nil, fmt.Errorf("设置单元格错误：%w", err).Error(), "设置单元格错误")}}
+	return &SetCellError{myError.MyError{Msg: fmt.Errorf("设置单元格错误"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*SetCellError) Panic() myError.IMyError {
@@ -58,7 +58,7 @@ func (*WriteError) New(msg string) myError.IMyError {
 }
 
 func (*WriteError) Wrap(err error) myError.IMyError {
-	return &WriteError{myError.MyError{Msg: operation.Ternary(err != nil, fmt.Errorf("写入数据错误：%w", err).Error(), "写入数据错误")}}
+	return &WriteError{myError.MyError{Msg: fmt.Errorf("写入数据错误"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
 }
 
 func (*WriteError) Panic() myError.IMyError {
