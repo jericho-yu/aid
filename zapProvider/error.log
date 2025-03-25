@@ -1,4 +1,0 @@
-2025-03-25 17:49:47.553	error	test-error
-2025-03-25 17:50:12.191	error	test-error
-2025-03-25 17:51:00.985	error	test-error	{"errors": [{"error": "err1"}, {"error": "err2\nerr3"}]}
-2025-03-25 17:51:29.766	error	test-error	{"errors": [{"error": "err1"}, {"error": "err2"}, {"error": "err3"}]}
