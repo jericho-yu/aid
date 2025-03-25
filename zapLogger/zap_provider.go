@@ -14,10 +14,7 @@ import (
 
 // ZapProvider Zap日志服务提供者
 type (
-	ZapProvider struct {
-		logger *zap.Logger
-		err    error
-	}
+	ZapProvider struct{}
 
 	EncoderType string
 )
@@ -47,15 +44,16 @@ func getWriteSync(config *zapConfig, path string) zapcore.WriteSyncer {
 }
 
 // New 实例化：Zap日志服务提供者
-func (*ZapProvider) New(config *zapConfig) *ZapProvider { return NewZapProvider(config) }
+func (*ZapProvider) New(config *zapConfig) (*zap.Logger, error) { return NewZapProvider(config) }
 
 // NewZapProvider 实例化：Zap日志服务提供者
 //
 //go:fix 推荐使用：New方法
-func NewZapProvider(config *zapConfig) *ZapProvider {
+func NewZapProvider(config *zapConfig) (*zap.Logger, error) {
 	var (
-		zapProvider     *ZapProvider = &ZapProvider{}
+		err             error
 		fs              *filesystem.FileSystem
+		zapLogger       *zap.Logger
 		zapCores        = make([]zapcore.Core, 0, 7)
 		zapLoggerConfig = zapcore.EncoderConfig{
 			MessageKey:    "message",
@@ -80,9 +78,8 @@ func NewZapProvider(config *zapConfig) *ZapProvider {
 
 	fs = operation.TernaryFuncAll(func() bool { return config.PathAbs }, func() *filesystem.FileSystem { return filesystem.FileSystemApp.NewByAbs(config.Path) }, func() *filesystem.FileSystem { return filesystem.FileSystemApp.NewByRel(config.Path) })
 	if !fs.IsExist {
-		if zapProvider.err = fs.MkDir(); zapProvider.err != nil {
-			zapProvider.err = fmt.Errorf("创建日志目录失败：%w", zapProvider.err)
-			return zapProvider
+		if err = fs.MkDir(); err != nil {
+			return nil, fmt.Errorf("创建日志目录失败：%w", err)
 		}
 	}
 
@@ -101,23 +98,17 @@ func NewZapProvider(config *zapConfig) *ZapProvider {
 		}
 	}
 
-	zapProvider.logger = zap.New(zapcore.NewTee(zapCores...))
+	zapLogger = zap.New(zapcore.NewTee(zapCores...))
 
 	defer func() {
 		if config.InConsole {
 			return
 		}
-		zapProvider.err = zapProvider.logger.Sync()
+		err = zapLogger.Sync()
 	}()
 
-	return zapProvider
+	return zapLogger, err
 }
-
-// Error 获取错误信息
-func (my *ZapProvider) Error() error { return my.err }
-
-// Logger 获取日志器
-func (my *ZapProvider) Logger() *zap.Logger { return my.logger }
 
 // func CustomTimeEncoder(t time.Time, encoder zapcore.PrimitiveArrayEncoder) {
 // 	encoder.AppendString(t.Format(time.DateTime + ".000"))

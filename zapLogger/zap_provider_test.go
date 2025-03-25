@@ -9,9 +9,12 @@ import (
 
 func Test1(t *testing.T) {
 	t.Run("test1 创建日志", func(t *testing.T) {
-		var zapLogger *zap.Logger
+		var (
+			zapLogger *zap.Logger
+			err       error
+		)
 
-		if zapProvider := ZapProviderApp.New(
+		if zapLogger, err = ZapProviderApp.New(
 			ZapProviderConfig.New(zapcore.ErrorLevel).
 				SetPath(".").
 				SetPathAbs(false).
@@ -21,10 +24,8 @@ func Test1(t *testing.T) {
 				SetMaxBackup(30).
 				SetMaxSize(10).
 				SetMaxDay(30),
-		); zapProvider.Error() != nil {
-			t.Error(zapProvider.Error())
-		} else {
-			zapLogger = zapProvider.Logger()
+		); err != nil {
+			t.Fatal(err)
 		}
 
 		zapLogger.Info("test-info", zap.String("a", "b"))
