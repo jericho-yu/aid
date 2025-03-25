@@ -207,9 +207,6 @@ func (my *AnyArray[T]) getIndexByValue(value T) int {
 	return -1
 }
 
-// GetIdxByVal 根据值获取索引下标
-func (my *AnyArray[T]) GetIdxByVal(val T) int { return my.GetIndexByValue(val) }
-
 // GetIndexByValue 根据值获取索引下标
 func (my *AnyArray[T]) GetIndexByValue(value T) int {
 	my.mu.RLock()
@@ -229,11 +226,6 @@ func (my *AnyArray[T]) getIndexesByValues(values ...T) []int {
 	}
 
 	return indexes
-}
-
-// GetIndexesByVals 通过值获取索引下标
-func (my *AnyArray[T]) GetIndexesByVals(vals ...T) *AnyArray[int] {
-	return my.GetIndexesByValues(vals...)
 }
 
 // GetIndexesByValues 通过值获取索引下标
@@ -300,7 +292,7 @@ func (my *AnyArray[T]) LenWithoutEmpty() int {
 func (my *AnyArray[T]) filter(fn func(v T) bool) *AnyArray[T] {
 	j := 0
 	ret := make([]T, len(my.data))
-	for i := 0; i < len(my.data); i++ {
+	for i := range my.data {
 		if fn(my.data[i]) {
 			ret[j] = my.data[i]
 			j++
