@@ -1,4 +1,4 @@
-package zapLogger
+package zapProvider
 
 import "go.uber.org/zap/zapcore"
 
