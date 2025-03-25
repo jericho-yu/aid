@@ -1,7 +1,6 @@
 package excel
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/go-gota/gota/dataframe"
@@ -123,7 +122,7 @@ func (my *Reader) GetTitle() *array.AnyArray[string] { return my.titles }
 // SetTitle 设置表头
 func (my *Reader) SetTitle(titles []string) *Reader {
 	if len(titles) == 0 {
-		my.Err = errors.New("表头不能为空")
+		my.Err = ReadErr.New("表头不能为空")
 		return my
 	}
 	my.titles = array.New(titles)
@@ -134,19 +133,19 @@ func (my *Reader) SetTitle(titles []string) *Reader {
 // OpenFile 打开文件
 func (my *Reader) OpenFile(filename ...any) *Reader {
 	if filename[0].(string) == "" {
-		my.Err = errors.New("文件名不能为空")
+		my.Err = ReadErr.New("文件名不能为空")
 		return my
 	}
 	f, err := excelize.OpenFile(fmt.Sprintf(filename[0].(string), filename[1:]...))
 	if err != nil {
-		my.Err = fmt.Errorf("打开文件错误：%s", err.Error())
+		my.Err = ReadErr.Wrap(fmt.Errorf("打开文件错误：%w", err))
 		return my
 	}
 	my.excel = f
 
 	defer func(r *Reader) {
 		if err = r.excel.Close(); err != nil {
-			r.Err = errors.New("文件关闭错误")
+			r.Err = ReadErr.New("文件关闭错误")
 		}
 	}(my)
 
@@ -160,15 +159,16 @@ func (my *Reader) OpenFile(filename ...any) *Reader {
 // ReadTitle 读取表头
 func (my *Reader) ReadTitle() *Reader {
 	if my.GetSheetName() == "" {
-		my.Err = errors.New("未设置工作表名称")
+		my.Err = ReadErr.New("未设置工作表名称")
 		return my
 	}
 
-	if rows, err := my.excel.GetRows(my.GetSheetName()); err != nil {
-		panic(fmt.Errorf("读取表头错误：%s", err.Error()))
-	} else {
-		my.SetTitle(rows[my.GetTitleRow()])
+	rows, err := my.excel.GetRows(my.GetSheetName())
+	if err != nil {
+		my.Err = ReadErr.New("读取表头错误")
+		return my
 	}
+	my.SetTitle(rows[my.GetTitleRow()])
 
 	return my
 }
@@ -176,22 +176,23 @@ func (my *Reader) ReadTitle() *Reader {
 // Read 读取Excel
 func (my *Reader) Read() *Reader {
 	if my.GetSheetName() == "" {
-		my.Err = errors.New("未设置工作表名称")
+		my.Err = ReadErr.New("未设置工作表名称")
 		return my
 	}
 
-	if rows, err := my.excel.GetRows(my.GetSheetName()); err != nil {
-		my.Err = errors.New("读取数据错误：%s")
+	rows, err := my.excel.GetRows(my.GetSheetName())
+	if err != nil {
+		my.Err = ReadErr.Wrap(err)
 		return my
+	}
+
+	if my.finishedRow == 0 {
+		for rowNumber, values := range rows[my.GetOriginalRow():] {
+			my.SetDataByRow(uint64(rowNumber), values)
+		}
 	} else {
-		if my.finishedRow == 0 {
-			for rowNumber, values := range rows[my.GetOriginalRow():] {
-				my.SetDataByRow(uint64(rowNumber), values)
-			}
-		} else {
-			for rowNumber, values := range rows[my.GetOriginalRow():my.GetFinishedRow()] {
-				my.SetDataByRow(uint64(rowNumber), values)
-			}
+		for rowNumber, values := range rows[my.GetOriginalRow():my.GetFinishedRow()] {
+			my.SetDataByRow(uint64(rowNumber), values)
 		}
 	}
 
@@ -211,19 +212,22 @@ func (my *Reader) ToDataFrameDefaultType() dataframe.DataFrame {
 // ToDataFrame 获取DataFrame类型数据
 func (my *Reader) ToDataFrame(titleWithType map[string]series.Type) dataframe.DataFrame {
 	if my.GetSheetName() == "" {
-		panic(errors.New("未设置工作表名称"))
+		my.Err = ReadErr.New("未设置工作表名称")
+		return dataframe.DataFrame{}
 	}
 
 	var _content [][]string
 
-	if rows, err := my.excel.GetRows(my.GetSheetName()); err != nil {
-		panic(errors.New("读取数据错误"))
+	rows, err := my.excel.GetRows(my.GetSheetName())
+	if err != nil {
+		my.Err = ReadErr.Wrap(err)
+		return dataframe.DataFrame{}
+	}
+
+	if my.finishedRow == 0 {
+		_content = rows[my.GetTitleRow():]
 	} else {
-		if my.finishedRow == 0 {
-			_content = rows[my.GetTitleRow():]
-		} else {
-			_content = rows[my.GetTitleRow():my.GetFinishedRow()]
-		}
+		_content = rows[my.GetTitleRow():my.GetFinishedRow()]
 	}
 
 	return dataframe.LoadRecords(
@@ -237,19 +241,22 @@ func (my *Reader) ToDataFrame(titleWithType map[string]series.Type) dataframe.Da
 // ToDataFrameDetectType 获取DataFrame类型数据 通过自动探寻数据类型
 func (my *Reader) ToDataFrameDetectType() dataframe.DataFrame {
 	if my.GetSheetName() == "" {
-		panic(errors.New("未设置工作表名称"))
+		my.Err = ReadErr.New("未设置工作表名称")
+		return dataframe.DataFrame{}
 	}
 
 	var _content [][]string
 
-	if rows, err := my.excel.GetRows(my.GetSheetName()); err != nil {
-		panic(errors.New("读取数据错误"))
+	rows, err := my.excel.GetRows(my.GetSheetName())
+	if err != nil {
+		my.Err = ReadErr.Wrap(err)
+		return dataframe.DataFrame{}
+	}
+
+	if my.finishedRow == 0 {
+		_content = rows[my.GetTitleRow():]
 	} else {
-		if my.finishedRow == 0 {
-			_content = rows[my.GetTitleRow():]
-		} else {
-			_content = rows[my.GetTitleRow():my.GetFinishedRow()]
-		}
+		_content = rows[my.GetTitleRow():my.GetFinishedRow()]
 	}
 
 	return dataframe.LoadRecords(

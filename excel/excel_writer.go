@@ -1,7 +1,6 @@
 package excel
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -28,7 +27,7 @@ func (*Writer) New(filename ...any) *Writer { return NewWriter(filename...) }
 func NewWriter(filename ...any) *Writer {
 	ins := &Writer{}
 	if filename[0].(string) == "" {
-		ins.Err = errors.New("文件名不能为空")
+		ins.Err = WriteErr.New("文件名不能为空")
 		return ins
 	}
 	ins.filename = fmt.Sprintf(filename[0].(string), filename[1:]...)
@@ -50,7 +49,7 @@ func (my *Writer) SetFilename(filename string) *Writer {
 // CreateSheet 创建工作表
 func (my *Writer) CreateSheet(sheetName string) *Writer {
 	if sheetName == "" {
-		my.Err = errors.New("工作表名称不能为空")
+		my.Err = WriteErr.New("工作表名称不能为空")
 		return my
 	}
 	sheetIndex := my.excel.NewSheet(sheetName)
@@ -63,7 +62,7 @@ func (my *Writer) CreateSheet(sheetName string) *Writer {
 // ActiveSheetByName 选择工作表（根据名称）
 func (my *Writer) ActiveSheetByName(sheetName string) *Writer {
 	if sheetName == "" {
-		my.Err = errors.New("工作表名称不能为空")
+		my.Err = WriteErr.New("工作表名称不能为空")
 		return my
 	}
 	sheetIndex := my.excel.GetSheetIndex(sheetName)
@@ -76,7 +75,7 @@ func (my *Writer) ActiveSheetByName(sheetName string) *Writer {
 // ActiveSheetByIndex 选择工作表（根据编号）
 func (my *Writer) ActiveSheetByIndex(sheetIndex int) *Writer {
 	if sheetIndex < 0 {
-		my.Err = errors.New("工作表索引不能小于0")
+		my.Err = WriteErr.New("工作表索引不能小于0")
 		return my
 	}
 	my.excel.SetActiveSheet(sheetIndex)
@@ -126,7 +125,7 @@ func (my *Writer) setStyleFont(cell *Cell) {
 		Fill:   fill,
 		Border: borders,
 	}); err != nil {
-		my.Err = fmt.Errorf("设置字体错误：%s", cell.GetCoordinate())
+		my.Err = WriteErr.Wrap(fmt.Errorf("设置字体错误：%s", cell.GetCoordinate()))
 	} else {
 		my.Err = my.excel.SetCellStyle(my.sheetName, cell.GetCoordinate(), cell.GetCoordinate(), style)
 	}
@@ -150,16 +149,16 @@ func (my *Writer) SetColumnWidthByText(col string, width float64) *Writer {
 func (my *Writer) SetColumnsWidthByIndex(startCol, endCol int, width float64) *Writer {
 	startColText, err := ColumnNumberToText(startCol)
 	if err != nil {
-		my.Err = fmt.Errorf("设置列宽错误：%s", err)
+		my.Err = WriteErr.Wrap(fmt.Errorf("设置列宽错误：%s", err))
 	}
 
 	endColText, err := ColumnNumberToText(endCol)
 	if err != nil {
-		my.Err = fmt.Errorf("设置列宽错误：%s", err)
+		my.Err = WriteErr.Wrap(fmt.Errorf("设置列宽错误：%s", err))
 	}
 
 	if err = my.excel.SetColWidth(my.sheetName, startColText, endColText, width); err != nil {
-		my.Err = fmt.Errorf("设置列宽错误：%s", err)
+		my.Err = WriteErr.Wrap(fmt.Errorf("设置列宽错误：%s", err))
 	}
 
 	return my
@@ -168,7 +167,7 @@ func (my *Writer) SetColumnsWidthByIndex(startCol, endCol int, width float64) *W
 // SetColumnsWidthByText 设置多列宽：通过列名称
 func (my *Writer) SetColumnsWidthByText(startCol, endCol string, width float64) *Writer {
 	if err := my.excel.SetColWidth(my.sheetName, startCol, endCol, width); err != nil {
-		my.Err = fmt.Errorf("设置列宽错误：%s", err)
+		my.Err = WriteErr.Wrap(fmt.Errorf("设置列宽错误：%s", err))
 	}
 
 	return my
@@ -190,32 +189,32 @@ func (my *Writer) AddRow(excelRow *Row) *Writer {
 		switch cell.GetContentType() {
 		case CellContentTypeFormula:
 			if err := my.excel.SetCellFormula(my.sheetName, cell.GetCoordinate(), cell.GetContent().(string)); err != nil {
-				my.Err = fmt.Errorf("写入数据错误（公式）%s %s：%v", cell.GetCoordinate(), cell.GetContent(), err.Error())
+				my.Err = WriteErr.Wrap(fmt.Errorf("写入数据错误（公式）%s %s：%v", cell.GetCoordinate(), cell.GetContent(), err.Error()))
 				return my
 			}
 		case CellContentTypeAny:
 			if err := my.excel.SetCellValue(my.sheetName, cell.GetCoordinate(), cell.GetContent()); err != nil {
-				my.Err = fmt.Errorf("写入ExcelCell（任意） %s %s：%v", cell.GetCoordinate(), cell.GetContent(), err.Error())
+				my.Err = WriteErr.Wrap(fmt.Errorf("写入ExcelCell（任意） %s %s：%v", cell.GetCoordinate(), cell.GetContent(), err.Error()))
 				return my
 			}
 		case CellContentTypeInt:
 			if err := my.excel.SetCellInt(my.sheetName, cell.GetCoordinate(), cell.GetContent().(int)); err != nil {
-				my.Err = fmt.Errorf("写入ExcelCell（整数） %s %s：%v", cell.GetCoordinate(), cell.GetContent(), err.Error())
+				my.Err = WriteErr.Wrap(fmt.Errorf("写入ExcelCell（整数） %s %s：%v", cell.GetCoordinate(), cell.GetContent(), err.Error()))
 				return my
 			}
 		case CellContentTypeFloat64:
 			if err := my.excel.SetCellFloat(my.sheetName, cell.GetCoordinate(), cell.GetContent().(float64), 2, 64); err != nil {
-				my.Err = fmt.Errorf("写入ExcelCell（浮点数） %s %s：%v", cell.GetCoordinate(), cell.GetContent(), err.Error())
+				my.Err = WriteErr.Wrap(fmt.Errorf("写入ExcelCell（浮点数） %s %s：%v", cell.GetCoordinate(), cell.GetContent(), err.Error()))
 				return my
 			}
 		case CellContentTypeBool:
 			if err := my.excel.SetCellBool(my.sheetName, cell.GetCoordinate(), cell.GetContent().(bool)); err != nil {
-				my.Err = fmt.Errorf("写入ExcelCell（布尔） %s %s：%v", cell.GetCoordinate(), cell.GetContent(), err.Error())
+				my.Err = WriteErr.Wrap(fmt.Errorf("写入ExcelCell（布尔） %s %s：%v", cell.GetCoordinate(), cell.GetContent(), err.Error()))
 				return my
 			}
 		case CellContentTypeTime:
 			if err := my.excel.SetCellValue(my.sheetName, cell.GetCoordinate(), cell.GetContent().(time.Time)); err != nil {
-				my.Err = fmt.Errorf("写入ExcelCell（时间） %s %s：%v", cell.GetCoordinate(), cell.GetContent(), err.Error())
+				my.Err = WriteErr.Wrap(fmt.Errorf("写入ExcelCell（时间） %s %s：%v", cell.GetCoordinate(), cell.GetContent(), err.Error()))
 			}
 		}
 		my.setStyleFont(cell)
@@ -247,7 +246,7 @@ func (my *Writer) SetTitleRow(titles []string, rowNumber uint64) *Writer {
 // Save 保存文件
 func (my *Writer) Save() error {
 	if my.filename == "" {
-		return errors.New("未设置文件名")
+		return WriteErr.New("未设置文件名")
 	}
 
 	return my.excel.SaveAs(my.filename)

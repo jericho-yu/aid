@@ -1,7 +1,6 @@
 package excel
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/jericho-yu/aid/array"
@@ -31,13 +30,14 @@ func (my *Row) GetCells() *array.AnyArray[*Cell] { return my.cells }
 // SetCells 设置单元格组
 func (my *Row) SetCells(cells []*Cell) *Row {
 	if my.GetRowNumber() == 0 {
-		my.Err = errors.New("行标必须大于0")
+		my.Err = SetCellErr.New("行标必须大于0")
 		return my
 	}
 
 	for colNumber, cell := range cells {
 		if colText, err := excelize.ColumnNumberToName(colNumber + 1); err != nil {
-			panic(fmt.Errorf("列索引转列文字失败：%d，%d", my.GetRowNumber(), colNumber+1))
+			my.Err = SetCellErr.Wrap(fmt.Errorf("列索引转列文字失败：%d，%d", my.GetRowNumber(), colNumber+1))
+			return my
 		} else {
 			cell.SetCoordinate(fmt.Sprintf("%s%d", colText, my.GetRowNumber()))
 		}

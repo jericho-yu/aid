@@ -27,7 +27,7 @@ func ColumnTextToNumber(columnText string) int {
 // pow 是一个简单的幂函数计算，用于26进制转换
 func pow(base, exponent int) int {
 	result := 1
-	for i := 0; i < exponent; i++ {
+	for range exponent {
 		result *= base
 	}
 

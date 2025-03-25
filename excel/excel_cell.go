@@ -96,51 +96,27 @@ func (my *Cell) GetBorder() *array.AnyArray[border] {
 	borders := array.Make[border](0)
 
 	if my.borderTopRgb != "" {
-		borders.Append(border{
-			Type:  "top",
-			Rgb:   my.borderTopRgb,
-			Style: my.borderTopStyle,
-		})
+		borders.Append(border{Type: "top", Rgb: my.borderTopRgb, Style: my.borderTopStyle})
 	}
 
 	if my.borderBottomRgb != "" {
-		borders.Append(border{
-			Type:  "bottom",
-			Rgb:   my.borderBottomRgb,
-			Style: my.borderBottomStyle,
-		})
+		borders.Append(border{Type: "bottom", Rgb: my.borderBottomRgb, Style: my.borderBottomStyle})
 	}
 
 	if my.borderLeftRgb != "" {
-		borders.Append(border{
-			Type:  "left",
-			Rgb:   my.borderLeftRgb,
-			Style: my.borderLeftStyle,
-		})
+		borders.Append(border{Type: "left", Rgb: my.borderLeftRgb, Style: my.borderLeftStyle})
 	}
 
 	if my.borderRightRgb != "" {
-		borders.Append(border{
-			Type:  "right",
-			Rgb:   my.borderRightRgb,
-			Style: my.borderRightStyle,
-		})
+		borders.Append(border{Type: "right", Rgb: my.borderRightRgb, Style: my.borderRightStyle})
 	}
 
 	if my.borderDiagonalUpRgb != "" {
-		borders.Append(border{
-			Type:  "diagonalUp",
-			Rgb:   my.borderDiagonalUpRgb,
-			Style: my.borderDiagonalUpStyle,
-		})
+		borders.Append(border{Type: "diagonalUp", Rgb: my.borderDiagonalUpRgb, Style: my.borderDiagonalUpStyle})
 	}
 
 	if my.borderDiagonalDownRgb != "" {
-		borders.Append(border{
-			Type:  "diagonalDown",
-			Rgb:   my.borderDiagonalDownRgb,
-			Style: my.borderDiagonalDownStyle,
-		})
+		borders.Append(border{Type: "diagonalDown", Rgb: my.borderDiagonalDownRgb, Style: my.borderDiagonalDownStyle})
 	}
 
 	return borders
