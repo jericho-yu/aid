@@ -1,6 +1,7 @@
 package zapLogger
 
 import (
+	"errors"
 	"testing"
 
 	"go.uber.org/zap"
@@ -30,7 +31,7 @@ func Test1(t *testing.T) {
 
 		zapLogger.Info("test-info", zap.String("a", "b"))
 		zapLogger.Debug("test-debug", zap.String("c", "d"))
-		zapLogger.Warn("test-warning")
-		zapLogger.Error("test-error")
+		zapLogger.Warn("test-warning", zap.Any("any", []any{"haha", "hehe", 1, 2, 3, 4}))
+		zapLogger.Error("test-error", zap.Errors("errors", []error{errors.New("err1"), errors.New("err2"), errors.New("err3")}))
 	})
 }
