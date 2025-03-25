@@ -18,11 +18,11 @@ type zapConfig struct {
 var ZapProviderConfig zapConfig
 
 // New 实例化：日志配置
-func (*zapConfig) New(path string, pathAbs bool, encoderType EncoderType, level zapcore.Level) *zapConfig {
+func (*zapConfig) New(level zapcore.Level) *zapConfig {
 	ins := &zapConfig{
-		Path:         path,
-		PathAbs:      pathAbs,
-		EncoderType:  encoderType,
+		Path:         ".",
+		PathAbs:      false,
+		EncoderType:  EncoderTypeConsole,
 		Level:        level,
 		MaxSize:      1,
 		MaxBackup:    5,
@@ -33,6 +33,27 @@ func (*zapConfig) New(path string, pathAbs bool, encoderType EncoderType, level 
 	}
 
 	return ins
+}
+
+// SetPath 设置路径
+func (my *zapConfig) SetPath(path string) *zapConfig {
+	my.Path = path
+
+	return my
+}
+
+// SetEncoderType 设置编码类型
+func (my *zapConfig) SetEncoderType(encoderType EncoderType) *zapConfig {
+	my.EncoderType = encoderType
+
+	return my
+}
+
+// SetPathAbs 设置路径是否使用绝对路径
+func (my *zapConfig) SetPathAbs(pathAbs bool) *zapConfig {
+	my.PathAbs = pathAbs
+
+	return my
 }
 
 // SetMaxSize 设置单文件最大存储容量
