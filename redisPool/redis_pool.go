@@ -13,7 +13,7 @@ import (
 
 type (
 	RedisPool struct {
-		connections *dict.AnyDict[string, *redisConn]
+		conns *dict.AnyDict[string, *redisConn]
 	}
 
 	redisConn struct {
@@ -36,11 +36,11 @@ func (*RedisPool) Once(redisSetting *RedisSetting) *RedisPool { return OnceRedis
 func OnceRedisPool(redisSetting *RedisSetting) *RedisPool {
 	redisPoolOnce.Do(func() {
 		redisPoolIns = &RedisPool{}
-		redisPoolIns.connections = dict.Make[string, *redisConn]()
+		redisPoolIns.conns = dict.Make[string, *redisConn]()
 
 		if len(redisSetting.Pool) > 0 {
 			for _, pool := range redisSetting.Pool {
-				redisPoolIns.connections.Set(pool.Key, &redisConn{
+				redisPoolIns.conns.Set(pool.Key, &redisConn{
 					prefix: fmt.Sprintf("%s:%s", redisSetting.Prefix, pool.Prefix),
 					conn: rds.NewClient(&rds.Options{
 						Addr:     fmt.Sprintf("%s:%d", redisSetting.Host, redisSetting.Port),
@@ -57,7 +57,7 @@ func OnceRedisPool(redisSetting *RedisSetting) *RedisPool {
 
 // GetClient 获取链接和链接前缀
 func (*RedisPool) GetClient(key string) (string, *rds.Client) {
-	if client, exist := redisPoolIns.connections.Get(key); exist {
+	if client, exist := redisPoolIns.conns.Get(key); exist {
 		return client.prefix, client.conn
 	}
 
@@ -106,7 +106,7 @@ func (*RedisPool) Set(clientName, key string, val any, exp time.Duration) (strin
 
 // Close 关闭链接
 func (my *RedisPool) Close(key string) error {
-	if client, exist := redisPoolIns.connections.Get(key); exist {
+	if client, exist := redisPoolIns.conns.Get(key); exist {
 		return client.conn.Close()
 	}
 
@@ -115,8 +115,8 @@ func (my *RedisPool) Close(key string) error {
 
 // Clean 清理链接
 func (*RedisPool) Clean() {
-	for key, val := range redisPoolIns.connections.ToMap() {
+	for key, val := range redisPoolIns.conns.ToMap() {
 		_ = val.conn.Close()
-		redisPoolIns.connections.RemoveByKey(key)
+		redisPoolIns.conns.RemoveByKey(key)
 	}
 }
