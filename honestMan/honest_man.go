@@ -12,7 +12,10 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type HonestMan struct{ dir string }
+type HonestMan struct {
+	dir string
+	err error
+}
 
 var HonestManApp HonestMan
 
@@ -28,6 +31,9 @@ func (*HonestMan) NewByRelative(dirs ...string) *HonestMan {
 	return &HonestMan{dir: filesystem.FileSystemApp.NewByRelative(".").Joins(dirs...).GetDir()}
 }
 
+// Error 获取错误
+func (my *HonestMan) Error() error { return my.err }
+
 // 读取文件
 func (my *HonestMan) readFile() []byte {
 	var (
@@ -36,7 +42,8 @@ func (my *HonestMan) readFile() []byte {
 	)
 	fileContent, err = os.ReadFile(my.dir)
 	if err != nil {
-		panic(fmt.Errorf("读取配置文件失败(%s)：%s", my.dir, err.Error()))
+		my.err = ReadErr.Wrap(fmt.Errorf("读取配置文件失败(%s)：%s", my.dir, err.Error()))
+		return nil
 	}
 
 	return fileContent
@@ -54,14 +61,23 @@ func (my *HonestMan) isPtr(target any) {
 // LoadYaml 读取Yaml配置文件
 func (my *HonestMan) LoadYaml(target any) (err error) {
 	my.isPtr(target)
-	return yaml.Unmarshal(my.readFile(), target)
+	content := my.readFile()
+	if my.err != nil {
+		return my.err
+	}
+
+	return yaml.Unmarshal(content, target)
 }
 
 // LoadJson 读取Json配置文件
 func (my *HonestMan) LoadJson(target any) (err error) {
 	my.isPtr(target)
+	content := my.readFile()
+	if my.err != nil {
+		return my.err
+	}
 
-	return json.Unmarshal(my.readFile(), target)
+	return json.Unmarshal(content, target)
 }
 
 // SaveYaml 写入Yaml文件
@@ -69,7 +85,7 @@ func (my *HonestMan) SaveYaml(target any) (err error) {
 	// my.isPtr(target)
 	out, err := yaml.Marshal(target)
 	if err != nil {
-		return err
+		return WriteErr.Wrap(err)
 	}
 
 	return os.WriteFile(my.dir, out, os.ModePerm)
@@ -80,7 +96,7 @@ func (my *HonestMan) SaveJson(target any) (err error) {
 	// my.isPtr(target)
 	out, err := json.Marshal(target)
 	if err != nil {
-		return err
+		return WriteErr.Wrap(err)
 	}
 
 	return os.WriteFile(my.dir, out, os.ModePerm)
