@@ -10,19 +10,21 @@ import (
 )
 
 type (
-	ConnRabbitError     struct{ myError.MyError }
-	NewChannelError     struct{ myError.MyError }
-	NewQueueError       struct{ myError.MyError }
-	QueueNotExistError  struct{ myError.MyError }
-	PublishMessageError struct{ myError.MyError }
+	ConnRabbitError       struct{ myError.MyError }
+	NewChannelError       struct{ myError.MyError }
+	NewQueueError         struct{ myError.MyError }
+	QueueNotExistError    struct{ myError.MyError }
+	PublishMessageError   struct{ myError.MyError }
+	RegisterConsumerError struct{ myError.MyError }
 )
 
 var (
-	ConnRabbitErr     ConnRabbitError
-	NewChannelErr     NewChannelError
-	NewQueueErr       NewQueueError
-	QueueNotExistErr  QueueNotExistError
-	PublishMessageErr PublishMessageError
+	ConnRabbitErr       ConnRabbitError
+	NewChannelErr       NewChannelError
+	NewQueueErr         NewQueueError
+	QueueNotExistErr    QueueNotExistError
+	PublishMessageErr   PublishMessageError
+	RegisterConsumerErr RegisterConsumerError
 )
 
 func (*ConnRabbitError) New(msg string) myError.IMyError {
@@ -99,3 +101,18 @@ func (*PublishMessageError) Panic() myError.IMyError {
 func (my *PublishMessageError) Error() string { return my.Msg }
 
 func (my *PublishMessageError) Is(target error) bool { return reflect.DeepEqual(target, my) }
+
+func (*RegisterConsumerError) New(msg string) myError.IMyError {
+	return &RegisterConsumerError{myError.MyError{Msg: array.NewDestruction("注册消费者错误", msg).JoinWithoutEmpty()}}
+}
+func (*RegisterConsumerError) Wrap(err error) myError.IMyError {
+	return &RegisterConsumerError{myError.MyError{Msg: fmt.Errorf("注册消费者错误" + operation.Ternary(err != nil, "：%w", "%w")).Error()}}
+}
+
+func (*RegisterConsumerError) Panic() myError.IMyError {
+	return &RegisterConsumerError{myError.MyError{Msg: "注册消费者错误"}}
+}
+
+func (my *RegisterConsumerError) Error() string { return my.Msg }
+
+func (my *RegisterConsumerError) Is(target error) bool { return reflect.DeepEqual(target, my) }

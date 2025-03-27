@@ -6,9 +6,8 @@ import (
 )
 
 func Test1(t *testing.T) {
-	// 链接
 	rabbit := RabbitApp.New("admin", "jcyf@cbit", "127.0.0.1", "5672", "")
-	defer rabbit.CloseChannel().Close()
+	defer func() { _ = rabbit.Close() }()
 
 	pool := PoolApp.Once().Set("default", rabbit)
 
@@ -17,15 +16,23 @@ func Test1(t *testing.T) {
 		t.Fatalf("没有找到链接：%s", "default")
 	}
 
-	rabbit.NewChannel()
-	if rabbit.Error() != nil {
-		t.Fatalf("创建channel失败：%v", rabbit.Error())
-	}
-
 	rabbit.NewQueue("message")
 	if rabbit.Error() != nil {
 		t.Fatalf("创建队列失败：%v", rabbit.Error())
 	}
 
 	rabbit.Publish("message", "hello world"+time.Now().Format(time.DateTime))
+}
+
+func Test2(t *testing.T) {
+	rabbit := RabbitApp.New("admin", "jcyf@cbit", "127.0.0.1", "5672", "")
+	defer func() { _ = rabbit.Close() }()
+
+	rabbit.NewQueue("message")
+	consumer := rabbit.Consume("message", "", func(prototypeMessage []byte) error {
+		message := MessageApp.Parse(prototypeMessage)
+		t.Logf("收到消息：%s", message.Content)
+		return nil
+	})
+	go consumer.Go()
 }

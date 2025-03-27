@@ -79,18 +79,29 @@ func (my *Rabbit) Close() error {
 	return nil
 }
 
+// newChannel 创建频道
+func (my *Rabbit) newChannel() {
+	if my.ch == nil {
+		my.ch, my.err = my.getConn().Channel()
+	}
+}
+
 // NewChannel 创建频道
 func (my *Rabbit) NewChannel() *Rabbit {
 	my.mu.Lock()
 	defer my.mu.Unlock()
 
-	my.ch, my.err = my.getConn().Channel()
+	my.newChannel()
 
 	return my
 }
 
 // closeChannel 关闭频道
-func (my *Rabbit) closeChannel() { my.err = my.ch.Close() }
+func (my *Rabbit) closeChannel() {
+	if my.ch != nil {
+		my.err = my.ch.Close()
+	}
+}
 
 // CloseChannel 关闭频道
 func (my *Rabbit) CloseChannel() *Rabbit {
@@ -102,22 +113,9 @@ func (my *Rabbit) CloseChannel() *Rabbit {
 	return my
 }
 
-// NewQueue 创建队列
-func (my *Rabbit) NewQueue(queueName string) *Rabbit {
-	my.mu.Lock()
-	defer my.mu.Unlock()
-
-	if my.ch == nil {
-		my.NewChannel()
-	}
-
-	if my.err != nil {
-		return my
-	}
-
+// newQueue 创建队列
+func (my *Rabbit) newQueue(queueName string) amqp.Queue {
 	var queue amqp.Queue
-
-	// 声明一个队列
 	queue, my.err = my.ch.QueueDeclare(
 		queueName, // 队列名称
 		true,      // 持久化
@@ -127,15 +125,42 @@ func (my *Rabbit) NewQueue(queueName string) *Rabbit {
 		nil,       // 附加属性
 	)
 	if my.err != nil {
-		fmt.Println("QueueDeclare err:", my.err)
+		my.err = NewQueueErr.Wrap(my.err)
+	}
+	return queue
+}
+
+// NewQueue 创建队列
+func (my *Rabbit) NewQueue(queueName string) *Rabbit {
+	my.mu.Lock()
+	defer my.mu.Unlock()
+
+	if my.err != nil {
+		return my
 	}
 
-	my.queues[queue.Name] = queue
+	my.newChannel()
+	if my.err != nil {
+		return my
+	}
+
+	my.queues[queueName] = my.newQueue(queueName)
 
 	return my
 }
 
-// 推送消息
+// getQueue 获取队列
+func (my *Rabbit) getQueue(queueName string) amqp.Queue {
+	if queue, ok := my.queues[queueName]; ok {
+		return queue
+	} else {
+		my.err = QueueNotExistErr.New(queueName)
+	}
+
+	return amqp.Queue{}
+}
+
+// Publish 生产消息
 func (my *Rabbit) Publish(queueName string, body string) *Rabbit {
 	my.mu.Lock()
 	defer my.mu.Unlock()
@@ -144,9 +169,8 @@ func (my *Rabbit) Publish(queueName string, body string) *Rabbit {
 		return my
 	}
 
-	queue, exist := my.queues[queueName]
-	if !exist {
-		my.err = QueueNotExistErr.New(queueName)
+	queue := my.getQueue(queueName)
+	if my.err != nil {
 		return my
 	}
 
@@ -166,4 +190,26 @@ func (my *Rabbit) Publish(queueName string, body string) *Rabbit {
 	}
 
 	return my
+}
+
+// Consume 消费消息
+func (my *Rabbit) Consume(queueName, consumer string, parseFn func(prototypeMessage []byte) error) *Consumer {
+	my.mu.RLock()
+	defer my.mu.RUnlock()
+
+	if my.ch == nil {
+		return nil
+	}
+
+	my.newChannel()
+	if my.err != nil {
+		return nil
+	}
+
+	queue := my.getQueue(queueName)
+	if my.err != nil {
+		return nil
+	}
+
+	return ConsumerApp.New(my.ch, queue, consumer, parseFn)
 }
