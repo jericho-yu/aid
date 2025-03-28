@@ -43,7 +43,7 @@ func (my *Consumer) Go() <-chan amqp.Delivery {
 	msgs, err := my.ch.Consume(
 		my.queue.Name, // 队列名称
 		my.consumer,   // 消费者名称
-		false,         // 自动确认消息
+		true,          // 自动确认消息
 		false,         // 独占
 		false,         // 不等待
 		false,         // 不阻塞
@@ -60,16 +60,18 @@ func (my *Consumer) Go() <-chan amqp.Delivery {
 func (my *Consumer) Start() *Consumer {
 	defer func() { my.isListening = true }()
 
+	msgs := my.Go()
 	go func() {
-		my.prototypeMessage, _ = my.ch.Consume(my.queue.Name, my.consumer, true, false, false, false, nil)
-		for {
-			select {
-			case <-my.stop:
-				return
-			case msg := <-my.prototypeMessage:
+		var forever chan struct{}
+		select {
+		case <-my.stop:
+			return
+		case <-msgs:
+			for msg := range msgs {
 				my.parseFn(msg.Body)
 			}
 		}
+		<-forever
 	}()
 
 	return my
