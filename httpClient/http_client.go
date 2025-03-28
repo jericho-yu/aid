@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/jericho-yu/aid/str"
+	jsonIter "github.com/json-iterator/go"
 )
 
 type (
@@ -383,9 +384,18 @@ func (my *HttpClient) ParseByContentType(target any) *HttpClient {
 func (my *HttpClient) GetResponseRawBody() []byte { return my.responseBody }
 
 // GetResponseJsonBody 获取json格式响应体
-func (my *HttpClient) GetResponseJsonBody(target any) *HttpClient {
-	if e := json.Unmarshal(my.responseBody, &target); e != nil {
-		my.Err = UnmarshalJsonErr.Wrap(e)
+func (my *HttpClient) GetResponseJsonBody(target any, keys ...any) *HttpClient {
+	if my.responseBody == nil {
+		return my
+	}
+
+	if len(keys) > 0 {
+		jsonIter.Get(my.responseBody, keys...).ToVal(&target)
+		return my
+	} else {
+		if e := json.Unmarshal(my.responseBody, &target); e != nil {
+			my.Err = UnmarshalJsonErr.Wrap(e)
+		}
 	}
 
 	return my
