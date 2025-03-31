@@ -148,7 +148,6 @@ func (my *Validator[T]) validate(v any) error {
 
 	for i := range val.NumField() {
 		field := val.Type().Field(i)
-		fmt.Printf("OK: %#v\n", field.Name)
 		if field.Anonymous {
 			// 递归验证嵌套字段
 			if err := NewValidator(val.Field(i).Interface(), my.prefixNames...).Validate(); err != nil {
