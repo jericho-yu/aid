@@ -203,7 +203,7 @@ func (my *Validator[T]) checkTime(rule, fieldName string, value any) error {
 	return nil
 }
 
-// checkString 验证：string -> 支持的规则 required、email、email=、date、date=、time、time=、datetime、datetime=、min<、min<=、max>、max>=、range=
+// checkString 验证：string -> 支持的规则 required、email、email=、date、date=、time、time=、datetime、datetime=、min<、min<=、max>、max>=、range=、length=
 func (my *Validator[T]) checkString(rule, fieldName string, value any) error {
 	if reflect.TypeOf(value).Kind() == reflect.Ptr {
 		if rule == "required" && reflect.ValueOf(value).IsNil() {
@@ -283,6 +283,11 @@ func (my *Validator[T]) checkString(rule, fieldName string, value any) error {
 		max := common.ToInt(betweens[1])
 		if utf8.RuneCountInString(value.(string)) < min || utf8.RuneCountInString(value.(string)) > max {
 			return LengthErr.NewFormat("[%s]长度必须在：%d~%d之间", fieldName, min, max)
+		}
+	case strings.HasPrefix(rule, "length="):
+		max := strings.TrimPrefix(rule, "length=")
+		if utf8.RuneCountInString(value.(string)) != common.ToInt(max) {
+			return LengthErr.NewFormat("[%s]长度必须为：%d", fieldName, common.ToInt(max))
 		}
 	}
 
