@@ -211,6 +211,10 @@ func (my *Validator[T]) checkString(rule, fieldName string, value any) error {
 		value = reflect.ValueOf(value).Elem().Interface()
 	}
 
+	if value.(string) == "" {
+		return nil
+	}
+
 	switch {
 	case rule == "required":
 		if value == "" {
@@ -274,7 +278,7 @@ func (my *Validator[T]) checkString(rule, fieldName string, value any) error {
 		}
 	case strings.HasPrefix(rule, "range="):
 		between := strings.TrimPrefix(rule, "range=")
-		betweens := strings.Split(between, "~")
+		betweens := strings.Split(between, ",")
 		if len(betweens) != 2 {
 			return RuleErr.NewFormat("[%s]规则定义错误，规则定义错误，规则格式：d~d", fieldName)
 		}
@@ -284,7 +288,6 @@ func (my *Validator[T]) checkString(rule, fieldName string, value any) error {
 			return LengthErr.NewFormat("[%s]长度必须在：%d~%d之间", fieldName, min, max)
 		}
 	case strings.HasPrefix(rule, "length="):
-		// 1
 		max := strings.TrimPrefix(rule, "length=")
 		if utf8.RuneCountInString(value.(string)) != common.ToInt(max) {
 			return LengthErr.NewFormat("[%s]长度必须为：%d", fieldName, common.ToInt(max))
