@@ -16,7 +16,7 @@ import (
 type (
 	ZapProvider struct{}
 
-	EncoderType string
+	EncoderType = string
 )
 
 var ZapProviderApp ZapProvider

@@ -13,7 +13,7 @@ type (
 	clientReceiveMessageSuccessFn func(groupName, name string, prototypeMessage []byte)
 	clientHeartFn                 func(groupName, name string, client *Client)
 	pingFn                        func(conn *websocket.Conn) error
-	serverConnectionFailFn        func(error)
+	serverConnectionFailFn        func(err error)
 	serverConnectionSuccessFn     func(conn *websocket.Conn) error
 	serverConnectionCheckFn       func(header http.Header) (string, error)
 	serverReceiveMessageSuccessFn func(server *Server, message Message)
