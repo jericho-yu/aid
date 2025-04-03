@@ -188,7 +188,7 @@ func (*ServerPool) Handle(
 	req *http.Request,
 	header http.Header,
 	condition serverConnectionCheckFn,
-) {
+) *ServerPool {
 	var (
 		err  error
 		conn *websocket.Conn
@@ -196,7 +196,7 @@ func (*ServerPool) Handle(
 
 	if condition == nil {
 		serverPool.onConnectionFail(errors.New("验证方法不能为空"))
-		return
+		return serverPool
 	}
 
 	// 升级协议
@@ -211,7 +211,7 @@ func (*ServerPool) Handle(
 	identity, err := condition(header)
 	if err != nil && serverPool.onConnectionFail != nil {
 		serverPool.onConnectionFail(err)
-		return
+		return serverPool
 	}
 
 	// 加入连接池
@@ -232,4 +232,6 @@ func (*ServerPool) Handle(
 		serverPool.removeConn(&server.addr)
 		server = nil
 	}
+
+	return serverPool
 }
