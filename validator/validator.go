@@ -30,7 +30,14 @@ type (
 	checkFunctionMap map[string]checkFunction
 )
 
+// New 实例化：验证器
+func New[T any](data T, prefixNames ...string) *Validator[T] {
+	return NewValidator(data, prefixNames...)
+}
+
 // NewValidator 实例化：验证器
+//
+//go:fix 建议使用New方法
 func NewValidator[T any](data T, prefixNames ...string) *Validator[T] {
 	p := make([]string, 0)
 	if len(prefixNames) > 0 {
