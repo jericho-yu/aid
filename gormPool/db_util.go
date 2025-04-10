@@ -50,5 +50,6 @@ func (my *Finder) WhenFunc(condition bool, fn func(db *gorm.DB) *gorm.DB) *Finde
 	if condition {
 		my.DB = fn(my.DB)
 	}
+
 	return my
 }
