@@ -15,11 +15,8 @@ func (*Finder) New(db *gorm.DB) *Finder { return &Finder{DB: db} }
 
 // FindAndPagination 查询多条数据并自动分页
 func (my *Finder) FindAndPagination(page, size int, ret any) *Finder {
-	if page > 0 && size > 0 {
-		if my.DB.Count(&my.Total).Error != nil {
-			return my
-		}
-		my.DB = my.DB.Limit(size).Offset((page - 1) * size)
+	if my.Pagination(page, size).DB.Error != nil {
+		return my
 	}
 
 	my.DB.Find(ret)
