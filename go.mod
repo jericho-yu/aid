@@ -1,6 +1,6 @@
 module github.com/jericho-yu/aid
 
-go 1.23.8
+go 1.22.11
 
 require (
 	github.com/gin-gonic/gin v1.10.0
