@@ -343,3 +343,41 @@ func (my *Reflection) hasField(v any, fieldName string) bool {
 
 	return field.IsValid()
 }
+
+// Iter 迭代
+func (my *Reflection) Iter(fn func(k, v any)) (isIter bool) {
+	val := reflect.ValueOf(my.original)
+
+	switch val.Kind() {
+	case reflect.Slice, reflect.Array:
+		for i := range val.Len() {
+			if val.Index(i).Kind() == reflect.Ptr {
+				fn(i, val.Index(i).Elem().Interface())
+			} else {
+				fn(i, val.Index(i).Interface())
+			}
+		}
+		isIter = true
+	case reflect.Struct:
+		for i := range val.NumField() {
+			if val.Field(i).Kind() == reflect.Ptr {
+				fn(val.Type().Field(i).Name, val.Field(i).Elem().Interface())
+			} else {
+				fn(val.Type().Field(i).Name, val.Field(i).Interface())
+			}
+		}
+		isIter = true
+	case reflect.Map:
+		iter := val.MapRange()
+		for iter.Next() {
+			if iter.Value().Kind() == reflect.Ptr {
+				fn(iter.Key().Interface(), iter.Value().Elem().Interface())
+			} else {
+				fn(iter.Key().Interface(), iter.Value().Interface())
+			}
+		}
+		isIter = true
+	}
+
+	return
+}
