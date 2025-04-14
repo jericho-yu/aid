@@ -52,7 +52,12 @@ func (my *Writer) CreateSheet(sheetName string) *Writer {
 		my.Err = WriteErr.New("工作表名称不能为空")
 		return my
 	}
-	sheetIndex := my.excel.NewSheet(sheetName)
+	sheetIndex, err := my.excel.NewSheet(sheetName)
+	if err != nil {
+		my.Err = WriteErr.Wrap(err)
+		return my
+	}
+
 	my.excel.SetActiveSheet(sheetIndex)
 	my.sheetName = my.excel.GetSheetName(sheetIndex)
 
@@ -65,7 +70,12 @@ func (my *Writer) ActiveSheetByName(sheetName string) *Writer {
 		my.Err = WriteErr.New("工作表名称不能为空")
 		return my
 	}
-	sheetIndex := my.excel.GetSheetIndex(sheetName)
+	sheetIndex, err := my.excel.GetSheetIndex(sheetName)
+	if err != nil {
+		my.Err = WriteErr.Wrap(err)
+		return my
+	}
+
 	my.excel.SetActiveSheet(sheetIndex)
 	my.sheetName = sheetName
 
