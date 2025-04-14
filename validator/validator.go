@@ -89,7 +89,7 @@ func NewValidator[T any](data T, prefixNames ...string) *Validator[T] {
 }
 
 // Validate 执行验证
-func (my *Validator[T]) Validate(exCheckFns ...func() error) error {
+func (my *Validator[T]) Validate() error {
 	defer my.clean()
 
 	if my.err != nil {
@@ -99,15 +99,6 @@ func (my *Validator[T]) Validate(exCheckFns ...func() error) error {
 	my.err = my.validate(my.data)
 	if my.err != nil {
 		return my.err
-	}
-
-	if len(exCheckFns) > 0 {
-		for _, exCheckFn := range exCheckFns {
-			if err := exCheckFn(); err != nil {
-				my.err = err
-				return my.err
-			}
-		}
 	}
 
 	return my.err
