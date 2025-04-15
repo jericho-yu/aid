@@ -9,6 +9,8 @@ import (
 	"sync"
 	"time"
 
+	"slices"
+
 	"github.com/jericho-yu/aid/operation"
 )
 
@@ -395,21 +397,19 @@ func (my *AnyArray[T]) in(target T) bool {
 }
 
 // In 检查值是否存在
-func (my *AnyArray[T]) In(target T) bool {
+func (my *AnyArray[T]) In(targets ...T) bool {
 	my.mu.RLock()
 	defer my.mu.RUnlock()
 
-	return my.in(target)
+	return slices.ContainsFunc(targets, my.in)
 }
 
-func (my *AnyArray[T]) notIn(target T) bool { return !my.in(target) }
-
 // NotIn 检查值是否不存在
-func (my *AnyArray[T]) NotIn(target T) bool {
+func (my *AnyArray[T]) NotIn(targets ...T) bool {
 	my.mu.RLock()
 	defer my.mu.RUnlock()
 
-	return my.notIn(target)
+	return !slices.ContainsFunc(targets, my.in)
 }
 
 func (my *AnyArray[T]) allEmpty() bool { return my.copy().removeEmpty().len() == 0 }
