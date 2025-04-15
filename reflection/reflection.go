@@ -346,6 +346,10 @@ func (my *Reflection) hasField(v any, fieldName string) bool {
 
 // Iter 迭代
 func (my *Reflection) Iter(fn func(k, v any)) (isIter bool) {
+	if _, isBytes := my.original.([]byte); isBytes {
+		return
+	}
+
 	val := reflect.ValueOf(my.original)
 
 	switch val.Kind() {
