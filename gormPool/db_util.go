@@ -31,6 +31,12 @@ func (my *Finder) Find(ret any) *Finder {
 	return my
 }
 
+// Ex 额外操作
+func (my *Finder) Ex(fn func(db *gorm.DB)) *Finder {
+	fn(my.DB)
+	return my
+}
+
 // Pagination 分页处理
 func (my *Finder) Pagination(page, size int) *Finder {
 	if page > 0 && size > 0 {
