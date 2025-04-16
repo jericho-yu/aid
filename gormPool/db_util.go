@@ -98,6 +98,33 @@ func (my *Finder) WhenNotBetween(condition bool, query any, args ...any) *Finder
 	return my
 }
 
+// WhenLike 当条件满足时执行：like %?%
+func (my *Finder) WhenLike(condition bool, query, arg any) *Finder {
+	if condition {
+		my.DB.Where(fmt.Sprintf("%v like ?", query), fmt.Sprintf("%%%s%%", arg))
+	}
+
+	return my
+}
+
+// WhenLikeLeft 当条件满足时执行：like %?
+func (my *Finder) WhenLikeLeft(condition bool, query, arg any) *Finder {
+	if condition {
+		my.DB.Where(fmt.Sprintf("%v like ?", query), fmt.Sprintf("%%%s", arg))
+	}
+
+	return my
+}
+
+// WhenLikeRight 当条件满足时执行：like ?%
+func (my *Finder) WhenLikeRight(condition bool, query, arg any) *Finder {
+	if condition {
+		my.DB.Where(fmt.Sprintf("%v like ?", query), fmt.Sprintf("%s%%", arg))
+	}
+
+	return my
+}
+
 // WhenFunc 当条件满足时执行：通过回调执行
 func (my *Finder) WhenFunc(condition bool, fn func(db *gorm.DB)) *Finder {
 	if condition {
