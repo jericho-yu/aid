@@ -102,6 +102,20 @@ func (my *Str) PadLeft(length int, s string) string {
 	return my.original
 }
 
+// ToLong 超出长度截断
+func (my *Str) ToLong(length int, ends ...string) string {
+	end := "..."
+	if len(ends) > 0 {
+		end = ends[0]
+	}
+
+	if len(my.original) > length {
+		return my.original[:length] + end
+	}
+
+	return my.original
+}
+
 // New 实例化：控制台日志
 func (*TerminalLog) New(format ...string) *TerminalLog {
 	var f string
