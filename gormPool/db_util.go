@@ -1,6 +1,10 @@
 package gormPool
 
-import "gorm.io/gorm"
+import (
+	"fmt"
+
+	"gorm.io/gorm"
+)
 
 // Finder 查询帮助器
 type Finder struct {
@@ -49,7 +53,7 @@ func (my *Finder) Pagination(page, size int) *Finder {
 	return my
 }
 
-// When 条件判断
+// When 当条件满足时执行：where
 func (my *Finder) When(condition bool, query any, args ...any) *Finder {
 	if condition {
 		my.DB.Where(query, args...)
@@ -58,7 +62,43 @@ func (my *Finder) When(condition bool, query any, args ...any) *Finder {
 	return my
 }
 
-// WhenFunc 条件判断：通过回调执行
+// WhenIn 当条件满足时执行：where in
+func (my *Finder) WhenIn(condition bool, query any, args ...any) *Finder {
+	if condition {
+		my.DB.Where(fmt.Sprintf("%v in (?)", query), args...)
+	}
+
+	return my
+}
+
+// WhenNotIn 当条件满足时执行：where not in
+func (my *Finder) WhenNotIn(condition bool, query any, args ...any) *Finder {
+	if condition {
+		my.DB.Where(fmt.Sprintf("%v not in (?)", query), args...)
+	}
+
+	return my
+}
+
+// WhenBetween 当条件满足时执行：where between
+func (my *Finder) WhenBetween(condition bool, query any, args ...any) *Finder {
+	if condition {
+		my.DB.Where(fmt.Sprintf("%v between ? and ?", query), args...)
+	}
+
+	return my
+}
+
+// WhenNotBetween 当条件满足时执行：where not between
+func (my *Finder) WhenNotBetween(condition bool, query any, args ...any) *Finder {
+	if condition {
+		my.DB.Where(fmt.Sprintf("%v not between ? and ?", query), args...)
+	}
+
+	return my
+}
+
+// WhenFunc 当条件满足时执行：通过回调执行
 func (my *Finder) WhenFunc(condition bool, fn func(db *gorm.DB)) *Finder {
 	if condition {
 		fn(my.DB)
