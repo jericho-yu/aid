@@ -38,6 +38,23 @@ func (my *Retry) SetCtx(ctx context.Context) *Retry {
 	return my
 }
 
+// Simple 线性重试
+func (my *Retry) Simple(attempts int) error {
+	if my.fn == nil {
+		return nil
+	}
+
+	if err := my.fn(); err != nil {
+		if attempts--; attempts > 0 {
+			time.Sleep(my.sleep)
+			return my.Simple(attempts)
+		}
+		return err
+	}
+
+	return nil
+}
+
 // Do 指数退避
 func (my *Retry) Do(attempts int) error {
 	if my.fn == nil {
