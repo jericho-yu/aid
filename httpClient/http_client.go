@@ -508,31 +508,6 @@ func (my *HttpClient) Download(filename string) *HttpClientDownload {
 	return HttpClientDownloadApp.New(my, filename)
 }
 
-// Download 下载文件
-// func (my *HttpClient) Download(filename, processContent string) *HttpClient {
-// 	client := my.beforeSend()
-// 	if my.Err != nil {
-// 		return my
-// 	}
-
-// 	if my.response, my.Err = client.Do(my.request); my.Err != nil {
-// 		return my
-// 	} else {
-// 		defer my.response.Body.Close()
-
-// 		f, _ := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0644)
-// 		defer f.Close()
-
-// 		if processContent != "" {
-// 			_, _ = io.Copy(io.MultiWriter(f, processBar.DefaultBytes(my.response.ContentLength, processContent)), my.response.Body)
-// 		} else {
-// 			_, _ = io.Copy(f, my.response.Body)
-// 		}
-
-// 		return my
-// 	}
-// }
-
 // Send 发送请求
 func (my *HttpClient) Send() *HttpClient {
 	defer func() { my.isReady = false }()
@@ -562,6 +537,8 @@ func (my *HttpClient) Send() *HttpClient {
 			return my
 		}
 	}
+
+	my.response.Body = io.NopCloser(bytes.NewBuffer(my.responseBody)) // 还原响应体
 
 	return my
 }
