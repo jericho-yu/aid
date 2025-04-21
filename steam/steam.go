@@ -5,7 +5,7 @@ import "io"
 type (
 	Steam struct {
 		readCloser io.ReadCloser
-		err        error
+		Error      error
 	}
 )
 
@@ -19,12 +19,12 @@ func (*Steam) New(readCloser io.ReadCloser) *Steam { return &Steam{readCloser: r
 // Copy 复制流
 func (my *Steam) Copy(fn func(copied []byte) error) *Steam {
 	var b []byte
-	b, my.err = io.ReadAll(my.readCloser)
-	if my.err != nil {
+	b, my.Error = io.ReadAll(my.readCloser)
+	if my.Error != nil {
 		return my
 	}
 
-	my.err = fn(b)
+	my.Error = fn(b)
 
 	return my
 }
