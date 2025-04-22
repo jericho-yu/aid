@@ -205,7 +205,7 @@ func (my *Finder) AutoFill(conditions ...*FinderAutoFillCondition) error {
 			case "=", ">", "<", "!=", "<=", ">=":
 				my.DB.Where(fmt.Sprintf("%s %s ?", condition.Field, condition.Operator), condition.Values[0])
 			case "in", "not in":
-				my.DB.Where(fmt.Sprintf("%s %s (?)", condition.Field, condition.Operator), condition.Values...)
+				my.DB.Where(fmt.Sprintf("%s %s (?)", condition.Field, condition.Operator), condition.Values[0])
 			case "between", "not between":
 				my.DB.Where(fmt.Sprintf("%s %s ? and ?", condition.Field, condition.Operator), condition.Values...)
 			case "like":
