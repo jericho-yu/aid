@@ -204,39 +204,35 @@ func (my *Finder) queryAutoFill(queries ...*FinderAutoQuery) error {
 	return nil
 }
 
-// TryQueryFromArray 从array中解析参数并查询
-func (my *Finder) TryQueryFromArray(array [][]any) *Finder {
-	var conditions = make([]*FinderAutoQuery, 0, len(array))
+// TryQueryFromMap 从map中解析参数并查询
+func (my *Finder) TryQueryFromMap(values map[string][]any) *Finder {
+	var conditions = make([]*FinderAutoQuery, 0, len(values))
 
-	if len(array) > 0 && my != nil {
-		for _, value := range array {
-			var (
-				finderAutoQuery      = &FinderAutoQuery{}
-				ok              bool = false
-			)
+	for key, value := range values {
+		var (
+			finderAutoQuery = &FinderAutoQuery{}
+			ok              = false
+		)
 
-			if finderAutoQuery.Field, ok = value[0].(string); ok {
-				continue
-			}
+		finderAutoQuery.Field = key
 
-			if finderAutoQuery.Operator, ok = value[1].(string); !ok {
-				continue
-			}
-
-			finderAutoQuery.Values = value[2:]
-
-			conditions = append(conditions, finderAutoQuery)
+		if finderAutoQuery.Operator, ok = value[0].(string); !ok {
+			continue
 		}
 
-		my.queryAutoFill(conditions...)
+		finderAutoQuery.Values = value[1:]
+
+		conditions = append(conditions, finderAutoQuery)
 	}
+
+	my.queryAutoFill(conditions...)
 
 	return my
 }
 
 // TryAutoQuery 自动填充查询条件和预加载字段
-func (my *Finder) TryAutoFind(queries [][]any, preloads []string, page, size int, orders []string, ret any) *Finder {
-	my.TryQueryFromArray(queries).TryPreload(preloads...).TryPagination(page, size).TryOrder(orders...).Find(ret)
+func (my *Finder) TryAutoFind(queries map[string][]any, preloads []string, page, size int, orders []string, ret any) *Finder {
+	my.TryQueryFromMap(queries).TryPreload(preloads...).TryPagination(page, size).TryOrder(orders...).Find(ret)
 
 	return my
 }
