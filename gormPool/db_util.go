@@ -227,6 +227,13 @@ func (my *Finder) TryQueryFromArray(array [][]any) *Finder {
 	return my
 }
 
+// TryAutoQuery 自动填充查询条件和预加载字段
+func (my *Finder) TryAutoFind(queries [][]any, preloads []string, page, size int, ret any) *Finder {
+	my.TryQueryFromArray(queries).TryPreloads(preloads...).TryPagination(page, size).Find(ret)
+
+	return my
+}
+
 // FinderWhen 实例化：查询条件
 func (*FinderAutoQuery) New(field string, operator string, values ...any) *FinderAutoQuery {
 	return &FinderAutoQuery{Field: field, Operator: operator, Values: values}
