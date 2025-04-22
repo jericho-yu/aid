@@ -22,11 +22,11 @@ type (
 
 	// FinderListArgs 列表查询额外条件
 	FinderListArgs struct {
-		Page     int              `json:"page" form:"page"` // 页码
-		Size     int              `json:"size" form:"size"` // 每页大小
-		Queries  map[string][]any `json:"queries"`          // 查询条件
-		Preloads []string         `json:"preloads"`         // 深度查询
-		Orders   []string         `json:"orders"`           // 排序
+		Page     int              `json:"page" form:"page"`         // 页码
+		Size     int              `json:"pageSize" form:"pageSize"` // 每页大小
+		Queries  map[string][]any `json:"queries"`                  // 查询条件
+		Preloads []string         `json:"preloads"`                 // 深度查询
+		Orders   []string         `json:"orders"`                   // 排序
 	}
 )
 
