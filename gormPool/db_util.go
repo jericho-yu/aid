@@ -167,43 +167,6 @@ func (my *Finder) Transaction(funcs ...func(db *gorm.DB)) error {
 	return nil
 }
 
-// FinderWhen 实例化：查询条件
-func (*FinderAutoQuery) New(field string, operator string, values ...any) *FinderAutoQuery {
-	return &FinderAutoQuery{
-		Field:    field,
-		Operator: operator,
-		Values:   values,
-	}
-}
-
-// FromArray 从数组中解析查询条件
-func (*FinderAutoQuery) FromArray(array [][]any, finder *Finder) *Finder {
-	var conditions = make([]*FinderAutoQuery, 0, len(array))
-
-	if len(array) > 0 && finder != nil {
-		for _, value := range array {
-			var (
-				field, operator string = "", ""
-				ok              bool   = false
-			)
-
-			if field, ok = value[0].(string); ok {
-				continue
-			}
-
-			if operator, ok = value[1].(string); !ok {
-				continue
-			}
-
-			conditions = append(conditions, FinderAutoQueryApp.New(field, operator, value[2:]...))
-		}
-
-		finder.AutoFill(conditions...)
-	}
-
-	return finder
-}
-
 // AutoFill 自动填充查询条件
 func (my *Finder) AutoFill(queries ...*FinderAutoQuery) error {
 	if len(queries) > 0 {
@@ -232,4 +195,41 @@ func (my *Finder) AutoFill(queries ...*FinderAutoQuery) error {
 	}
 
 	return nil
+}
+
+// QueryFromArray 从array中解析参数并查询
+func (my *Finder) QueryFromArray(array [][]any) *Finder {
+	var conditions = make([]*FinderAutoQuery, 0, len(array))
+
+	if len(array) > 0 && my != nil {
+		for _, value := range array {
+			var (
+				field, operator string = "", ""
+				ok              bool   = false
+			)
+
+			if field, ok = value[0].(string); ok {
+				continue
+			}
+
+			if operator, ok = value[1].(string); !ok {
+				continue
+			}
+
+			conditions = append(conditions, FinderAutoQueryApp.New(field, operator, value[2:]...))
+		}
+
+		my.AutoFill(conditions...)
+	}
+
+	return my
+}
+
+// FinderWhen 实例化：查询条件
+func (*FinderAutoQuery) New(field string, operator string, values ...any) *FinderAutoQuery {
+	return &FinderAutoQuery{
+		Field:    field,
+		Operator: operator,
+		Values:   values,
+	}
 }
