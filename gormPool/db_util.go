@@ -13,8 +13,8 @@ type (
 		Total int64
 	}
 
-	// FinderAutoQuery 查询条件
-	FinderAutoQuery struct {
+	// FinderAutoArg 查询条件
+	FinderAutoArg struct {
 		Field    string
 		Operator string
 		Values   []any
@@ -31,8 +31,8 @@ type (
 )
 
 var (
-	FinderApp          Finder
-	FinderAutoQueryApp FinderAutoQuery
+	FinderApp        Finder
+	FinderAutoArgApp FinderAutoArg
 )
 
 // New 实例化：查询帮助器
@@ -184,7 +184,7 @@ func (my *Finder) Transaction(funcs ...func(db *gorm.DB)) error {
 }
 
 // queryAutoFill 自动填充查询条件
-func (my *Finder) queryAutoFill(queries ...*FinderAutoQuery) error {
+func (my *Finder) queryAutoFill(queries ...*FinderAutoArg) error {
 	if len(queries) > 0 {
 		for _, query := range queries {
 			switch query.Operator {
@@ -216,11 +216,11 @@ func (my *Finder) queryAutoFill(queries ...*FinderAutoQuery) error {
 
 // TryQueryFromMap 从map中解析参数并查询
 func (my *Finder) TryQueryFromMap(values map[string][]any) *Finder {
-	var conditions = make([]*FinderAutoQuery, 0, len(values))
+	var conditions = make([]*FinderAutoArg, 0, len(values))
 
 	for key, value := range values {
 		var (
-			finderAutoQuery = &FinderAutoQuery{}
+			finderAutoQuery = &FinderAutoArg{}
 			ok              = false
 		)
 
@@ -253,6 +253,6 @@ func (my *Finder) TryAutoFindByArgs(args FinderListArgs, ret any) *Finder {
 }
 
 // FinderWhen 实例化：查询条件
-func (*FinderAutoQuery) New(field string, operator string, values ...any) *FinderAutoQuery {
-	return &FinderAutoQuery{Field: field, Operator: operator, Values: values}
+func (*FinderAutoArg) New(field string, operator string, values ...any) *FinderAutoArg {
+	return &FinderAutoArg{Field: field, Operator: operator, Values: values}
 }
