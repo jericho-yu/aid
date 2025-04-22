@@ -29,10 +29,10 @@ var (
 // New 实例化：查询帮助器
 func (*Finder) New(db *gorm.DB) *Finder { return &Finder{DB: db} }
 
-// Preloads 为查询添加预加载条件。接收一个或多个预加载字段名称作为参数，
+// TryPreloads 为查询添加预加载条件。接收一个或多个预加载字段名称作为参数，
 // 每个字段名称将被添加到 GORM 的预加载队列中。
 // 返回 Finder 实例以支持链式调用。
-func (my *Finder) Preloads(preloads ...string) *Finder {
+func (my *Finder) TryPreloads(preloads ...string) *Finder {
 	for _, preload := range preloads {
 		my.DB.Preload(preload)
 	}
