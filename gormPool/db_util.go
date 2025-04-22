@@ -19,6 +19,15 @@ type (
 		Operator string
 		Values   []any
 	}
+
+	// FinderListArgs 列表查询额外条件
+	FinderListArgs struct {
+		Page     int              `json:"page" form:"page"` // 页码
+		Size     int              `json:"size" form:"size"` // 每页大小
+		Queries  map[string][]any `json:"queries"`          // 查询条件
+		Preloads []string         `json:"preloads"`         // 深度查询
+		Orders   []string         `json:"orders"`           // 排序
+	}
 )
 
 var (
@@ -216,11 +225,9 @@ func (my *Finder) TryQueryFromMap(values map[string][]any) *Finder {
 		)
 
 		finderAutoQuery.Field = key
-
 		if finderAutoQuery.Operator, ok = value[0].(string); !ok {
 			continue
 		}
-
 		finderAutoQuery.Values = value[1:]
 
 		conditions = append(conditions, finderAutoQuery)
@@ -234,6 +241,13 @@ func (my *Finder) TryQueryFromMap(values map[string][]any) *Finder {
 // TryAutoQuery 自动填充查询条件和预加载字段
 func (my *Finder) TryAutoFind(queries map[string][]any, preloads []string, page, size int, orders []string, ret any) *Finder {
 	my.TryQueryFromMap(queries).TryPreload(preloads...).TryPagination(page, size).TryOrder(orders...).Find(ret)
+
+	return my
+}
+
+// TryAutoFindByArgs 自动填充查询条件和预加载字段
+func (my *Finder) TryAutoFindByArgs(args FinderListArgs, ret any) *Finder {
+	my.TryPreload(args.Preloads...).TryOrder(args.Orders...).TryQueryFromMap(args.Queries).TryPagination(args.Page, args.Size).Find(ret)
 
 	return my
 }
