@@ -236,7 +236,7 @@ func (my *Finder) TryQueryFromArray(array [][]any) *Finder {
 
 // TryAutoQuery 自动填充查询条件和预加载字段
 func (my *Finder) TryAutoFind(queries [][]any, preloads []string, page, size int, orders []string, ret any) *Finder {
-	my.TryQueryFromArray(queries).TryPreloads(preloads...).TryPagination(page, size).TryOrder(orders...).Find(ret)
+	my.TryQueryFromArray(queries).TryPreload(preloads...).TryPagination(page, size).TryOrder(orders...).Find(ret)
 
 	return my
 }
