@@ -1,6 +1,9 @@
 package steam
 
-import "io"
+import (
+	"bytes"
+	"io"
+)
 
 type (
 	Steam struct {
@@ -29,6 +32,11 @@ func (my *Steam) Copy(fn func(copied []byte) error) *Steam {
 	}
 
 	my.Error = fn(b)
+	if my.Error != nil {
+		return my
+	}
+
+	my.readCloser = io.NopCloser(bytes.NewBuffer(b))
 
 	return my
 }
