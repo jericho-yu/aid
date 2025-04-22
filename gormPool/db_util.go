@@ -6,13 +6,24 @@ import (
 	"gorm.io/gorm"
 )
 
-// Finder 查询帮助器
-type Finder struct {
-	DB    *gorm.DB
-	Total int64
-}
+type (
+	// Finder 查询帮助器
+	Finder struct {
+		DB    *gorm.DB
+		Total int64
+	}
 
-var FinderApp Finder
+	// FinderAutoFillCondition 查询条件
+	FinderAutoFillCondition struct {
+		Field    string
+		Operator string
+		Values   []any
+	}
+)
+
+var (
+	FinderApp Finder
+)
 
 // New 实例化：查询帮助器
 func (*Finder) New(db *gorm.DB) *Finder { return &Finder{DB: db} }
@@ -151,6 +162,45 @@ func (my *Finder) Transaction(funcs ...func(db *gorm.DB)) error {
 	}
 
 	my.DB.Commit()
+
+	return nil
+}
+
+// FinderWhen 实例化：查询条件
+func (*FinderAutoFillCondition) New(field string, operator string, values ...any) *FinderAutoFillCondition {
+	return &FinderAutoFillCondition{
+		Field:    field,
+		Operator: operator,
+		Values:   values,
+	}
+}
+
+// AutoFill 自动填充查询条件
+func (my *Finder) AutoFill(conditions ...*FinderAutoFillCondition) error {
+	if len(conditions) > 0 {
+		for _, condition := range conditions {
+			switch condition.Operator {
+			case "alias":
+				my.DB.Table("%s as %s", condition.Values...)
+			case "=", ">", "<", "!=", "<=", ">=":
+				my.DB.Where(fmt.Sprintf("%s %s ?", condition.Field, condition.Operator), condition.Values[0])
+			case "in", "not in":
+				my.DB.Where(fmt.Sprintf("%s %s (?)", condition.Field, condition.Operator), condition.Values...)
+			case "between", "not between":
+				my.DB.Where(fmt.Sprintf("%s %s ? and ?", condition.Field, condition.Operator), condition.Values...)
+			case "like":
+				my.DB.Where(fmt.Sprintf("%s like ?", condition.Field), fmt.Sprintf("%%%s%%", condition.Values[0]))
+			case "like%":
+				my.DB.Where(fmt.Sprintf("%s like ?", condition.Field), fmt.Sprintf("%s%%", condition.Values[0]))
+			case "%like":
+				my.DB.Where(fmt.Sprintf("%s like ?", condition.Field), fmt.Sprintf("%%%s", condition.Values[0]))
+			case "join":
+				my.DB.Joins("join %s on %s %s", condition.Values[0], condition.Field)
+			case "raw":
+				my.DB.Where(condition.Field, condition.Values...)
+			}
+		}
+	}
 
 	return nil
 }
