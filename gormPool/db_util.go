@@ -177,22 +177,26 @@ func (*FinderAutoFillCondition) New(field string, operator string, values ...any
 }
 
 // FromArray 从数组中解析查询条件
-func (*FinderAutoFillCondition) FromArray(array [][]any) []*FinderAutoFillCondition {
+func (*FinderAutoFillCondition) FromArray(array [][]any, finder *Finder) *Finder {
 	var conditions = make([]*FinderAutoFillCondition, 0, len(array))
 
-	for _, value := range array {
-		if _, ok := value[0].(string); ok {
-			continue
+	if len(array) > 0 && finder != nil {
+		for _, value := range array {
+			if _, ok := value[0].(string); ok {
+				continue
+			}
+
+			if _, ok := value[1].(string); !ok {
+				continue
+			}
+
+			conditions = append(conditions, FinderAutoFillConditionApp.New(value[0].(string), value[1].(string), value[2:]...))
 		}
 
-		if _, ok := value[1].(string); !ok {
-			continue
-		}
-
-		conditions = append(conditions, FinderAutoFillConditionApp.New(value[0].(string), value[1].(string), value[2:]...))
+		finder.AutoFill(conditions...)
 	}
 
-	return conditions
+	return finder
 }
 
 // AutoFill 自动填充查询条件
