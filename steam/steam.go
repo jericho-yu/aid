@@ -18,6 +18,10 @@ func (*Steam) New(readCloser io.ReadCloser) *Steam { return &Steam{readCloser: r
 
 // Copy 复制流
 func (my *Steam) Copy(fn func(copied []byte) error) *Steam {
+	if my.readCloser == nil {
+		return my
+	}
+
 	var b []byte
 	b, my.Error = io.ReadAll(my.readCloser)
 	if my.Error != nil {
