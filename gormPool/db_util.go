@@ -9,9 +9,8 @@ import (
 type (
 	// Finder 查询帮助器
 	Finder struct {
-		DB     *gorm.DB
-		Total  int64
-		ArgsEx map[string]func(db *gorm.DB) error
+		DB    *gorm.DB
+		Total int64
 	}
 
 	// FinderAutoQuery 查询条件
@@ -37,9 +36,7 @@ var (
 )
 
 // New 实例化：查询帮助器
-func (*Finder) New(db *gorm.DB) *Finder {
-	return &Finder{DB: db, ArgsEx: make(map[string]func(db *gorm.DB) error)}
-}
+func (*Finder) New(db *gorm.DB) *Finder { return &Finder{DB: db} }
 
 // Find 查询数据
 func (my *Finder) Find(ret any) *Finder {
@@ -250,21 +247,7 @@ func (my *Finder) TryAutoFind(queries map[string][]any, preloads []string, page,
 
 // TryAutoFindByArgs 自动填充查询条件和预加载字段
 func (my *Finder) TryAutoFindByArgs(args FinderListArgs, ret any) *Finder {
-	for _, argEx := range my.ArgsEx {
-		my.DB.Error = argEx(my.DB)
-		if my.DB.Error != nil {
-			return my
-		}
-	}
-
 	my.TryPreload(args.Preloads...).TryOrder(args.Orders...).TryQueryFromMap(args.Queries).TryPagination(args.Page, args.Size).Find(ret)
-
-	return my
-}
-
-// SetArgsEx 添加参数额外操作
-func (my *Finder) SetArgsEx(key string, fn func(db *gorm.DB) error) *Finder {
-	my.ArgsEx[key] = fn
 
 	return my
 }
