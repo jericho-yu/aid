@@ -2,6 +2,7 @@ package steam
 
 import (
 	"bytes"
+	"errors"
 	"io"
 )
 
@@ -20,23 +21,25 @@ var (
 func (*Steam) New(readCloser io.ReadCloser) *Steam { return &Steam{readCloser: readCloser} }
 
 // Copy 复制流
-func (my *Steam) Copy(fn func(copied []byte) error) *Steam {
+func (my *Steam) Copy(fn func(copied []byte) error) (io.ReadCloser, error) {
+	var (
+		err    error
+		copied []byte
+	)
+
 	if my.readCloser == nil {
-		return my
+		return nil, errors.New("空内容")
 	}
 
-	var b []byte
-	b, my.Error = io.ReadAll(my.readCloser)
-	if my.Error != nil {
-		return my
+	copied, err = io.ReadAll(my.readCloser)
+	if err != nil {
+		return nil, err
 	}
 
-	my.Error = fn(b)
-	if my.Error != nil {
-		return my
+	err = fn(copied)
+	if err != nil {
+		return nil, err
 	}
 
-	my.readCloser = io.NopCloser(bytes.NewBuffer(b))
-
-	return my
+	return io.NopCloser(bytes.NewBuffer(copied)), err
 }
