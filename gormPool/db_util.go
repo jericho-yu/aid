@@ -22,7 +22,8 @@ type (
 )
 
 var (
-	FinderApp Finder
+	FinderApp                  Finder
+	FinderAutoFillConditionApp FinderAutoFillCondition
 )
 
 // New 实例化：查询帮助器
@@ -175,6 +176,25 @@ func (*FinderAutoFillCondition) New(field string, operator string, values ...any
 	}
 }
 
+// FromArray 从数组中解析查询条件
+func (*FinderAutoFillCondition) FromArray(array [][]any) []*FinderAutoFillCondition {
+	var conditions = make([]*FinderAutoFillCondition, 0, len(array))
+
+	for _, value := range array {
+		if _, ok := value[0].(string); ok {
+			continue
+		}
+
+		if _, ok := value[1].(string); !ok {
+			continue
+		}
+
+		conditions = append(conditions, FinderAutoFillConditionApp.New(value[0].(string), value[1].(string), value[2:]...))
+	}
+
+	return conditions
+}
+
 // AutoFill 自动填充查询条件
 func (my *Finder) AutoFill(conditions ...*FinderAutoFillCondition) error {
 	if len(conditions) > 0 {
@@ -195,7 +215,7 @@ func (my *Finder) AutoFill(conditions ...*FinderAutoFillCondition) error {
 			case "%like":
 				my.DB.Where(fmt.Sprintf("%s like ?", condition.Field), fmt.Sprintf("%%%s", condition.Values[0]))
 			case "join":
-				my.DB.Joins("join %s on %s %s", condition.Values[0], condition.Field)
+				my.DB.Joins(condition.Field, condition.Values...)
 			case "raw":
 				my.DB.Where(condition.Field, condition.Values...)
 			}
