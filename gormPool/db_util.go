@@ -64,7 +64,7 @@ func (my *Finder) TryOrder(orders ...string) *Finder {
 }
 
 // TryPreloads 尝试深度查询
-func (my *Finder) TryPreloads(preloads ...string) *Finder {
+func (my *Finder) TryPreload(preloads ...string) *Finder {
 	for _, preload := range preloads {
 		my.DB.Preload(preload)
 	}
