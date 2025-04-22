@@ -13,8 +13,8 @@ type (
 		Total int64
 	}
 
-	// FinderAutoFillCondition 查询条件
-	FinderAutoFillCondition struct {
+	// FinderAutoQuery 查询条件
+	FinderAutoQuery struct {
 		Field    string
 		Operator string
 		Values   []any
@@ -22,8 +22,8 @@ type (
 )
 
 var (
-	FinderApp                  Finder
-	FinderAutoFillConditionApp FinderAutoFillCondition
+	FinderApp          Finder
+	FinderAutoQueryApp FinderAutoQuery
 )
 
 // New 实例化：查询帮助器
@@ -168,8 +168,8 @@ func (my *Finder) Transaction(funcs ...func(db *gorm.DB)) error {
 }
 
 // FinderWhen 实例化：查询条件
-func (*FinderAutoFillCondition) New(field string, operator string, values ...any) *FinderAutoFillCondition {
-	return &FinderAutoFillCondition{
+func (*FinderAutoQuery) New(field string, operator string, values ...any) *FinderAutoQuery {
+	return &FinderAutoQuery{
 		Field:    field,
 		Operator: operator,
 		Values:   values,
@@ -177,20 +177,25 @@ func (*FinderAutoFillCondition) New(field string, operator string, values ...any
 }
 
 // FromArray 从数组中解析查询条件
-func (*FinderAutoFillCondition) FromArray(array [][]any, finder *Finder) *Finder {
-	var conditions = make([]*FinderAutoFillCondition, 0, len(array))
+func (*FinderAutoQuery) FromArray(array [][]any, finder *Finder) *Finder {
+	var conditions = make([]*FinderAutoQuery, 0, len(array))
 
 	if len(array) > 0 && finder != nil {
 		for _, value := range array {
-			if _, ok := value[0].(string); ok {
+			var (
+				field, operator string = "", ""
+				ok              bool   = false
+			)
+
+			if field, ok = value[0].(string); ok {
 				continue
 			}
 
-			if _, ok := value[1].(string); !ok {
+			if operator, ok = value[1].(string); !ok {
 				continue
 			}
 
-			conditions = append(conditions, FinderAutoFillConditionApp.New(value[0].(string), value[1].(string), value[2:]...))
+			conditions = append(conditions, FinderAutoQueryApp.New(field, operator, value[2:]...))
 		}
 
 		finder.AutoFill(conditions...)
@@ -200,28 +205,28 @@ func (*FinderAutoFillCondition) FromArray(array [][]any, finder *Finder) *Finder
 }
 
 // AutoFill 自动填充查询条件
-func (my *Finder) AutoFill(conditions ...*FinderAutoFillCondition) error {
-	if len(conditions) > 0 {
-		for _, condition := range conditions {
-			switch condition.Operator {
+func (my *Finder) AutoFill(queries ...*FinderAutoQuery) error {
+	if len(queries) > 0 {
+		for _, query := range queries {
+			switch query.Operator {
 			case "alias":
-				my.DB.Table("%s as %s", condition.Values...)
+				my.DB.Table("%s as %s", query.Field, query.Values[0])
 			case "=", ">", "<", "!=", "<=", ">=":
-				my.DB.Where(fmt.Sprintf("%s %s ?", condition.Field, condition.Operator), condition.Values[0])
+				my.DB.Where(fmt.Sprintf("%s %s ?", query.Field, query.Operator), query.Values[0])
 			case "in", "not in":
-				my.DB.Where(fmt.Sprintf("%s %s (?)", condition.Field, condition.Operator), condition.Values[0])
+				my.DB.Where(fmt.Sprintf("%s %s (?)", query.Field, query.Operator), query.Values[0])
 			case "between", "not between":
-				my.DB.Where(fmt.Sprintf("%s %s ? and ?", condition.Field, condition.Operator), condition.Values...)
+				my.DB.Where(fmt.Sprintf("%s %s ? and ?", query.Field, query.Operator), query.Values...)
 			case "like":
-				my.DB.Where(fmt.Sprintf("%s like ?", condition.Field), fmt.Sprintf("%%%s%%", condition.Values[0]))
+				my.DB.Where(fmt.Sprintf("%s like ?", query.Field), fmt.Sprintf("%%%s%%", query.Values[0]))
 			case "like%":
-				my.DB.Where(fmt.Sprintf("%s like ?", condition.Field), fmt.Sprintf("%s%%", condition.Values[0]))
+				my.DB.Where(fmt.Sprintf("%s like ?", query.Field), fmt.Sprintf("%s%%", query.Values[0]))
 			case "%like":
-				my.DB.Where(fmt.Sprintf("%s like ?", condition.Field), fmt.Sprintf("%%%s", condition.Values[0]))
+				my.DB.Where(fmt.Sprintf("%s like ?", query.Field), fmt.Sprintf("%%%s", query.Values[0]))
 			case "join":
-				my.DB.Joins(condition.Field, condition.Values...)
+				my.DB.Joins(query.Field, query.Values...)
 			case "raw":
-				my.DB.Where(condition.Field, condition.Values...)
+				my.DB.Where(query.Field, query.Values...)
 			}
 		}
 	}
