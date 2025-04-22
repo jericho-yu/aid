@@ -53,8 +53,8 @@ func (my *Finder) Ex(fn func(db *gorm.DB)) *Finder {
 	return my
 }
 
-// Pagination 分页处理
-func (my *Finder) Pagination(page, size int) *Finder {
+// TryPagination 分页处理
+func (my *Finder) TryPagination(page, size int) *Finder {
 	if page > 0 && size > 0 {
 		if my.DB.Count(&my.Total).Error != nil {
 			return my
@@ -167,8 +167,8 @@ func (my *Finder) Transaction(funcs ...func(db *gorm.DB)) error {
 	return nil
 }
 
-// QueryAutoFill 自动填充查询条件
-func (my *Finder) QueryAutoFill(queries ...*FinderAutoQuery) error {
+// queryAutoFill 自动填充查询条件
+func (my *Finder) queryAutoFill(queries ...*FinderAutoQuery) error {
 	if len(queries) > 0 {
 		for _, query := range queries {
 			switch query.Operator {
@@ -197,8 +197,8 @@ func (my *Finder) QueryAutoFill(queries ...*FinderAutoQuery) error {
 	return nil
 }
 
-// QueryFromArray 从array中解析参数并查询
-func (my *Finder) QueryFromArray(array [][]any) *Finder {
+// TryQueryFromArray 从array中解析参数并查询
+func (my *Finder) TryQueryFromArray(array [][]any) *Finder {
 	var conditions = make([]*FinderAutoQuery, 0, len(array))
 
 	if len(array) > 0 && my != nil {
@@ -221,7 +221,7 @@ func (my *Finder) QueryFromArray(array [][]any) *Finder {
 			conditions = append(conditions, finderAutoQuery)
 		}
 
-		my.QueryAutoFill(conditions...)
+		my.queryAutoFill(conditions...)
 	}
 
 	return my
