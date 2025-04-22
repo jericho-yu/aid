@@ -167,8 +167,8 @@ func (my *Finder) Transaction(funcs ...func(db *gorm.DB)) error {
 	return nil
 }
 
-// AutoFill 自动填充查询条件
-func (my *Finder) AutoFill(queries ...*FinderAutoQuery) error {
+// QueryAutoFill 自动填充查询条件
+func (my *Finder) QueryAutoFill(queries ...*FinderAutoQuery) error {
 	if len(queries) > 0 {
 		for _, query := range queries {
 			switch query.Operator {
@@ -204,22 +204,24 @@ func (my *Finder) QueryFromArray(array [][]any) *Finder {
 	if len(array) > 0 && my != nil {
 		for _, value := range array {
 			var (
-				field, operator string = "", ""
-				ok              bool   = false
+				finderAutoQuery      = &FinderAutoQuery{}
+				ok              bool = false
 			)
 
-			if field, ok = value[0].(string); ok {
+			if finderAutoQuery.Field, ok = value[0].(string); ok {
 				continue
 			}
 
-			if operator, ok = value[1].(string); !ok {
+			if finderAutoQuery.Operator, ok = value[1].(string); !ok {
 				continue
 			}
 
-			conditions = append(conditions, FinderAutoQueryApp.New(field, operator, value[2:]...))
+			finderAutoQuery.Values = value[2:]
+
+			conditions = append(conditions, finderAutoQuery)
 		}
 
-		my.AutoFill(conditions...)
+		my.QueryAutoFill(conditions...)
 	}
 
 	return my
@@ -227,9 +229,5 @@ func (my *Finder) QueryFromArray(array [][]any) *Finder {
 
 // FinderWhen 实例化：查询条件
 func (*FinderAutoQuery) New(field string, operator string, values ...any) *FinderAutoQuery {
-	return &FinderAutoQuery{
-		Field:    field,
-		Operator: operator,
-		Values:   values,
-	}
+	return &FinderAutoQuery{Field: field, Operator: operator, Values: values}
 }
