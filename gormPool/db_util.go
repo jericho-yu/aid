@@ -29,17 +29,6 @@ var (
 // New 实例化：查询帮助器
 func (*Finder) New(db *gorm.DB) *Finder { return &Finder{DB: db} }
 
-// TryPreloads 为查询添加预加载条件。接收一个或多个预加载字段名称作为参数，
-// 每个字段名称将被添加到 GORM 的预加载队列中。
-// 返回 Finder 实例以支持链式调用。
-func (my *Finder) TryPreloads(preloads ...string) *Finder {
-	for _, preload := range preloads {
-		my.DB.Preload(preload)
-	}
-
-	return my
-}
-
 // Find 查询数据
 func (my *Finder) Find(ret any) *Finder {
 	my.DB.Find(ret)
@@ -53,13 +42,31 @@ func (my *Finder) Ex(fn func(db *gorm.DB)) *Finder {
 	return my
 }
 
-// TryPagination 分页处理
+// TryPagination 尝试分页
 func (my *Finder) TryPagination(page, size int) *Finder {
 	if page > 0 && size > 0 {
 		if my.DB.Count(&my.Total).Error != nil {
 			return my
 		}
 		my.DB.Limit(size).Offset((page - 1) * size)
+	}
+
+	return my
+}
+
+// TryOrder 尝试排序
+func (my *Finder) TryOrder(orders ...string) *Finder {
+	for _, order := range orders {
+		my.DB.Order(order)
+	}
+
+	return my
+}
+
+// TryPreloads 尝试深度查询
+func (my *Finder) TryPreloads(preloads ...string) *Finder {
+	for _, preload := range preloads {
+		my.DB.Preload(preload)
 	}
 
 	return my
@@ -228,8 +235,8 @@ func (my *Finder) TryQueryFromArray(array [][]any) *Finder {
 }
 
 // TryAutoQuery 自动填充查询条件和预加载字段
-func (my *Finder) TryAutoFind(queries [][]any, preloads []string, page, size int, ret any) *Finder {
-	my.TryQueryFromArray(queries).TryPreloads(preloads...).TryPagination(page, size).Find(ret)
+func (my *Finder) TryAutoFind(queries [][]any, preloads []string, page, size int, orders []string, ret any) *Finder {
+	my.TryQueryFromArray(queries).TryPreloads(preloads...).TryPagination(page, size).TryOrder(orders...).Find(ret)
 
 	return my
 }
