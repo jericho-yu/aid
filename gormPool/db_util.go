@@ -180,7 +180,7 @@ func (my *Finder) queryAutoFill(queries ...*FinderAutoQuery) error {
 		for _, query := range queries {
 			switch query.Operator {
 			case "alias":
-				my.DB.Table("%s as %s", query.Field, query.Values[0])
+				my.DB.Table(fmt.Sprintf("%s as %s", query.Field, query.Values[0]))
 			case "=", ">", "<", "!=", "<=", ">=":
 				my.DB.Where(fmt.Sprintf("%s %s ?", query.Field, query.Operator), query.Values[0])
 			case "in", "not in":
