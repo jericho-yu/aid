@@ -180,18 +180,18 @@ func (my *Finder) TryQueryFromMap(values map[string][]any) *Finder {
 
 		switch operator {
 		case "alias":
-			tableAlias := fmt.Sprintf("%s as %s", key, value[0])
+			tableAlias := fmt.Sprintf("%s as %s", key, value[1])
 			my.DB.Table(tableAlias)
 		case "=", ">", "<", "!=", "<=", ">=":
-			my.DB.Where(fmt.Sprintf("%s %s ?", key, operator), value[0])
+			my.DB.Where(fmt.Sprintf("%s %s ?", key, operator), value[1])
 		case "in", "not in":
-			my.DB.Where(fmt.Sprintf("%s %s (?)", key, operator), value[0])
+			my.DB.Where(fmt.Sprintf("%s %s (?)", key, operator), value[1])
 		case "between", "not between":
 			my.DB.Where(fmt.Sprintf("%s %s ? and ?", key, operator), value[1:]...)
 		case "like":
-			my.DB.Where(fmt.Sprintf("%s like ?", key), fmt.Sprintf("%%%s%%", value[0]))
+			my.DB.Where(fmt.Sprintf("%s like ?", key), fmt.Sprintf("%%%s%%", value[1]))
 		case "%like":
-			my.DB.Where(fmt.Sprintf("%s like ?", key), fmt.Sprintf("%%%s", value[0]))
+			my.DB.Where(fmt.Sprintf("%s like ?", key), fmt.Sprintf("%%%s", value[1]))
 		case "join":
 			my.DB.Joins(key, value[1:]...)
 		case "raw":
@@ -209,7 +209,7 @@ func (my *Finder) TryQueryFromMap(values map[string][]any) *Finder {
 }
 
 // TryAutoQuery 自动填充查询条件和预加载字段
-func (my *Finder) TryAutoFind(queries map[string][]any, preloads []string, page, size int, orders []string, ret any) *Finder {
+func (my *Finder) TryAutoFind(queries map[string][]any, preloads []string, orders []string, page, size int, ret any) *Finder {
 	my.TryQueryFromMap(queries).TryPreload(preloads...).TryPagination(page, size).TryOrder(orders...).Find(ret)
 
 	return my
