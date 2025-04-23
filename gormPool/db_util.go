@@ -182,7 +182,7 @@ func (my *Finder) TryQueryFromMap(values map[string][]any) *Finder {
 		case "alias":
 			tableAlias := fmt.Sprintf("%s as %s", key, value[1])
 			my.DB.Table(tableAlias)
-		case "=", ">", "<", "!=", "<=", ">=":
+		case "=", ">", "<", "!=", "<=", ">=", "<>":
 			my.DB.Where(fmt.Sprintf("%s %s ?", key, operator), value[1])
 		case "in", "not in":
 			my.DB.Where(fmt.Sprintf("%s %s (?)", key, operator), value[1])
@@ -190,6 +190,8 @@ func (my *Finder) TryQueryFromMap(values map[string][]any) *Finder {
 			my.DB.Where(fmt.Sprintf("%s %s ? and ?", key, operator), value[1:]...)
 		case "like":
 			my.DB.Where(fmt.Sprintf("%s like ?", key), fmt.Sprintf("%%%s%%", value[1]))
+		case "like%":
+			my.DB.Where(fmt.Sprintf("%s like ?", key), fmt.Sprintf("%s%%", value[1]))
 		case "%like":
 			my.DB.Where(fmt.Sprintf("%s like ?", key), fmt.Sprintf("%%%s", value[1]))
 		case "join":
