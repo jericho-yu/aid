@@ -12,18 +12,10 @@ type (
 		DB    *gorm.DB
 		Total int64
 	}
-
-	// FinderAutoArg 查询条件
-	FinderAutoArg struct {
-		Field    string
-		Operator string
-		Values   []any
-	}
 )
 
 var (
-	FinderApp        Finder
-	FinderAutoArgApp FinderAutoArg
+	FinderApp Finder
 )
 
 // New 实例化：查询帮助器
@@ -174,57 +166,40 @@ func (my *Finder) Transaction(funcs ...func(db *gorm.DB)) error {
 	return nil
 }
 
-// queryAutoFill 自动填充查询条件
-func (my *Finder) queryAutoFill(queries ...*FinderAutoArg) error {
-	if len(queries) > 0 {
-		for _, query := range queries {
-			switch query.Operator {
-			case "alias":
-				tableAlias := fmt.Sprintf("%s as %s", query.Field, query.Values[0])
-				my.DB.Table(tableAlias)
-			case "=", ">", "<", "!=", "<=", ">=":
-				my.DB.Where(fmt.Sprintf("%s %s ?", query.Field, query.Operator), query.Values[0])
-			case "in", "not in":
-				my.DB.Where(fmt.Sprintf("%s %s (?)", query.Field, query.Operator), query.Values[0])
-			case "between", "not between":
-				my.DB.Where(fmt.Sprintf("%s %s ? and ?", query.Field, query.Operator), query.Values...)
-			case "like":
-				my.DB.Where(fmt.Sprintf("%s like ?", query.Field), fmt.Sprintf("%%%s%%", query.Values[0]))
-			case "like%":
-				my.DB.Where(fmt.Sprintf("%s like ?", query.Field), fmt.Sprintf("%s%%", query.Values[0]))
-			case "%like":
-				my.DB.Where(fmt.Sprintf("%s like ?", query.Field), fmt.Sprintf("%%%s", query.Values[0]))
-			case "join":
-				my.DB.Joins(query.Field, query.Values...)
-			case "raw":
-				my.DB.Where(query.Field, query.Values...)
-			}
-		}
-	}
-
-	return nil
-}
-
 // TryQueryFromMap 从map中解析参数并查询
 func (my *Finder) TryQueryFromMap(values map[string][]any) *Finder {
-	var conditions = make([]*FinderAutoArg, 0, len(values))
-
 	for key, value := range values {
 		var (
-			finderAutoQuery = &FinderAutoArg{}
-			ok              = false
+			ok       = false
+			operator string
 		)
 
-		finderAutoQuery.Field = key
-		if finderAutoQuery.Operator, ok = value[0].(string); !ok {
+		if operator, ok = value[0].(string); !ok {
 			continue
 		}
-		finderAutoQuery.Values = value[1:]
 
-		conditions = append(conditions, finderAutoQuery)
+		switch operator {
+		case "alias":
+			tableAlias := fmt.Sprintf("%s as %s", key, value[0])
+			my.DB.Table(tableAlias)
+		case "=", ">", "<", "!=", "<=", ">=":
+			my.DB.Where(fmt.Sprintf("%s %s ?", key, operator), value[0])
+		case "in", "not in":
+			my.DB.Where(fmt.Sprintf("%s %s (?)", key, operator), value[0])
+		case "between", "not between":
+			my.DB.Where(fmt.Sprintf("%s %s ? and ?", key, operator), value[1:]...)
+		case "like":
+			my.DB.Where(fmt.Sprintf("%s like ?", key), fmt.Sprintf("%%%s%%", value[0]))
+		case "like%":
+			my.DB.Where(fmt.Sprintf("%s like ?", key), fmt.Sprintf("%s%%", value[0]))
+		case "%like":
+			my.DB.Where(fmt.Sprintf("%s like ?", key), fmt.Sprintf("%%%s", value[0]))
+		case "join":
+			my.DB.Joins(key, value[1:]...)
+		case "raw":
+			my.DB.Where(key, value[1:]...)
+		}
 	}
-
-	my.queryAutoFill(conditions...)
 
 	return my
 }
@@ -234,9 +209,4 @@ func (my *Finder) TryAutoFind(queries map[string][]any, preloads []string, page,
 	my.TryQueryFromMap(queries).TryPreload(preloads...).TryPagination(page, size).TryOrder(orders...).Find(ret)
 
 	return my
-}
-
-// FinderWhen 实例化：查询条件
-func (*FinderAutoArg) New(field string, operator string, values ...any) *FinderAutoArg {
-	return &FinderAutoArg{Field: field, Operator: operator, Values: values}
 }
