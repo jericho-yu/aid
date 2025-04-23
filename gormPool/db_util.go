@@ -2,6 +2,7 @@ package gormPool
 
 import (
 	"fmt"
+	"reflect"
 
 	"gorm.io/gorm"
 )
@@ -80,18 +81,42 @@ func (my *Finder) When(condition bool, query any, args ...any) *Finder {
 }
 
 // WhenIn 当条件满足时执行：where in
-func (my *Finder) WhenIn(condition bool, query any, args ...any) *Finder {
+func (my *Finder) WhenIn(condition bool, query any, args any) *Finder {
 	if condition {
-		my.DB.Where(fmt.Sprintf("%v in (?)", query), args...)
+		my.DB.Where(fmt.Sprintf("%v in (?)", query), args)
+	}
+
+	return my
+}
+
+// WhenInPtr 当条件满足时执行：where in
+// args 为指针类型
+func (my *Finder) WhenInPtr(condition bool, query any, args any) *Finder {
+	if condition {
+		if args != nil {
+			my.DB.Where(fmt.Sprintf("%v in (?)", query), reflect.ValueOf(args).Elem().Interface())
+		}
 	}
 
 	return my
 }
 
 // WhenNotIn 当条件满足时执行：where not in
-func (my *Finder) WhenNotIn(condition bool, query any, args ...any) *Finder {
+func (my *Finder) WhenNotIn(condition bool, query any, args any) *Finder {
 	if condition {
-		my.DB.Where(fmt.Sprintf("%v not in (?)", query), args...)
+		my.DB.Where(fmt.Sprintf("%v not in (?)", query), args)
+	}
+
+	return my
+}
+
+// WhenNotInPtr 当条件满足时执行：where in
+// args 为指针类型
+func (my *Finder) WhenNotInPtr(condition bool, query any, args any) *Finder {
+	if condition {
+		if args != nil {
+			my.DB.Where(fmt.Sprintf("%v not in (?)", query), reflect.ValueOf(args).Elem().Interface())
+		}
 	}
 
 	return my
