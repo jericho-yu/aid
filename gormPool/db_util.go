@@ -83,7 +83,12 @@ func (my *Finder) When(condition bool, query any, args ...any) *Finder {
 // WhenIn 当条件满足时执行：where in
 func (my *Finder) WhenIn(condition bool, query any, args any) *Finder {
 	if condition {
-		my.DB.Where(fmt.Sprintf("%v in (?)", query), args)
+		ref := reflect.ValueOf(args)
+		if ref.Kind() == reflect.Ptr && !ref.IsNil() {
+			my.DB.Where(fmt.Sprintf("%v in (?)", query), ref.Elem().Interface())
+		} else {
+			my.DB.Where(fmt.Sprintf("%v in (?)", query), args)
+		}
 	}
 
 	return my
@@ -92,10 +97,8 @@ func (my *Finder) WhenIn(condition bool, query any, args any) *Finder {
 // WhenInPtr 当条件满足时执行：where in
 // args 为指针类型
 func (my *Finder) WhenInPtr(condition bool, query any, args any) *Finder {
-	if condition {
-		if args != nil {
-			my.DB.Where(fmt.Sprintf("%v in (?)", query), reflect.ValueOf(args).Elem().Interface())
-		}
+	if condition && args != nil {
+		my.DB.Where(fmt.Sprintf("%v in (?)", query), reflect.ValueOf(args).Elem().Interface())
 	}
 
 	return my
@@ -104,7 +107,12 @@ func (my *Finder) WhenInPtr(condition bool, query any, args any) *Finder {
 // WhenNotIn 当条件满足时执行：where not in
 func (my *Finder) WhenNotIn(condition bool, query any, args any) *Finder {
 	if condition {
-		my.DB.Where(fmt.Sprintf("%v not in (?)", query), args)
+		ref := reflect.ValueOf(args)
+		if ref.Kind() == reflect.Ptr && !ref.IsNil() {
+			my.DB.Where(fmt.Sprintf("%v not in (?)", query), ref.Elem().Interface())
+		} else {
+			my.DB.Where(fmt.Sprintf("%v not in (?)", query), args)
+		}
 	}
 
 	return my
@@ -113,10 +121,8 @@ func (my *Finder) WhenNotIn(condition bool, query any, args any) *Finder {
 // WhenNotInPtr 当条件满足时执行：where in
 // args 为指针类型
 func (my *Finder) WhenNotInPtr(condition bool, query any, args any) *Finder {
-	if condition {
-		if args != nil {
-			my.DB.Where(fmt.Sprintf("%v not in (?)", query), reflect.ValueOf(args).Elem().Interface())
-		}
+	if condition && args != nil {
+		my.DB.Where(fmt.Sprintf("%v not in (?)", query), reflect.ValueOf(args).Elem().Interface())
 	}
 
 	return my
