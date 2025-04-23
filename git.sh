@@ -5,6 +5,8 @@ if [ "$operator" = "push-tag" ]; then
 	git tag "$tag" && git push origin "$tag"
 elif [ "$operator" = "last-tag" ]; then
 	git describe --tags $(git rev-list --tags --max-count=1)
+elif [ "$operator" = "to" ]; then
+	git checkout $1
 elif [ "$operator" = "help" ]; then
 	echo "    1、基本用法：source git.sh 执行子程序名称 [参数1, 参数2...]"
 	echo "    2、子程序名称为push-tag  ：创建并推送当前分支内容到tag（参数1表示tag名称）"
@@ -18,7 +20,9 @@ else
 	commit="$2"
 	tag="$3"
 
-	git add --all && git commit -m"$commit"
+	if [ -n "$commit" ]; then
+		git add --all && git commit -m"$commit"
+	fi
 
 	if [ -n "$src_branch" ]; then
 		git push origin $src_branch
@@ -26,6 +30,7 @@ else
 		if [ -n "$dst_branch" ]; then
 			git checkout $dst_branch &&
 				git merge $src_branch &&
+				git pull origin $dst_branch &&
 				git push origin $dst_branch &&
 				git checkout $src_branch
 		fi
