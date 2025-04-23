@@ -29,8 +29,13 @@ func (my *Finder) Find(ret any) *Finder {
 }
 
 // Ex 额外操作
-func (my *Finder) Ex(fn func(db *gorm.DB)) *Finder {
-	fn(my.DB)
+func (my *Finder) Ex(funcs ...func(db *gorm.DB)) *Finder {
+	if len(funcs) > 0 {
+		for _, fn := range funcs {
+			fn(my.DB)
+		}
+	}
+
 	return my
 }
 
