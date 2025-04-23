@@ -22,7 +22,8 @@ var (
 func (*Finder) New(db *gorm.DB) *Finder { return &Finder{DB: db} }
 
 // Find 查询数据
-func (my *Finder) Find(ret any) *Finder {
+func (my *Finder) Find(ret any, preloads ...string) *Finder {
+	my.TryPreload(preloads...)
 	my.DB.Find(ret)
 
 	return my
@@ -211,7 +212,7 @@ func (my *Finder) TryQueryFromMap(values map[string][]any) *Finder {
 
 // TryAutoQuery 自动填充查询条件和预加载字段
 func (my *Finder) TryAutoFind(queries map[string][]any, preloads []string, orders []string, page, size int, ret any) *Finder {
-	my.TryQueryFromMap(queries).TryPreload(preloads...).TryPagination(page, size).TryOrder(orders...).Find(ret)
+	my.TryQueryFromMap(queries).TryPagination(page, size).TryOrder(orders...).Find(ret, preloads...)
 
 	return my
 }
