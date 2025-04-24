@@ -1,6 +1,8 @@
 module github.com/jericho-yu/aid
 
-go 1.22.11
+go 1.23.0
+
+toolchain go1.23.8
 
 require (
 	github.com/gin-gonic/gin v1.10.0
@@ -73,8 +75,9 @@ require (
 	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/arch v0.8.0 // indirect
 	golang.org/x/crypto v0.28.0 // indirect
+	golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0
 	golang.org/x/net v0.30.0 // indirect
-	golang.org/x/sync v0.8.0 // indirect
+	golang.org/x/sync v0.13.0 // indirect
 	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/term v0.28.0 // indirect
 	golang.org/x/text v0.19.0 // indirect
