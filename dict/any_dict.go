@@ -283,12 +283,17 @@ func (my *AnyDict[K, V]) GetIndexesByValues(values ...V) *array.AnyArray[int] {
 	return my.getIndexesByValues(values...)
 }
 
+// hasKey 判断是否有键
+func (my *AnyDict[K, V]) hasKey(key K) bool {
+	return my.getIndexByKey(key) > -1
+}
+
 // HasKey 检查键是否存在
 func (my *AnyDict[K, V]) HasKey(key K) bool {
 	my.mu.RLock()
 	defer my.mu.RUnlock()
 
-	return my.getIndexByKey(key) > -1
+	return my.hasKey(key)
 }
 
 // HasKeys 检查多个键是否全部存在
@@ -331,6 +336,24 @@ func (my *AnyDict[K, V]) HasIndexes(indexes ...int) bool {
 	defer my.mu.RUnlock()
 
 	return my.getKeysByIndexes(indexes...).Len() == len(indexes)
+}
+
+func (my *AnyDict[K, V]) hasKeyDefault(key K, existFn func(v V), notExistFn func() V) *AnyDict[K, V] {
+	if v, e := my.get(key); e {
+		existFn(v)
+	} else {
+		my.set(key, notExistFn())
+	}
+
+	return my
+}
+
+// HasKeyDefault 判断key是否存在，并执行后续操作
+func (my *AnyDict[K, V]) HasKeyDefault(key K, existFn func(v V), notExistFn func() V) *AnyDict[K, V] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
+
+	return my.hasKeyDefault(key, existFn, notExistFn)
 }
 
 func (my *AnyDict[K, V]) len() int { return len(my.keys) }
