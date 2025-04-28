@@ -130,13 +130,7 @@ func (my *AnyArray[T]) GetByIndexes(indexes ...int) *AnyArray[T] {
 }
 
 func (my *AnyArray[T]) append(v ...T) *AnyArray[T] {
-	if len(my.data) > len(my.data)+len(v) {
-		my.data = append(my.data, v...)
-	} else {
-		var data = make([]T, 0, len(my.data)+len(my.data)+len(v)+10)
-		data = append(data, my.data...)
-		data = append(data, v...)
-	}
+	my.data = append(my.data, v...)
 
 	return my
 }

@@ -390,6 +390,7 @@ func (my *AnyDict[K, V]) set(key K, value V) *AnyDict[K, V] {
 	my.data[key] = value
 	my.keys = append(my.keys, key)
 	my.values = append(my.values, value)
+
 	return my
 }
 
