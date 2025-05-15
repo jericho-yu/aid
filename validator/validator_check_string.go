@@ -97,7 +97,7 @@ func (my *Validator[T]) checkString(rule, fieldName string, value any) error {
 		between := strings.TrimPrefix(rule, "range=")
 		betweens := strings.Split(between, ",")
 		if len(betweens) != 2 {
-			return RuleErr.NewFormat("[%s]规则定义错误，规则定义错误，规则格式[d~d]", fieldName)
+			return RuleErr.NewFormat("[%s]规则定义错误，规则定义错误，规则格式[d,d]", fieldName)
 		}
 		min := common.ToInt(betweens[0])
 		max := common.ToInt(betweens[1])

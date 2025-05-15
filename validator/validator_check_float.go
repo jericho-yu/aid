@@ -51,7 +51,7 @@ func (my *Validator[T]) checkFloat32(rule, fieldName string, value any) error {
 		between := strings.TrimPrefix(rule, "range=")
 		betweens := strings.Split(between, "~")
 		if len(betweens) != 2 {
-			return RuleErr.NewFormat("[%s]规则定义错误，规则定义错误，规则格式：f~f", fieldName)
+			return RuleErr.NewFormat("[%s]规则定义错误，规则定义错误，规则格式：f,f", fieldName)
 		}
 		min := common.ToFloat32(betweens[0])
 		max := common.ToFloat32(betweens[1])
@@ -107,7 +107,7 @@ func (my *Validator[T]) checkFloat64(rule, fieldName string, value any) error {
 		between := strings.TrimPrefix(rule, "range=")
 		betweens := strings.Split(between, "~")
 		if len(betweens) != 2 {
-			return RuleErr.NewFormat("[%s]规则定义错误，规则定义错误，规则格式：f~f", fieldName)
+			return RuleErr.NewFormat("[%s]规则定义错误，规则定义错误，规则格式：f,f", fieldName)
 		}
 		min := common.ToFloat64(betweens[0])
 		max := common.ToFloat64(betweens[1])

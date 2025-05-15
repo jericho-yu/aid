@@ -10,7 +10,7 @@ import (
 )
 
 type (
-	// Validator 验证器 验证规则 -> [required] [email|datetime|date|time] [size<|size<=] [size>|max=] [range=]
+	// Validator 验证器 验证规则 -> [required] [email|datetime|date|time] [size<|size<=|size>|size>=|size=|size!=] [range=]
 	Validator[T any] struct {
 		data           T
 		prefixNames    []string

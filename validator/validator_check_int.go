@@ -51,7 +51,7 @@ func (my *Validator[T]) checkInt(rule, fieldName string, value any) error {
 		between := strings.TrimPrefix(rule, "range=")
 		betweens := strings.Split(between, "~")
 		if len(betweens) != 2 {
-			return RuleErr.NewFormat("[%s]规则定义错误，规则定义错误，规则格式[d~d]", fieldName)
+			return RuleErr.NewFormat("[%s]规则定义错误，规则定义错误，规则格式[d,d]", fieldName)
 		}
 		min := common.ToInt(betweens[0])
 		max := common.ToInt(betweens[1])
@@ -107,7 +107,7 @@ func (my *Validator[T]) checkInt8(rule, fieldName string, value any) error {
 		between := strings.TrimPrefix(rule, "range=")
 		betweens := strings.Split(between, "~")
 		if len(betweens) != 2 {
-			return RuleErr.NewFormat("[%s]规则定义错误，规则定义错误，规则格式[d~d]", fieldName)
+			return RuleErr.NewFormat("[%s]规则定义错误，规则定义错误，规则格式[d,d]", fieldName)
 		}
 		min := common.ToInt8(betweens[0])
 		max := common.ToInt8(betweens[1])
@@ -163,7 +163,7 @@ func (my *Validator[T]) checkInt16(rule, fieldName string, value any) error {
 		between := strings.TrimPrefix(rule, "range=")
 		betweens := strings.Split(between, "~")
 		if len(betweens) != 2 {
-			return RuleErr.NewFormat("[%s]规则定义错误，规则定义错误，规则格式[d~d]", fieldName)
+			return RuleErr.NewFormat("[%s]规则定义错误，规则定义错误，规则格式[d,d]", fieldName)
 		}
 		min := common.ToInt16(betweens[0])
 		max := common.ToInt16(betweens[1])
@@ -219,7 +219,7 @@ func (my *Validator[T]) checkInt32(rule, fieldName string, value any) error {
 		between := strings.TrimPrefix(rule, "range=")
 		betweens := strings.Split(between, "~")
 		if len(betweens) != 2 {
-			return RuleErr.NewFormat("[%s]规则定义错误，规则定义错误，规则格式[d~d]", fieldName)
+			return RuleErr.NewFormat("[%s]规则定义错误，规则定义错误，规则格式[d,d]", fieldName)
 		}
 		min := common.ToInt32(betweens[0])
 		max := common.ToInt32(betweens[1])
@@ -275,7 +275,7 @@ func (my *Validator[T]) checkInt64(rule, fieldName string, value any) error {
 		between := strings.TrimPrefix(rule, "range=")
 		betweens := strings.Split(between, "~")
 		if len(betweens) != 2 {
-			return RuleErr.NewFormat("[%s]规则定义错误，规则定义错误，规则格式[d~d]", fieldName)
+			return RuleErr.NewFormat("[%s]规则定义错误，规则定义错误，规则格式[d,d]", fieldName)
 		}
 		min := common.ToInt64(betweens[0])
 		max := common.ToInt64(betweens[1])
