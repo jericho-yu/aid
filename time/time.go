@@ -123,3 +123,12 @@ func (my *Time) IsAfter(other *Time) bool { return my.original.After(other.origi
 
 // IsEqual 判断是否等于某时间
 func (my *Time) IsEqual(other *Time) bool { return my.original.Equal(other.original) }
+
+// IsZero 判断是否是0值
+func (my *Time) IsZero() bool { return my.original.IsZero() }
+
+// ToTime 转换为时间
+func (my *Time) ToTime() time.Time { return my.original }
+
+// ToTimePtr 转换为时间指针
+func (my *Time) ToTimePtr() *time.Time { return &my.original }
