@@ -9,7 +9,7 @@ import (
 type Time struct{ original time.Time }
 
 var (
-	TimeApp Time
+	App Time
 
 	Layout      = time.Layout
 	ANSIC       = time.ANSIC
