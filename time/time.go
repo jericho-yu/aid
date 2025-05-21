@@ -8,8 +8,15 @@ import (
 // Time 时间帮助
 type Time struct{ original time.Time }
 
-var (
-	App Time
+var App Time
+
+const (
+	Nanosecond  time.Duration = 1
+	Microsecond               = 1000 * Nanosecond
+	Millisecond               = 1000 * Microsecond
+	Second                    = 1000 * Millisecond
+	Minute                    = 60 * Second
+	Hour                      = 60 * Minute
 
 	Layout      = time.Layout
 	ANSIC       = time.ANSIC
