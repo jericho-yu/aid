@@ -83,6 +83,7 @@ func (my *Daemon) Launch(title, logDir string) {
 	}
 
 	my.logger.Info(title, zap.String("启动成功", ""), zap.Int("进程号", cmd.Process.Pid), zap.Time("启动时间", time.Now()))
-	log.Printf("%s 程序启动成功 [进程号->%d] 启动于：%s\r\n", title, cmd.Process.Pid, time.Now().Format(string(time.DateTime+".000")))
+	fp.WriteString(fmt.Sprintf("(>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\r\n%s 程序启动成功 [进程号->%d] 启动于：%s\r\n", title, cmd.Process.Pid, time.Now().Format(string(time.DateTime+".000"))))
+
 	os.Exit(0)
 }
