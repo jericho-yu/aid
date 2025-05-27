@@ -18,7 +18,7 @@ type Daemon struct {
 	logger *zap.Logger
 }
 
-var DaemonApp Daemon
+var App Daemon
 
 // New 实例化：
 func (*Daemon) New(logger *zap.Logger) *Daemon {
