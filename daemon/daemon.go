@@ -7,8 +7,6 @@ import (
 	"os/exec"
 	"syscall"
 	"time"
-
-	"go.uber.org/zap"
 )
 
 // Daemon 守护进程服务提供者
@@ -17,7 +15,7 @@ type Daemon struct{}
 var App Daemon
 
 // New 实例化：
-func (*Daemon) New(logger *zap.Logger) *Daemon { return &Daemon{} }
+func (*Daemon) New() *Daemon { return &Daemon{} }
 
 // Launch 启动守护进程
 func (my *Daemon) Launch(title, logDir string) {
