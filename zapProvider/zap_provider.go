@@ -109,7 +109,3 @@ func NewZapProvider(config *zapConfig) (*zap.Logger, error) {
 
 	return zapLogger, err
 }
-
-// func CustomTimeEncoder(t time.Time, encoder zapcore.PrimitiveArrayEncoder) {
-// 	encoder.AppendString(t.Format(time.DateTime + ".000"))
-// }
