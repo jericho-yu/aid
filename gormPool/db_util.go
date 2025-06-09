@@ -21,8 +21,8 @@ type (
 			Operator   *string     `json:"operator,omitempty"`   // 操作：and、in、not
 			Conditions []Condition `json:"conditions,omitempty"` // 条件
 		} `json:"queries,omitempty"` // 查询条件
-		Order   []string `json:"order,omitempty"`   // 排序
-		Preload []string `json:"preload,omitempty"` // 预加载
+		Orders   []string `json:"orders,omitempty"`   // 排序
+		Preloads []string `json:"preloads,omitempty"` // 预加载
 	}
 
 	// 查询
@@ -90,7 +90,7 @@ func (my *Finder) TryPreload(preloads ...string) *Finder {
 // TryQuery 尝试查询
 func (my *Finder) TryQuery(mode string, fieldName string, values ...any) {
 	switch mode {
-	case "and":
+	case "and", "":
 		my.DB.Where(fieldName, values...)
 	case "or":
 		my.DB.Or(fieldName, values...)
@@ -279,13 +279,13 @@ func (my *Finder) TryQueryFromFinderCondition(finderCondition *FinderCondition) 
 	}
 
 	// 设置排序
-	if len(finderCondition.Order) > 0 {
-		my.TryOrder(finderCondition.Order...)
+	if len(finderCondition.Orders) > 0 {
+		my.TryOrder(finderCondition.Orders...)
 	}
 
 	// 设置预加载
-	if len(finderCondition.Preload) > 0 {
-		my.TryPreload(finderCondition.Preload...)
+	if len(finderCondition.Preloads) > 0 {
+		my.TryPreload(finderCondition.Preloads...)
 	}
 
 	return my
@@ -347,7 +347,7 @@ func (my *Finder) TryAutoFindFromMap(queries map[string][]any, preloads []string
 
 // TryAutoFindFromFinderCondition 自动填充查询条件并查询：使用FinderCondition
 func (my *Finder) TryAutoFindFromFinderCondition(finderCondition *FinderCondition, page, size int, ret any) *Finder {
-	my.TryQueryFromFinderCondition(finderCondition).TryPagination(page, size).Find(ret, finderCondition.Preload...)
+	my.TryQueryFromFinderCondition(finderCondition).TryPagination(page, size).Find(ret, finderCondition.Preloads...)
 
 	return my
 }
