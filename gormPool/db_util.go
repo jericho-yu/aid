@@ -13,11 +13,27 @@ type (
 		DB    *gorm.DB
 		Total int64
 	}
+
+	// 查询条件
+	FinderCondition struct {
+		Table   *string `json:"table,omitempty"`
+		Queries []struct {
+			Operator   *string     `json:"operator,omitempty"`   // 操作：and、in、not
+			Conditions []Condition `json:"conditions,omitempty"` // 条件
+		} `json:"queries,omitempty"` // 查询条件
+		Order   []string `json:"order,omitempty"`   // 排序
+		Preload []string `json:"preload,omitempty"` // 预加载
+	}
+
+	// 查询
+	Condition struct {
+		Key      string `json:"key"`      // SQL字段名称，如果有别名则需要带有别名
+		Operator string `json:"operator"` // 操作符：=、>、<、!=、<=、>=、<>、in、not in、between、not between、like、like%、%like、raw、join
+		Values   []any  `json:"values"`   // 查询条件值
+	}
 )
 
-var (
-	FinderApp Finder
-)
+var FinderApp Finder
 
 // New 实例化：查询帮助器
 func (*Finder) New(db *gorm.DB) *Finder { return &Finder{DB: db} }
@@ -69,6 +85,18 @@ func (my *Finder) TryPreload(preloads ...string) *Finder {
 	}
 
 	return my
+}
+
+// TryQuery 尝试查询
+func (my *Finder) TryQuery(mode string, fieldName string, values ...any) {
+	switch mode {
+	case "and":
+		my.DB.Where(fieldName, values...)
+	case "or":
+		my.DB.Or(fieldName, values...)
+	case "not":
+		my.DB.Not(fieldName, values...)
+	}
 }
 
 // When 当条件满足时执行：where
@@ -203,9 +231,69 @@ func (my *Finder) Transaction(funcs ...func(db *gorm.DB)) error {
 	return nil
 }
 
+// TryQueryFromFinderCondition 从请求体中获取查询条件
+func (my *Finder) TryQueryFromFinderCondition(finderCondition *FinderCondition) *Finder {
+	if finderCondition == nil {
+		return my
+	}
+
+	// 设置表名
+	if finderCondition.Table != nil && *finderCondition.Table != "" {
+		my.DB.Table(*finderCondition.Table)
+	}
+
+	// 设置查询条件
+	if len(finderCondition.Queries) > 0 {
+		for _, query := range finderCondition.Queries {
+			for _, condition := range query.Conditions {
+				if condition.Key != "" {
+					switch condition.Operator {
+					case "=", ">", "<", "!=", "<=", ">=", "<>":
+						// {key:"fieldName", operator:"=", values:["value"]}
+						my.TryQuery(*query.Operator, fmt.Sprintf("%s %s ?", condition.Key, condition.Operator), condition.Values[0])
+					case "in", "not in":
+						// {key:"fieldName", operator:"in", values:["value1", "value2"]}
+						my.TryQuery(*query.Operator, fmt.Sprintf("%s %s (?)", condition.Key, condition.Operator), condition.Values[0])
+					case "between", "not between":
+						// {key:"fieldName", operator:"between", values:["value1", "value2"]}
+						my.TryQuery(*query.Operator, fmt.Sprintf("%s %s ? and ?", condition.Key, condition.Operator), condition.Values...)
+					case "like":
+						// {key:"fieldName", operator:"like", values:["value"]}
+						my.TryQuery(*query.Operator, fmt.Sprintf("%s like ?", condition.Key), fmt.Sprintf("%%%s%%", condition.Values[0]))
+					case "like%":
+						// {key:"fieldName", operator:"like%", values:["value"]}
+						my.TryQuery(*query.Operator, fmt.Sprintf("%s like ?", condition.Key), fmt.Sprintf("%s%%", condition.Values[0]))
+					case "%like":
+						// {key:"fieldName", operator:"%like", values:["value"]}
+						my.TryQuery(*query.Operator, fmt.Sprintf("%s like ?", condition.Key), fmt.Sprintf("%%%s", condition.Values[0]))
+					case "join", "left join", "right join", "inner join", "outer join":
+						// {key:"otherName o", operator:"join", values["o.xxx = tableName.xxx where xxx = ? and yyy = ?","xxx-value","yyy-value"]}
+						my.TryQuery(*query.Operator, fmt.Sprintf("%s %s", condition.Operator, condition.Key), condition.Values...)
+					case "raw":
+						// {key:"fieldName", operator:"raw", values:["> ?", 100]}
+						my.TryQuery(*query.Operator, condition.Key, condition.Values...)
+					}
+				}
+			}
+		}
+	}
+
+	// 设置排序
+	if len(finderCondition.Order) > 0 {
+		my.TryOrder(finderCondition.Order...)
+	}
+
+	// 设置预加载
+	if len(finderCondition.Preload) > 0 {
+		my.TryPreload(finderCondition.Preload...)
+	}
+
+	return my
+}
+
 // TryQueryFromMap 从map中解析参数并查询
-func (my *Finder) TryQueryFromMap(values map[string][]any) *Finder {
-	for key, value := range values {
+func (my *Finder) TryQueryFromMap(queries map[string][]any) *Finder {
+	for key, value := range queries {
 		var (
 			ok       = false
 			operator string
@@ -217,23 +305,32 @@ func (my *Finder) TryQueryFromMap(values map[string][]any) *Finder {
 
 		switch operator {
 		case "alias":
+			// 表别名：{"tableName": ["alias", "aliasName"]}
 			tableAlias := fmt.Sprintf("%s as %s", key, value[1])
 			my.DB.Table(tableAlias)
 		case "=", ">", "<", "!=", "<=", ">=", "<>":
+			// 常规比较操作：{"fieldName": ["=", "value"]}
 			my.DB.Where(fmt.Sprintf("%s %s ?", key, operator), value[1])
 		case "in", "not in":
+			// 包含或不包含操作：{"fieldName": ["in", ["value1", "value2"]]}
 			my.DB.Where(fmt.Sprintf("%s %s (?)", key, operator), value[1])
 		case "between", "not between":
-			my.DB.Where(fmt.Sprintf("%s %s ? and ?", key, operator), value[1:]...)
+			// 范围查询：{"fieldName": ["between", ["value1", "value2"]]}
+			my.DB.Where(fmt.Sprintf("%s %s ? and ?", key, operator), value[1], value[2])
 		case "like":
+			// 模糊查询：{"fieldName": ["like", "value"]}
 			my.DB.Where(fmt.Sprintf("%s like ?", key), fmt.Sprintf("%%%s%%", value[1]))
 		case "like%":
+			// 模糊查询：{"fieldName": ["like%", "value"]}
 			my.DB.Where(fmt.Sprintf("%s like ?", key), fmt.Sprintf("%s%%", value[1]))
 		case "%like":
+			// 模糊查询：{"fieldName": ["%like", "value"]}
 			my.DB.Where(fmt.Sprintf("%s like ?", key), fmt.Sprintf("%%%s", value[1]))
 		case "join":
+			// 连接查询：{"otherTableName": ["join", "joinSql", "onCondition"]}
 			my.DB.Joins(key, value[1:]...)
 		case "raw":
+			// 原生查询：{"fieldName": ["raw", "> ?", 100]}
 			my.DB.Where(key, value[1:]...)
 		}
 	}
@@ -241,9 +338,16 @@ func (my *Finder) TryQueryFromMap(values map[string][]any) *Finder {
 	return my
 }
 
-// TryAutoQuery 自动填充查询条件和预加载字段
-func (my *Finder) TryAutoFind(queries map[string][]any, preloads []string, orders []string, page, size int, ret any) *Finder {
+// TryAutoQuery 自动填充查询条件并查询：使用map[string][]any
+func (my *Finder) TryAutoFindFromMap(queries map[string][]any, preloads []string, orders []string, page, size int, ret any) *Finder {
 	my.TryQueryFromMap(queries).TryPagination(page, size).TryOrder(orders...).Find(ret, preloads...)
+
+	return my
+}
+
+// TryAutoFindFromFinderCondition 自动填充查询条件并查询：使用FinderCondition
+func (my *Finder) TryAutoFindFromFinderCondition(finderCondition *FinderCondition, page, size int, ret any) *Finder {
+	my.TryQueryFromFinderCondition(finderCondition).TryPagination(page, size).Find(ret, finderCondition.Preload...)
 
 	return my
 }
