@@ -347,7 +347,7 @@ func (my *Finder) TryAutoFindFromMap(queries map[string][]any, preloads []string
 
 // TryAutoFindFromFinderCondition 自动填充查询条件并查询：使用FinderCondition
 func (my *Finder) TryAutoFindFromFinderCondition(finderCondition *FinderCondition, page, size int, ret any) *Finder {
-	my.TryQueryFromFinderCondition(finderCondition).TryPagination(page, size).Find(ret, finderCondition.Preloads...)
+	my.TryQueryFromFinderCondition(finderCondition).TryPagination(page, size).Find(ret)
 
 	return my
 }
