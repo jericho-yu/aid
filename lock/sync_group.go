@@ -13,5 +13,6 @@ func (my *SyncGroup[T]) Go(fn T) {
 		defer my.sw.Done()
 		fn()
 	}()
-	my.sw.Wait()
 }
+
+func (my *SyncGroup[T]) Wait() { my.sw.Wait() }
