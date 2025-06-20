@@ -29,7 +29,7 @@ type (
 )
 
 var (
-	ExFunMap exFunMap
+	ExFunMap = make(exFunMap)
 )
 
 // 注册额外的验证函数
