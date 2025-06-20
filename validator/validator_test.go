@@ -42,7 +42,7 @@ func TestValidator(t *testing.T) {
 		A4:       &t1,
 	}
 
-	RegisterExFunMap("onlyEnglish", func(val any) error {
+	ValidatorExChecker.Once().RegisterExFun("onlyEnglish", func(val any) error {
 		if matched, err := regexp.MatchString(`^[a-zA-Z][a-zA-Z0-9._-]{2,}$`, val.(string)); err != nil {
 			return err
 		} else {

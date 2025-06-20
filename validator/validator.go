@@ -2,9 +2,9 @@ package validator
 
 import (
 	"fmt"
-	"log"
 	"reflect"
 	"strings"
+	"sync"
 
 	"github.com/jericho-yu/aid/operation"
 	"github.com/jericho-yu/aid/str"
@@ -23,6 +23,8 @@ type (
 		checkFunctions checkFunMap
 	}
 
+	ValidatorExCheckerApp struct{ ExFunMap exFunMap }
+
 	checkFun    func(rule string, fieldName string, value any) error
 	checkFunMap map[string]checkFun
 	exFun       func(value any) error
@@ -30,11 +32,28 @@ type (
 )
 
 var (
-	ExFunMap = make(exFunMap)
+	validatorExCheckerOnce sync.Once
+	validatorExCheckerIns  *ValidatorExCheckerApp
+	ValidatorExChecker     ValidatorExCheckerApp
 )
 
-// 注册额外的验证函数
-func RegisterExFunMap(name string, exFun exFun) { ExFunMap[name] = exFun }
+// Once 单利化：额外验证器
+func (*ValidatorExCheckerApp) Once() *ValidatorExCheckerApp {
+	validatorExCheckerOnce.Do(func() {
+		validatorExCheckerIns = &ValidatorExCheckerApp{
+			ExFunMap: make(exFunMap),
+		}
+	})
+
+	return validatorExCheckerIns
+}
+
+// RegisterExFun 注册额外验证函数
+func (my *ValidatorExCheckerApp) RegisterExFun(name string, exFun exFun) *ValidatorExCheckerApp {
+	my.ExFunMap[name] = exFun
+
+	return my
+}
 
 // New 实例化：验证器
 func New[T any](data T, prefixNames ...string) *ValidatorApp[T] {
@@ -177,17 +196,14 @@ func (my *ValidatorApp[T]) validate(v any) error {
 
 		exTag := field.Tag.Get("v-ex")
 		if exTag == "" || exTag == "-" {
-			log.Printf("跳过：v-ex")
 			continue
 		}
 
 		for _, exRule := range strings.Split(exTag, ";") {
-			if exFun, exist := ExFunMap[exRule]; exist {
+			if exFun, exist := ValidatorExChecker.Once().ExFunMap[exRule]; exist {
 				if err := exFun(val.Field(i).Interface()); err != nil {
 					return err
 				}
-			} else {
-				log.Printf("跳过：%s\n", exTag)
 			}
 		}
 	}
