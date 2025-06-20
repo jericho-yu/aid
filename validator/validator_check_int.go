@@ -10,8 +10,12 @@ import (
 // checkInt 验证：int -> 支持的规则 required、size<、size<=、size>、size>=、range=
 func (my *ValidatorApp[T]) checkInt(rule, fieldName string, value any) error {
 	if reflect.TypeOf(value).Kind() == reflect.Ptr {
-		if rule == "required" && reflect.ValueOf(value).IsNil() {
+		isNil := reflect.ValueOf(value).IsNil()
+		if rule == "required" && isNil {
 			return RequiredErr.New(fieldName)
+		}
+		if isNil {
+			return nil
 		}
 		value = reflect.ValueOf(value).Elem().Interface()
 	}
@@ -66,8 +70,12 @@ func (my *ValidatorApp[T]) checkInt(rule, fieldName string, value any) error {
 // checkInt8 验证：int8 -> 支持的规则 required、size<、size<=、size>、size>=、range=
 func (my *ValidatorApp[T]) checkInt8(rule, fieldName string, value any) error {
 	if reflect.TypeOf(value).Kind() == reflect.Ptr {
-		if rule == "required" && reflect.ValueOf(value).IsNil() {
+		isNil := reflect.ValueOf(value).IsNil()
+		if rule == "required" && isNil {
 			return RequiredErr.New(fieldName)
+		}
+		if isNil {
+			return nil
 		}
 		value = reflect.ValueOf(value).Elem().Interface()
 	}
@@ -122,8 +130,12 @@ func (my *ValidatorApp[T]) checkInt8(rule, fieldName string, value any) error {
 // checkInt16 验证：int16 -> 支持的规则 required、size<、size<=、size>、size>=、range=
 func (my *ValidatorApp[T]) checkInt16(rule, fieldName string, value any) error {
 	if reflect.TypeOf(value).Kind() == reflect.Ptr {
-		if rule == "required" && reflect.ValueOf(value).IsNil() {
+		isNil := reflect.ValueOf(value).IsNil()
+		if rule == "required" && isNil {
 			return RequiredErr.New(fieldName)
+		}
+		if isNil {
+			return nil
 		}
 		value = reflect.ValueOf(value).Elem().Interface()
 	}
@@ -178,8 +190,12 @@ func (my *ValidatorApp[T]) checkInt16(rule, fieldName string, value any) error {
 // checkInt32 验证：int32 -> 支持的规则 required、size<、size<=、size>、size>=、range=
 func (my *ValidatorApp[T]) checkInt32(rule, fieldName string, value any) error {
 	if reflect.TypeOf(value).Kind() == reflect.Ptr {
-		if rule == "required" && reflect.ValueOf(value).IsNil() {
+		isNil := reflect.ValueOf(value).IsNil()
+		if rule == "required" && isNil {
 			return RequiredErr.New(fieldName)
+		}
+		if isNil {
+			return nil
 		}
 		value = reflect.ValueOf(value).Elem().Interface()
 	}
@@ -234,8 +250,12 @@ func (my *ValidatorApp[T]) checkInt32(rule, fieldName string, value any) error {
 // checkInt64 验证：int64 -> 支持的规则 required、size<、size<=、size>、size>=、range=
 func (my *ValidatorApp[T]) checkInt64(rule, fieldName string, value any) error {
 	if reflect.TypeOf(value).Kind() == reflect.Ptr {
-		if rule == "required" && reflect.ValueOf(value).IsNil() {
+		isNil := reflect.ValueOf(value).IsNil()
+		if rule == "required" && isNil {
 			return RequiredErr.New(fieldName)
+		}
+		if isNil {
+			return nil
 		}
 		value = reflect.ValueOf(value).Elem().Interface()
 	}

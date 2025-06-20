@@ -12,8 +12,12 @@ import (
 // checkString 验证：string -> 支持的规则 required、email、email=、date、date=、time、time=、datetime、datetime=、size<、size<=、size>、size>=、range=、length=
 func (my *ValidatorApp[T]) checkString(rule, fieldName string, value any) error {
 	if reflect.TypeOf(value).Kind() == reflect.Ptr {
-		if rule == "required" && reflect.ValueOf(value).IsNil() {
+		isNil := reflect.ValueOf(value).IsNil()
+		if rule == "required" && isNil {
 			return RequiredErr.New(fieldName)
+		}
+		if isNil {
+			return nil
 		}
 		value = reflect.ValueOf(value).Elem().Interface()
 	}

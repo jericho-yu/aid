@@ -10,8 +10,12 @@ import (
 // checkFloat32 验证：float32 -> 支持的规则 required、size<、size<=、size>、size>=、range=
 func (my *ValidatorApp[T]) checkFloat32(rule, fieldName string, value any) error {
 	if reflect.TypeOf(value).Kind() == reflect.Ptr {
-		if rule == "required" && reflect.ValueOf(value).IsNil() {
+		isNil := reflect.ValueOf(value).IsNil()
+		if rule == "required" && isNil {
 			return RequiredErr.New(fieldName)
+		}
+		if isNil {
+			return nil
 		}
 		value = reflect.ValueOf(value).Elem().Interface()
 	}
@@ -66,8 +70,12 @@ func (my *ValidatorApp[T]) checkFloat32(rule, fieldName string, value any) error
 // checkFloat64 验证：float64 -> 支持的规则 required、size<、size<=、size>、size>=、range=
 func (my *ValidatorApp[T]) checkFloat64(rule, fieldName string, value any) error {
 	if reflect.TypeOf(value).Kind() == reflect.Ptr {
-		if rule == "required" && reflect.ValueOf(value).IsNil() {
+		isNil := reflect.ValueOf(value).IsNil()
+		if rule == "required" && isNil {
 			return RequiredErr.New(fieldName)
+		}
+		if isNil {
+			return nil
 		}
 		value = reflect.ValueOf(value).Elem().Interface()
 	}
