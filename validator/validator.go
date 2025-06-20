@@ -19,12 +19,21 @@ type (
 		dateFormat     string
 		timeFormat     string
 		datetimeFormat string
-		checkFunctions checkFunctionMap
+		checkFunctions checkFunMap
 	}
 
-	checkFunction    func(rule string, fieldName string, value any) error
-	checkFunctionMap map[string]checkFunction
+	checkFun    func(rule string, fieldName string, value any) error
+	checkFunMap map[string]checkFun
+	exFun       func(value any) error
+	exFunMap    map[string]exFun
 )
+
+var (
+	ExFunMap exFunMap
+)
+
+// 注册额外的验证函数
+func RegisterExFunMap(name string, exFun exFun) { ExFunMap[name] = exFun }
 
 // New 实例化：验证器
 func New[T any](data T, prefixNames ...string) *ValidatorApp[T] {
@@ -40,10 +49,10 @@ func New[T any](data T, prefixNames ...string) *ValidatorApp[T] {
 		dateFormat:     `^\d{4}-\d{2}-\d{2}$`,
 		timeFormat:     `^\d{2}:\d{2}:\d{2}\.{0,1}\d+$`,
 		datetimeFormat: `^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$`,
-		checkFunctions: make(checkFunctionMap, 0),
+		checkFunctions: make(checkFunMap, 0),
 	}
 
-	ins.checkFunctions = checkFunctionMap{
+	ins.checkFunctions = checkFunMap{
 		"string":     ins.checkString,
 		"*string":    ins.checkString,
 		"int":        ins.checkInt,
@@ -162,6 +171,17 @@ func (my *ValidatorApp[T]) validate(v any) error {
 				if err := fn(rule, fieldName, val.Field(i).Interface()); err != nil {
 					return err
 				}
+			}
+		}
+
+		exTag := field.Tag.Get("v-ex")
+		if exTag == "" || exTag == "-" {
+			continue
+		}
+
+		if exFun, exist := ExFunMap[exTag]; exist {
+			if err := exFun(val.Field(i).Interface()); err != nil {
+				return err
 			}
 		}
 	}
