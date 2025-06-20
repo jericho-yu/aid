@@ -8,7 +8,7 @@ import (
 )
 
 // checkInt 验证：int -> 支持的规则 required、size<、size<=、size>、size>=、range=
-func (my *Validator[T]) checkInt(rule, fieldName string, value any) error {
+func (my *ValidatorApp[T]) checkInt(rule, fieldName string, value any) error {
 	if reflect.TypeOf(value).Kind() == reflect.Ptr {
 		if rule == "required" && reflect.ValueOf(value).IsNil() {
 			return RequiredErr.New(fieldName)
@@ -64,7 +64,7 @@ func (my *Validator[T]) checkInt(rule, fieldName string, value any) error {
 }
 
 // checkInt8 验证：int8 -> 支持的规则 required、size<、size<=、size>、size>=、range=
-func (my *Validator[T]) checkInt8(rule, fieldName string, value any) error {
+func (my *ValidatorApp[T]) checkInt8(rule, fieldName string, value any) error {
 	if reflect.TypeOf(value).Kind() == reflect.Ptr {
 		if rule == "required" && reflect.ValueOf(value).IsNil() {
 			return RequiredErr.New(fieldName)
@@ -120,7 +120,7 @@ func (my *Validator[T]) checkInt8(rule, fieldName string, value any) error {
 }
 
 // checkInt16 验证：int16 -> 支持的规则 required、size<、size<=、size>、size>=、range=
-func (my *Validator[T]) checkInt16(rule, fieldName string, value any) error {
+func (my *ValidatorApp[T]) checkInt16(rule, fieldName string, value any) error {
 	if reflect.TypeOf(value).Kind() == reflect.Ptr {
 		if rule == "required" && reflect.ValueOf(value).IsNil() {
 			return RequiredErr.New(fieldName)
@@ -132,31 +132,31 @@ func (my *Validator[T]) checkInt16(rule, fieldName string, value any) error {
 	case strings.HasPrefix(rule, "size<="):
 		min := strings.TrimPrefix(rule, "size<=")
 		if value.(int16) <= common.ToInt16(min) {
-			return LengthErr.NewFormat("[%s]长度不能小于等于：[%d]", fieldName, common.ToInt(min))
+			return LengthErr.NewFormat("[%s]长度必须小于等于：[%d]", fieldName, common.ToInt(min))
 		}
 	case strings.HasPrefix(rule, "size<"):
 		min := strings.TrimPrefix(rule, "size<")
 		if value.(int16) < common.ToInt16(min) {
-			return LengthErr.NewFormat("[%s]长度不能小于：[%d]", fieldName, common.ToInt(min))
+			return LengthErr.NewFormat("[%s]长度必须小于：[%d]", fieldName, common.ToInt(min))
 		}
 	case strings.HasPrefix(rule, "size>="):
 		max := strings.TrimPrefix(rule, "size>=")
 		if value.(int16) >= common.ToInt16(max) {
-			return LengthErr.NewFormat("[%s]长度不能大于等于：[%d]", fieldName, common.ToInt(max))
+			return LengthErr.NewFormat("[%s]长度必须大于等于：[%d]", fieldName, common.ToInt(max))
 		}
 	case strings.HasPrefix(rule, "size>"):
 		max := strings.TrimPrefix(rule, "size>")
-		if value.(int16) > common.ToInt16(max) {
-			return LengthErr.NewFormat("[%s]长度不能大于：[%d]", fieldName, common.ToInt(max))
+		if !(value.(int16) > common.ToInt16(max)) {
+			return LengthErr.NewFormat("[%s]长度必须大于：[%d]", fieldName, common.ToInt(max))
 		}
 	case strings.HasPrefix(rule, "size="):
 		size := strings.TrimPrefix(rule, "size=")
-		if value.(int16) != common.ToInt16(size) {
+		if !(value.(int16) != common.ToInt16(size)) {
 			return LengthErr.NewFormat("[%s]长度必须等于：[%d]", fieldName, common.ToInt(size))
 		}
 	case strings.HasPrefix(rule, "size!="):
 		size := strings.TrimPrefix(rule, "size!=")
-		if value.(int16) == common.ToInt16(size) {
+		if !(value.(int16) == common.ToInt16(size)) {
 			return LengthErr.NewFormat("[%s]长度必须不等于：[%d]", fieldName, common.ToInt(size))
 		}
 	case strings.HasPrefix(rule, "range="):
@@ -176,7 +176,7 @@ func (my *Validator[T]) checkInt16(rule, fieldName string, value any) error {
 }
 
 // checkInt32 验证：int32 -> 支持的规则 required、size<、size<=、size>、size>=、range=
-func (my *Validator[T]) checkInt32(rule, fieldName string, value any) error {
+func (my *ValidatorApp[T]) checkInt32(rule, fieldName string, value any) error {
 	if reflect.TypeOf(value).Kind() == reflect.Ptr {
 		if rule == "required" && reflect.ValueOf(value).IsNil() {
 			return RequiredErr.New(fieldName)
@@ -232,7 +232,7 @@ func (my *Validator[T]) checkInt32(rule, fieldName string, value any) error {
 }
 
 // checkInt64 验证：int64 -> 支持的规则 required、size<、size<=、size>、size>=、range=
-func (my *Validator[T]) checkInt64(rule, fieldName string, value any) error {
+func (my *ValidatorApp[T]) checkInt64(rule, fieldName string, value any) error {
 	if reflect.TypeOf(value).Kind() == reflect.Ptr {
 		if rule == "required" && reflect.ValueOf(value).IsNil() {
 			return RequiredErr.New(fieldName)

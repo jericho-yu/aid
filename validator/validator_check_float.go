@@ -8,7 +8,7 @@ import (
 )
 
 // checkFloat32 验证：float32 -> 支持的规则 required、size<、size<=、size>、size>=、range=
-func (my *Validator[T]) checkFloat32(rule, fieldName string, value any) error {
+func (my *ValidatorApp[T]) checkFloat32(rule, fieldName string, value any) error {
 	if reflect.TypeOf(value).Kind() == reflect.Ptr {
 		if rule == "required" && reflect.ValueOf(value).IsNil() {
 			return RequiredErr.New(fieldName)
@@ -64,7 +64,7 @@ func (my *Validator[T]) checkFloat32(rule, fieldName string, value any) error {
 }
 
 // checkFloat64 验证：float64 -> 支持的规则 required、size<、size<=、size>、size>=、range=
-func (my *Validator[T]) checkFloat64(rule, fieldName string, value any) error {
+func (my *ValidatorApp[T]) checkFloat64(rule, fieldName string, value any) error {
 	if reflect.TypeOf(value).Kind() == reflect.Ptr {
 		if rule == "required" && reflect.ValueOf(value).IsNil() {
 			return RequiredErr.New(fieldName)
@@ -75,22 +75,22 @@ func (my *Validator[T]) checkFloat64(rule, fieldName string, value any) error {
 	switch {
 	case strings.HasPrefix(rule, "size<="):
 		min := strings.TrimPrefix(rule, "size<=")
-		if value.(float64) <= common.ToFloat64(min) {
+		if !(value.(float64) <= common.ToFloat64(min)) {
 			return LengthErr.NewFormat("[%s]长度不能小于等于[%f]", fieldName, common.ToFloat64(min))
 		}
 	case strings.HasPrefix(rule, "size<"):
 		min := strings.TrimPrefix(rule, "size<")
-		if value.(float64) < common.ToFloat64(min) {
+		if !(value.(float64) < common.ToFloat64(min)) {
 			return LengthErr.NewFormat("[%s]长度不能小于[%f]", fieldName, common.ToFloat64(min))
 		}
 	case strings.HasPrefix(rule, "size>="):
 		max := strings.TrimPrefix(rule, "size>=")
-		if value.(float64) >= common.ToFloat64(max) {
+		if !(value.(float64) >= common.ToFloat64(max)) {
 			return LengthErr.NewFormat("[%s]长度不能大于等于[%f]", fieldName, common.ToFloat64(max))
 		}
 	case strings.HasPrefix(rule, "size>"):
 		max := strings.TrimPrefix(rule, "size>")
-		if value.(float64) > common.ToFloat64(max) {
+		if !(value.(float64) > common.ToFloat64(max)) {
 			return LengthErr.NewFormat("[%s]长度不能大于[%f]", fieldName, common.ToFloat64(max))
 		}
 	case strings.HasPrefix(rule, "size="):

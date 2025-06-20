@@ -10,8 +10,8 @@ import (
 )
 
 type (
-	// Validator 验证器 验证规则 -> [required] [email|datetime|date|time] [size<|size<=|size>|size>=|size=|size!=] [range=]
-	Validator[T any] struct {
+	// ValidatorApp 验证器 验证规则 -> [required] [email|datetime|date|time] [size<|size<=|size>|size>=|size=|size!=] [range=]
+	ValidatorApp[T any] struct {
 		data           T
 		prefixNames    []string
 		err            error
@@ -27,20 +27,13 @@ type (
 )
 
 // New 实例化：验证器
-func New[T any](data T, prefixNames ...string) *Validator[T] {
-	return NewValidator(data, prefixNames...)
-}
-
-// NewValidator 实例化：验证器
-//
-//go:fix 建议使用New方法
-func NewValidator[T any](data T, prefixNames ...string) *Validator[T] {
+func New[T any](data T, prefixNames ...string) *ValidatorApp[T] {
 	p := make([]string, 0)
 	if len(prefixNames) > 0 {
 		p = prefixNames
 	}
 
-	ins := &Validator[T]{
+	ins := &ValidatorApp[T]{
 		data:           data,
 		prefixNames:    p,
 		emailFormat:    `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`,
@@ -85,7 +78,7 @@ func NewValidator[T any](data T, prefixNames ...string) *Validator[T] {
 }
 
 // Validate 执行验证
-func (my *Validator[T]) Validate(funcs ...func() error) error {
+func (my *ValidatorApp[T]) Validate(funcs ...func() error) error {
 	defer my.clean()
 
 	if my.err != nil {
@@ -108,37 +101,37 @@ func (my *Validator[T]) Validate(funcs ...func() error) error {
 }
 
 // EmailFormat 设置email默认规则
-func (my *Validator[T]) EmailFormat(emailFormat string) *Validator[T] {
+func (my *ValidatorApp[T]) EmailFormat(emailFormat string) *ValidatorApp[T] {
 	my.emailFormat = emailFormat
 
 	return my
 }
 
 // DateFormat 设置日期默认规则
-func (my *Validator[T]) DateFormat(dateFormat string) *Validator[T] {
+func (my *ValidatorApp[T]) DateFormat(dateFormat string) *ValidatorApp[T] {
 	my.dateFormat = dateFormat
 
 	return my
 }
 
 // TimeFormat 设置时间默认规则
-func (my *Validator[T]) TimeFormat(timeFormat string) *Validator[T] {
+func (my *ValidatorApp[T]) TimeFormat(timeFormat string) *ValidatorApp[T] {
 	my.timeFormat = timeFormat
 
 	return my
 }
 
 // DatetimeFormat 设置日期+时间默认规则
-func (my *Validator[T]) DatetimeFormat(datetimeFormat string) *Validator[T] {
+func (my *ValidatorApp[T]) DatetimeFormat(datetimeFormat string) *ValidatorApp[T] {
 	my.datetimeFormat = datetimeFormat
 
 	return my
 }
 
-func (my *Validator[T]) clean() { my.err = nil }
+func (my *ValidatorApp[T]) clean() { my.err = nil }
 
 // validate 执行验证
-func (my *Validator[T]) validate(v any) error {
+func (my *ValidatorApp[T]) validate(v any) error {
 	val := reflect.ValueOf(v)
 	if val.Kind() != reflect.Struct && val.Kind() != reflect.Ptr {
 		return ValidateErr.New("不符合结构或指针")
@@ -151,7 +144,7 @@ func (my *Validator[T]) validate(v any) error {
 		field := val.Type().Field(i)
 		if field.Anonymous {
 			// 递归验证嵌套字段
-			if err := NewValidator(val.Field(i).Interface(), my.prefixNames...).Validate(); err != nil {
+			if err := New(val.Field(i).Interface(), my.prefixNames...).Validate(); err != nil {
 				return err
 			}
 			continue
@@ -176,7 +169,7 @@ func (my *Validator[T]) validate(v any) error {
 	return nil
 }
 
-func (my *Validator[T]) concatFieldName(fieldName string) string {
+func (my *ValidatorApp[T]) concatFieldName(fieldName string) string {
 	var concatFieldNames = make([]string, len(my.prefixNames)+1)
 
 	if len(my.prefixNames) > 0 {

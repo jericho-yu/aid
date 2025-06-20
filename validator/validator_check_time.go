@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func (my *Validator[T]) checkTime(rule, fieldName string, value any) error {
+func (my *ValidatorApp[T]) checkTime(rule, fieldName string, value any) error {
 	if reflect.TypeOf(value).Kind() == reflect.Ptr {
 		if rule == "required" && reflect.ValueOf(value).IsNil() {
 			return RequiredErr.New(fieldName)

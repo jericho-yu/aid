@@ -10,7 +10,7 @@ import (
 )
 
 // checkString 验证：string -> 支持的规则 required、email、email=、date、date=、time、time=、datetime、datetime=、size<、size<=、size>、size>=、range=、length=
-func (my *Validator[T]) checkString(rule, fieldName string, value any) error {
+func (my *ValidatorApp[T]) checkString(rule, fieldName string, value any) error {
 	if reflect.TypeOf(value).Kind() == reflect.Ptr {
 		if rule == "required" && reflect.ValueOf(value).IsNil() {
 			return RequiredErr.New(fieldName)
@@ -65,23 +65,23 @@ func (my *Validator[T]) checkString(rule, fieldName string, value any) error {
 		}
 	case strings.HasPrefix(rule, "size<="):
 		min := strings.TrimPrefix(rule, "size<=")
-		if utf8.RuneCountInString(value.(string)) <= common.ToInt(min) {
-			return LengthErr.NewFormat("[%s]长度不能小于等于[%d]", fieldName, common.ToInt(min))
+		if !(utf8.RuneCountInString(value.(string)) <= common.ToInt(min)) {
+			return LengthErr.NewFormat("[%s]长度必须小于等于[%d]", fieldName, common.ToInt(min))
 		}
 	case strings.HasPrefix(rule, "size<"):
 		min := strings.TrimPrefix(rule, "size<")
-		if utf8.RuneCountInString(value.(string)) < common.ToInt(min) {
-			return LengthErr.NewFormat("[%s]长度不能小于[%d]", fieldName, common.ToInt(min))
+		if !(utf8.RuneCountInString(value.(string)) < common.ToInt(min)) {
+			return LengthErr.NewFormat("[%s]长度必须小于[%d]", fieldName, common.ToInt(min))
 		}
 	case strings.HasPrefix(rule, "size>="):
 		max := strings.TrimPrefix(rule, "size>=")
-		if utf8.RuneCountInString(value.(string)) >= common.ToInt(max) {
-			return LengthErr.NewFormat("[%s]长度不能大于等于[%d]", fieldName, common.ToInt(max))
+		if !(utf8.RuneCountInString(value.(string)) >= common.ToInt(max)) {
+			return LengthErr.NewFormat("[%s]长度必须大于等于[%d]", fieldName, common.ToInt(max))
 		}
 	case strings.HasPrefix(rule, "size>"):
 		max := strings.TrimPrefix(rule, "size>")
-		if utf8.RuneCountInString(value.(string)) > common.ToInt(max) {
-			return LengthErr.NewFormat("[%s]长度不能大于[%d]", fieldName, common.ToInt(max))
+		if !(utf8.RuneCountInString(value.(string)) > common.ToInt(max)) {
+			return LengthErr.NewFormat("[%s]长度必须大于[%d]", fieldName, common.ToInt(max))
 		}
 	case strings.HasPrefix(rule, "size="):
 		size := strings.TrimPrefix(rule, "size=")

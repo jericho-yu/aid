@@ -40,7 +40,7 @@ func TestValidator(t *testing.T) {
 		A4:       &t1,
 	}
 
-	validator := NewValidator(validStruct)
+	validator := New(validStruct)
 	if err := validator.Validate(); err != nil {
 		t.Logf("expected no error, got %v", err)
 		// t.Errorf("expected no error, got %v", err)
