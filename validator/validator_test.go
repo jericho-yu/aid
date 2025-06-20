@@ -1,12 +1,14 @@
 package validator
 
 import (
+	"errors"
+	"regexp"
 	"testing"
 	"time"
 )
 
 type TestStruct struct {
-	Name     string     `v-rule:"required;min>3;max<10" v-name:"名称"`
+	Name     string     `v-rule:"required;min>3;max<10" v-name:"名称" v-ex:"onlyEnglish"`
 	Email    string     `v-rule:"required;email" v-name:"邮箱"`
 	Date     string     `v-rule:"required;date" v-name:"日期"`
 	Time     string     `v-rule:"required;time" v-name:"时间"`
@@ -27,7 +29,7 @@ func TestValidator(t *testing.T) {
 	var s float32 = 2.2
 	t1 := time.Now()
 	validStruct := TestStruct{
-		Name:     "ValidName",
+		Name:     "啊啊啊",
 		Email:    "test@example.com",
 		Date:     "2022-01-02",
 		Time:     "03:04:05.12345",
@@ -39,6 +41,17 @@ func TestValidator(t *testing.T) {
 		A3:       &s,
 		A4:       &t1,
 	}
+
+	RegisterExFunMap("onlyEnglish", func(val any) error {
+		if matched, err := regexp.MatchString(`^[a-zA-Z][a-zA-Z0-9._-]{2,}$`, val.(string)); err != nil {
+			return err
+		} else {
+			if !matched {
+				return errors.New("仓库名称必须是英文开始。可包含：英文、数字、_、")
+			}
+		}
+		return nil
+	})
 
 	validator := New(validStruct)
 	if err := validator.Validate(); err != nil {

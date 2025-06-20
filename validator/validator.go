@@ -2,6 +2,7 @@ package validator
 
 import (
 	"fmt"
+	"log"
 	"reflect"
 	"strings"
 
@@ -176,12 +177,17 @@ func (my *ValidatorApp[T]) validate(v any) error {
 
 		exTag := field.Tag.Get("v-ex")
 		if exTag == "" || exTag == "-" {
+			log.Printf("跳过：v-ex")
 			continue
 		}
 
-		if exFun, exist := ExFunMap[exTag]; exist {
-			if err := exFun(val.Field(i).Interface()); err != nil {
-				return err
+		for _, exRule := range strings.Split(exTag, ";") {
+			if exFun, exist := ExFunMap[exRule]; exist {
+				if err := exFun(val.Field(i).Interface()); err != nil {
+					return err
+				}
+			} else {
+				log.Printf("跳过：%s\n", exTag)
 			}
 		}
 	}
