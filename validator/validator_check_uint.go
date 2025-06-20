@@ -11,10 +11,10 @@ import (
 func (my *ValidatorApp[T]) checkUint(rule, fieldName string, value any) error {
 	if reflect.TypeOf(value).Kind() == reflect.Ptr {
 		isNil := reflect.ValueOf(value).IsNil()
-		if rule == "required" && isNil {
-			return RequiredErr.New(fieldName)
-		}
 		if isNil {
+			if rule == "required" {
+				return RequiredErr.New(fieldName)
+			}
 			return nil
 		}
 		value = reflect.ValueOf(value).Elem().Interface()
@@ -71,10 +71,10 @@ func (my *ValidatorApp[T]) checkUint(rule, fieldName string, value any) error {
 func (my *ValidatorApp[T]) checkUint8(rule, fieldName string, value any) error {
 	if reflect.TypeOf(value).Kind() == reflect.Ptr {
 		isNil := reflect.ValueOf(value).IsNil()
-		if rule == "required" && isNil {
-			return RequiredErr.New(fieldName)
-		}
 		if isNil {
+			if rule == "required" {
+				return RequiredErr.New(fieldName)
+			}
 			return nil
 		}
 		value = reflect.ValueOf(value).Elem().Interface()
@@ -131,10 +131,10 @@ func (my *ValidatorApp[T]) checkUint8(rule, fieldName string, value any) error {
 func (my *ValidatorApp[T]) checkUint16(rule, fieldName string, value any) error {
 	if reflect.TypeOf(value).Kind() == reflect.Ptr {
 		isNil := reflect.ValueOf(value).IsNil()
-		if rule == "required" && isNil {
-			return RequiredErr.New(fieldName)
-		}
 		if isNil {
+			if rule == "required" {
+				return RequiredErr.New(fieldName)
+			}
 			return nil
 		}
 		value = reflect.ValueOf(value).Elem().Interface()
@@ -191,10 +191,10 @@ func (my *ValidatorApp[T]) checkUint16(rule, fieldName string, value any) error 
 func (my *ValidatorApp[T]) checkUint32(rule, fieldName string, value any) error {
 	if reflect.TypeOf(value).Kind() == reflect.Ptr {
 		isNil := reflect.ValueOf(value).IsNil()
-		if rule == "required" && isNil {
-			return RequiredErr.New(fieldName)
-		}
 		if isNil {
+			if rule == "required" {
+				return RequiredErr.New(fieldName)
+			}
 			return nil
 		}
 		value = reflect.ValueOf(value).Elem().Interface()
@@ -251,10 +251,10 @@ func (my *ValidatorApp[T]) checkUint32(rule, fieldName string, value any) error 
 func (my *ValidatorApp[T]) checkUint64(rule, fieldName string, value any) error {
 	if reflect.TypeOf(value).Kind() == reflect.Ptr {
 		isNil := reflect.ValueOf(value).IsNil()
-		if rule == "required" && isNil {
-			return RequiredErr.New(fieldName)
-		}
 		if isNil {
+			if rule == "required" {
+				return RequiredErr.New(fieldName)
+			}
 			return nil
 		}
 		value = reflect.ValueOf(value).Elem().Interface()

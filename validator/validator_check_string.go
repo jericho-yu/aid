@@ -13,10 +13,10 @@ import (
 func (my *ValidatorApp[T]) checkString(rule, fieldName string, value any) error {
 	if reflect.TypeOf(value).Kind() == reflect.Ptr {
 		isNil := reflect.ValueOf(value).IsNil()
-		if rule == "required" && isNil {
-			return RequiredErr.New(fieldName)
-		}
 		if isNil {
+			if rule == "required" {
+				return RequiredErr.New(fieldName)
+			}
 			return nil
 		}
 		value = reflect.ValueOf(value).Elem().Interface()
