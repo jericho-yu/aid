@@ -1,6 +1,7 @@
 package reflection
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 	"time"
@@ -384,4 +385,17 @@ func (my *Reflection) Iter(fn func(k, v any)) (isIter bool) {
 	}
 
 	return
+}
+
+// Serialize 序列化
+func (my *Reflection) Serialize() []string {
+	var ret = array.Make[string](0)
+
+	if !my.Iter(func(k, v any) {
+		ret.Append(fmt.Sprintf("%v=>%v", k, v))
+	}) {
+		ret.Append(fmt.Sprintf("%v", my.original))
+	}
+
+	return ret.ToSlice()
 }
