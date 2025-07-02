@@ -1,6 +1,8 @@
 package validator
 
 import (
+	"github.com/jericho-yu/aid/array"
+	"github.com/spf13/cast"
 	"reflect"
 	"strings"
 
@@ -22,24 +24,24 @@ func (my *ValidatorApp[T]) checkInt(rule, fieldName string, value any) error {
 
 	switch {
 	case strings.HasPrefix(rule, "size<="):
-		min := strings.TrimPrefix(rule, "size<=")
-		if value.(int) <= common.ToInt(min) {
-			return LengthErr.NewFormat("[%s]长度不能小于等于：[%d]", fieldName, common.ToInt(min))
+		small := strings.TrimPrefix(rule, "size<=")
+		if value.(int) <= common.ToInt(small) {
+			return LengthErr.NewFormat("[%s]长度不能小于等于：[%d]", fieldName, common.ToInt(small))
 		}
 	case strings.HasPrefix(rule, "size<"):
-		min := strings.TrimPrefix(rule, "size<")
-		if value.(int) < common.ToInt(min) {
-			return LengthErr.NewFormat("[%s]长度不能小于：[%d]", fieldName, common.ToInt(min))
+		small := strings.TrimPrefix(rule, "size<")
+		if value.(int) < common.ToInt(small) {
+			return LengthErr.NewFormat("[%s]长度不能小于：[%d]", fieldName, common.ToInt(small))
 		}
 	case strings.HasPrefix(rule, "size>="):
-		max := strings.TrimPrefix(rule, "size>=")
-		if value.(int) >= common.ToInt(max) {
-			return LengthErr.NewFormat("[%s]长度不能大于等于：[%d]", fieldName, common.ToInt(max))
+		large := strings.TrimPrefix(rule, "size>=")
+		if value.(int) >= common.ToInt(large) {
+			return LengthErr.NewFormat("[%s]长度不能大于等于：[%d]", fieldName, common.ToInt(large))
 		}
 	case strings.HasPrefix(rule, "size>"):
-		max := strings.TrimPrefix(rule, "size>")
-		if value.(int) > common.ToInt(max) {
-			return LengthErr.NewFormat("[%s]长度不能大于：[%d]", fieldName, common.ToInt(max))
+		large := strings.TrimPrefix(rule, "size>")
+		if value.(int) > common.ToInt(large) {
+			return LengthErr.NewFormat("[%s]长度不能大于：[%d]", fieldName, common.ToInt(large))
 		}
 	case strings.HasPrefix(rule, "size="):
 		size := strings.TrimPrefix(rule, "size=")
@@ -53,14 +55,14 @@ func (my *ValidatorApp[T]) checkInt(rule, fieldName string, value any) error {
 		}
 	case strings.HasPrefix(rule, "range="):
 		between := strings.TrimPrefix(rule, "range=")
-		betweens := strings.Split(between, "~")
-		if len(betweens) != 2 {
+		betweenRange := strings.Split(between, "~")
+		if len(betweenRange) != 2 {
 			return RuleErr.NewFormat("[%s]规则定义错误，规则定义错误，规则格式[d,d]", fieldName)
 		}
-		min := common.ToInt(betweens[0])
-		max := common.ToInt(betweens[1])
-		if value.(int) < min || value.(int) > max {
-			return LengthErr.NewFormat("[%s]长度必须在[%d~%d]之间", fieldName, min, max)
+		small := common.ToInt(betweenRange[0])
+		large := common.ToInt(betweenRange[1])
+		if value.(int) < small || value.(int) > large {
+			return LengthErr.NewFormat("[%s]长度必须在[%d~%d]之间", fieldName, small, large)
 		}
 	}
 
@@ -82,24 +84,24 @@ func (my *ValidatorApp[T]) checkInt8(rule, fieldName string, value any) error {
 
 	switch {
 	case strings.HasPrefix(rule, "size<="):
-		min := strings.TrimPrefix(rule, "size<=")
-		if value.(int8) <= common.ToInt8(min) {
-			return LengthErr.NewFormat("[%s]长度不能小于等于：[%d]", fieldName, common.ToInt(min))
+		small := strings.TrimPrefix(rule, "size<=")
+		if value.(int8) <= common.ToInt8(small) {
+			return LengthErr.NewFormat("[%s]长度不能小于等于：[%d]", fieldName, common.ToInt(small))
 		}
 	case strings.HasPrefix(rule, "size<"):
-		min := strings.TrimPrefix(rule, "size<")
-		if value.(int8) < common.ToInt8(min) {
-			return LengthErr.NewFormat("[%s]长度不能小于：[%d]", fieldName, common.ToInt(min))
+		small := strings.TrimPrefix(rule, "size<")
+		if value.(int8) < common.ToInt8(small) {
+			return LengthErr.NewFormat("[%s]长度不能小于：[%d]", fieldName, common.ToInt(small))
 		}
 	case strings.HasPrefix(rule, "size>="):
-		max := strings.TrimPrefix(rule, "size>=")
-		if value.(int8) >= common.ToInt8(max) {
-			return LengthErr.NewFormat("[%s]长度不能大于等于：[%d]", fieldName, common.ToInt(max))
+		large := strings.TrimPrefix(rule, "size>=")
+		if value.(int8) >= common.ToInt8(large) {
+			return LengthErr.NewFormat("[%s]长度不能大于等于：[%d]", fieldName, common.ToInt(large))
 		}
 	case strings.HasPrefix(rule, "size>"):
-		max := strings.TrimPrefix(rule, "size>")
-		if value.(int8) > common.ToInt8(max) {
-			return LengthErr.NewFormat("[%s]长度不能大于：[%d]", fieldName, common.ToInt(max))
+		large := strings.TrimPrefix(rule, "size>")
+		if value.(int8) > common.ToInt8(large) {
+			return LengthErr.NewFormat("[%s]长度不能大于：[%d]", fieldName, common.ToInt(large))
 		}
 	case strings.HasPrefix(rule, "size="):
 		size := strings.TrimPrefix(rule, "size=")
@@ -113,14 +115,26 @@ func (my *ValidatorApp[T]) checkInt8(rule, fieldName string, value any) error {
 		}
 	case strings.HasPrefix(rule, "range="):
 		between := strings.TrimPrefix(rule, "range=")
-		betweens := strings.Split(between, "~")
-		if len(betweens) != 2 {
+		betweenRange := strings.Split(between, ",")
+		if len(betweenRange) != 2 {
 			return RuleErr.NewFormat("[%s]规则定义错误，规则定义错误，规则格式[d,d]", fieldName)
 		}
-		min := common.ToInt8(betweens[0])
-		max := common.ToInt8(betweens[1])
-		if value.(int8) < min || value.(int8) > max {
-			return LengthErr.NewFormat("[%s]长度必须在[%d~%d]之间", fieldName, min, max)
+		small := common.ToInt8(betweenRange[0])
+		large := common.ToInt8(betweenRange[1])
+		if value.(int8) < small || value.(int8) > large {
+			return LengthErr.NewFormat("[%s]长度必须在[%d~%d]之间", fieldName, small, large)
+		}
+	case strings.HasPrefix(rule, "in="):
+		inValuesStr := strings.TrimPrefix(rule, "in=")
+		inValuesArr := array.Cast[string, int](array.New(strings.Split(inValuesStr, ",")), func(value string) int { return cast.ToInt(value) })
+		if !inValuesArr.In(value.(int)) {
+			return ValidateErr.NewFormat("[%s]值必须在[%s]中", fieldName, inValuesStr)
+		}
+	case strings.HasPrefix(rule, "not in="):
+		inValuesStr := strings.TrimPrefix(rule, "not in=")
+		inValuesArr := array.Cast[string, int](array.New(strings.Split(inValuesStr, ",")), func(value string) int { return cast.ToInt(value) })
+		if inValuesArr.In(value.(int)) {
+			return ValidateErr.NewFormat("[%s]值不可为以下内容：[%s]", fieldName, inValuesStr)
 		}
 	}
 
@@ -142,24 +156,24 @@ func (my *ValidatorApp[T]) checkInt16(rule, fieldName string, value any) error {
 
 	switch {
 	case strings.HasPrefix(rule, "size<="):
-		min := strings.TrimPrefix(rule, "size<=")
-		if value.(int16) <= common.ToInt16(min) {
-			return LengthErr.NewFormat("[%s]长度必须小于等于：[%d]", fieldName, common.ToInt(min))
+		small := strings.TrimPrefix(rule, "size<=")
+		if value.(int16) <= common.ToInt16(small) {
+			return LengthErr.NewFormat("[%s]长度必须小于等于：[%d]", fieldName, common.ToInt(small))
 		}
 	case strings.HasPrefix(rule, "size<"):
-		min := strings.TrimPrefix(rule, "size<")
-		if value.(int16) < common.ToInt16(min) {
-			return LengthErr.NewFormat("[%s]长度必须小于：[%d]", fieldName, common.ToInt(min))
+		small := strings.TrimPrefix(rule, "size<")
+		if value.(int16) < common.ToInt16(small) {
+			return LengthErr.NewFormat("[%s]长度必须小于：[%d]", fieldName, common.ToInt(small))
 		}
 	case strings.HasPrefix(rule, "size>="):
-		max := strings.TrimPrefix(rule, "size>=")
-		if value.(int16) >= common.ToInt16(max) {
-			return LengthErr.NewFormat("[%s]长度必须大于等于：[%d]", fieldName, common.ToInt(max))
+		large := strings.TrimPrefix(rule, "size>=")
+		if value.(int16) >= common.ToInt16(large) {
+			return LengthErr.NewFormat("[%s]长度必须大于等于：[%d]", fieldName, common.ToInt(large))
 		}
 	case strings.HasPrefix(rule, "size>"):
-		max := strings.TrimPrefix(rule, "size>")
-		if !(value.(int16) > common.ToInt16(max)) {
-			return LengthErr.NewFormat("[%s]长度必须大于：[%d]", fieldName, common.ToInt(max))
+		large := strings.TrimPrefix(rule, "size>")
+		if !(value.(int16) > common.ToInt16(large)) {
+			return LengthErr.NewFormat("[%s]长度必须大于：[%d]", fieldName, common.ToInt(large))
 		}
 	case strings.HasPrefix(rule, "size="):
 		size := strings.TrimPrefix(rule, "size=")
@@ -173,14 +187,14 @@ func (my *ValidatorApp[T]) checkInt16(rule, fieldName string, value any) error {
 		}
 	case strings.HasPrefix(rule, "range="):
 		between := strings.TrimPrefix(rule, "range=")
-		betweens := strings.Split(between, "~")
-		if len(betweens) != 2 {
+		betweenRange := strings.Split(between, "~")
+		if len(betweenRange) != 2 {
 			return RuleErr.NewFormat("[%s]规则定义错误，规则定义错误，规则格式[d,d]", fieldName)
 		}
-		min := common.ToInt16(betweens[0])
-		max := common.ToInt16(betweens[1])
-		if value.(int16) < min || value.(int16) > max {
-			return LengthErr.NewFormat("[%s]长度必须在[%d~%d]之间", fieldName, min, max)
+		small := common.ToInt16(betweenRange[0])
+		large := common.ToInt16(betweenRange[1])
+		if value.(int16) < small || value.(int16) > large {
+			return LengthErr.NewFormat("[%s]长度必须在[%d~%d]之间", fieldName, small, large)
 		}
 	}
 
@@ -202,24 +216,24 @@ func (my *ValidatorApp[T]) checkInt32(rule, fieldName string, value any) error {
 
 	switch {
 	case strings.HasPrefix(rule, "size<="):
-		min := strings.TrimPrefix(rule, "size<=")
-		if value.(int32) <= common.ToInt32(min) {
-			return LengthErr.NewFormat("[%s]长度不能小于等于：[%d]", fieldName, common.ToInt(min))
+		small := strings.TrimPrefix(rule, "size<=")
+		if value.(int32) <= common.ToInt32(small) {
+			return LengthErr.NewFormat("[%s]长度不能小于等于：[%d]", fieldName, common.ToInt(small))
 		}
 	case strings.HasPrefix(rule, "size<"):
-		min := strings.TrimPrefix(rule, "size<")
-		if value.(int32) < common.ToInt32(min) {
-			return LengthErr.NewFormat("[%s]长度不能小于：[%d]", fieldName, common.ToInt(min))
+		small := strings.TrimPrefix(rule, "size<")
+		if value.(int32) < common.ToInt32(small) {
+			return LengthErr.NewFormat("[%s]长度不能小于：[%d]", fieldName, common.ToInt(small))
 		}
 	case strings.HasPrefix(rule, "size>="):
-		max := strings.TrimPrefix(rule, "size>=")
-		if value.(int32) >= common.ToInt32(max) {
-			return LengthErr.NewFormat("[%s]长度不能大于等于：[%d]", fieldName, common.ToInt(max))
+		large := strings.TrimPrefix(rule, "size>=")
+		if value.(int32) >= common.ToInt32(large) {
+			return LengthErr.NewFormat("[%s]长度不能大于等于：[%d]", fieldName, common.ToInt(large))
 		}
 	case strings.HasPrefix(rule, "size>"):
-		max := strings.TrimPrefix(rule, "size>")
-		if value.(int32) > common.ToInt32(max) {
-			return LengthErr.NewFormat("[%s]长度不能大于：[%d]", fieldName, common.ToInt(max))
+		large := strings.TrimPrefix(rule, "size>")
+		if value.(int32) > common.ToInt32(large) {
+			return LengthErr.NewFormat("[%s]长度不能大于：[%d]", fieldName, common.ToInt(large))
 		}
 	case strings.HasPrefix(rule, "size="):
 		size := strings.TrimPrefix(rule, "size=")
@@ -233,14 +247,14 @@ func (my *ValidatorApp[T]) checkInt32(rule, fieldName string, value any) error {
 		}
 	case strings.HasPrefix(rule, "range="):
 		between := strings.TrimPrefix(rule, "range=")
-		betweens := strings.Split(between, "~")
-		if len(betweens) != 2 {
+		betweenRange := strings.Split(between, "~")
+		if len(betweenRange) != 2 {
 			return RuleErr.NewFormat("[%s]规则定义错误，规则定义错误，规则格式[d,d]", fieldName)
 		}
-		min := common.ToInt32(betweens[0])
-		max := common.ToInt32(betweens[1])
-		if value.(int32) < min || value.(int32) > max {
-			return LengthErr.NewFormat("[%s]长度必须在[%d~%d]之间", fieldName, min, max)
+		small := common.ToInt32(betweenRange[0])
+		large := common.ToInt32(betweenRange[1])
+		if value.(int32) < small || value.(int32) > large {
+			return LengthErr.NewFormat("[%s]长度必须在[%d~%d]之间", fieldName, small, large)
 		}
 	}
 
@@ -262,24 +276,24 @@ func (my *ValidatorApp[T]) checkInt64(rule, fieldName string, value any) error {
 
 	switch {
 	case strings.HasPrefix(rule, "size<="):
-		min := strings.TrimPrefix(rule, "size<=")
-		if value.(int64) <= common.ToInt64(min) {
-			return LengthErr.NewFormat("[%s]长度不能小于等于[%d]", fieldName, common.ToInt(min))
+		small := strings.TrimPrefix(rule, "size<=")
+		if value.(int64) <= common.ToInt64(small) {
+			return LengthErr.NewFormat("[%s]长度不能小于等于[%d]", fieldName, common.ToInt(small))
 		}
 	case strings.HasPrefix(rule, "size<"):
-		min := strings.TrimPrefix(rule, "size<")
-		if value.(int64) < common.ToInt64(min) {
-			return LengthErr.NewFormat("[%s]长度不能小于[%d]", fieldName, common.ToInt(min))
+		small := strings.TrimPrefix(rule, "size<")
+		if value.(int64) < common.ToInt64(small) {
+			return LengthErr.NewFormat("[%s]长度不能小于[%d]", fieldName, common.ToInt(small))
 		}
 	case strings.HasPrefix(rule, "size>="):
-		max := strings.TrimPrefix(rule, "size>=")
-		if value.(int64) >= common.ToInt64(max) {
-			return LengthErr.NewFormat("[%s]长度不能大于等于[%d]", fieldName, common.ToInt(max))
+		large := strings.TrimPrefix(rule, "size>=")
+		if value.(int64) >= common.ToInt64(large) {
+			return LengthErr.NewFormat("[%s]长度不能大于等于[%d]", fieldName, common.ToInt(large))
 		}
 	case strings.HasPrefix(rule, "size>"):
-		max := strings.TrimPrefix(rule, "size>")
-		if value.(int64) > common.ToInt64(max) {
-			return LengthErr.NewFormat("[%s]长度不能大于[%d]", fieldName, common.ToInt(max))
+		large := strings.TrimPrefix(rule, "size>")
+		if value.(int64) > common.ToInt64(large) {
+			return LengthErr.NewFormat("[%s]长度不能大于[%d]", fieldName, common.ToInt(large))
 		}
 	case strings.HasPrefix(rule, "size="):
 		size := strings.TrimPrefix(rule, "size=")
@@ -293,14 +307,14 @@ func (my *ValidatorApp[T]) checkInt64(rule, fieldName string, value any) error {
 		}
 	case strings.HasPrefix(rule, "range="):
 		between := strings.TrimPrefix(rule, "range=")
-		betweens := strings.Split(between, "~")
-		if len(betweens) != 2 {
+		betweenRange := strings.Split(between, "~")
+		if len(betweenRange) != 2 {
 			return RuleErr.NewFormat("[%s]规则定义错误，规则定义错误，规则格式[d,d]", fieldName)
 		}
-		min := common.ToInt64(betweens[0])
-		max := common.ToInt64(betweens[1])
-		if value.(int64) < min || value.(int64) > max {
-			return LengthErr.NewFormat("[%s]长度必须在[%d~%d]之间", fieldName, min, max)
+		small := common.ToInt64(betweenRange[0])
+		large := common.ToInt64(betweenRange[1])
+		if value.(int64) < small || value.(int64) > large {
+			return LengthErr.NewFormat("[%s]长度必须在[%d~%d]之间", fieldName, small, large)
 		}
 	}
 

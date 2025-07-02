@@ -30,6 +30,9 @@ var (
 func (*ValidateError) New(msg string) myError.IMyError {
 	return &ValidateError{myError.MyError{Msg: array.NewDestruction("验证错误", msg).JoinWithoutEmpty("：")}}
 }
+func (my *ValidateError) NewFormat(format string, messages ...any) myError.IMyError {
+	return &ValidateError{myError.MyError{Msg: fmt.Sprintf(format, messages...)}}
+}
 
 func (*ValidateError) Wrap(err error) myError.IMyError {
 	return &ValidateError{myError.MyError{Msg: fmt.Errorf("验证错误"+operation.Ternary(err != nil, "：%w", "%w"), err).Error()}}
@@ -91,8 +94,8 @@ func (my *TimeError) Error() string { return my.MyError.Msg }
 
 func (my *TimeError) Is(target error) bool { return reflect.DeepEqual(target, &TimeErr) }
 
-func (my *TimeError) NewFormat(format string, msgs ...any) myError.IMyError {
-	return &TimeError{myError.MyError{Msg: fmt.Sprintf(format, msgs...)}}
+func (my *TimeError) NewFormat(format string, messages ...any) myError.IMyError {
+	return &TimeError{myError.MyError{Msg: fmt.Sprintf(format, messages...)}}
 }
 
 func (*LengthError) New(msg string) myError.IMyError {
@@ -111,8 +114,8 @@ func (my *LengthError) Error() string { return my.MyError.Msg }
 
 func (my *LengthError) Is(target error) bool { return reflect.DeepEqual(target, &LengthErr) }
 
-func (my *LengthError) NewFormat(format string, msgs ...any) myError.IMyError {
-	return &LengthError{myError.MyError{Msg: fmt.Sprintf(format, msgs...)}}
+func (my *LengthError) NewFormat(format string, messages ...any) myError.IMyError {
+	return &LengthError{myError.MyError{Msg: fmt.Sprintf(format, messages...)}}
 }
 
 func (*RuleError) New(msg string) myError.IMyError {
@@ -129,6 +132,6 @@ func (my *RuleError) Error() string { return my.MyError.Msg }
 
 func (my *RuleError) Is(target error) bool { return reflect.DeepEqual(target, &LengthErr) }
 
-func (my *RuleError) NewFormat(format string, msgs ...any) myError.IMyError {
-	return &RuleError{myError.MyError{Msg: fmt.Sprintf(format, msgs...)}}
+func (my *RuleError) NewFormat(format string, messages ...any) myError.IMyError {
+	return &RuleError{myError.MyError{Msg: fmt.Sprintf(format, messages...)}}
 }

@@ -1,6 +1,7 @@
 package validator
 
 import (
+	"github.com/jericho-yu/aid/array"
 	"reflect"
 	"regexp"
 	"strings"
@@ -68,24 +69,24 @@ func (my *ValidatorApp[T]) checkString(rule, fieldName string, value any) error 
 			return TimeErr.NewFormat("[%s]日期格式错误，正确格式[%s]", fieldName, my.dateFormat)
 		}
 	case strings.HasPrefix(rule, "size<="):
-		min := strings.TrimPrefix(rule, "size<=")
-		if !(utf8.RuneCountInString(value.(string)) <= common.ToInt(min)) {
-			return LengthErr.NewFormat("[%s]长度必须小于等于[%d]", fieldName, common.ToInt(min))
+		small := strings.TrimPrefix(rule, "size<=")
+		if !(utf8.RuneCountInString(value.(string)) <= common.ToInt(small)) {
+			return LengthErr.NewFormat("[%s]长度必须小于等于[%d]", fieldName, common.ToInt(small))
 		}
 	case strings.HasPrefix(rule, "size<"):
-		min := strings.TrimPrefix(rule, "size<")
-		if !(utf8.RuneCountInString(value.(string)) < common.ToInt(min)) {
-			return LengthErr.NewFormat("[%s]长度必须小于[%d]", fieldName, common.ToInt(min))
+		large := strings.TrimPrefix(rule, "size<")
+		if !(utf8.RuneCountInString(value.(string)) < common.ToInt(large)) {
+			return LengthErr.NewFormat("[%s]长度必须小于[%d]", fieldName, common.ToInt(large))
 		}
 	case strings.HasPrefix(rule, "size>="):
-		max := strings.TrimPrefix(rule, "size>=")
-		if !(utf8.RuneCountInString(value.(string)) >= common.ToInt(max)) {
-			return LengthErr.NewFormat("[%s]长度必须大于等于[%d]", fieldName, common.ToInt(max))
+		large := strings.TrimPrefix(rule, "size>=")
+		if !(utf8.RuneCountInString(value.(string)) >= common.ToInt(large)) {
+			return LengthErr.NewFormat("[%s]长度必须大于等于[%d]", fieldName, common.ToInt(large))
 		}
 	case strings.HasPrefix(rule, "size>"):
-		max := strings.TrimPrefix(rule, "size>")
-		if !(utf8.RuneCountInString(value.(string)) > common.ToInt(max)) {
-			return LengthErr.NewFormat("[%s]长度必须大于[%d]", fieldName, common.ToInt(max))
+		large := strings.TrimPrefix(rule, "size>")
+		if !(utf8.RuneCountInString(value.(string)) > common.ToInt(large)) {
+			return LengthErr.NewFormat("[%s]长度必须大于[%d]", fieldName, common.ToInt(large))
 		}
 	case strings.HasPrefix(rule, "size="):
 		size := strings.TrimPrefix(rule, "size=")
@@ -99,14 +100,26 @@ func (my *ValidatorApp[T]) checkString(rule, fieldName string, value any) error 
 		}
 	case strings.HasPrefix(rule, "range="):
 		between := strings.TrimPrefix(rule, "range=")
-		betweens := strings.Split(between, ",")
-		if len(betweens) != 2 {
+		betweenRange := strings.Split(between, ",")
+		if len(betweenRange) != 2 {
 			return RuleErr.NewFormat("[%s]规则定义错误，规则定义错误，规则格式[d,d]", fieldName)
 		}
-		min := common.ToInt(betweens[0])
-		max := common.ToInt(betweens[1])
-		if utf8.RuneCountInString(value.(string)) < min || utf8.RuneCountInString(value.(string)) > max {
-			return LengthErr.NewFormat("[%s]长度必须在[%d~%d]之间", fieldName, min, max)
+		small := common.ToInt(betweenRange[0])
+		large := common.ToInt(betweenRange[1])
+		if utf8.RuneCountInString(value.(string)) < small || utf8.RuneCountInString(value.(string)) > large {
+			return LengthErr.NewFormat("[%s]长度必须在[%d~%d]之间", fieldName, small, large)
+		}
+	case strings.HasPrefix(rule, "in="):
+		inValuesStr := strings.TrimPrefix(rule, "in=")
+		inValuesArr := array.New(strings.Split(inValuesStr, ","))
+		if !inValuesArr.In(value.(string)) {
+			return ValidateErr.NewFormat("[%s]值必须在[%s]中", fieldName, inValuesStr)
+		}
+	case strings.HasPrefix(rule, "not in="):
+		inValuesStr := strings.TrimPrefix(rule, "not in=")
+		inValuesArr := array.New(strings.Split(inValuesStr, ","))
+		if inValuesArr.In(value.(string)) {
+			return ValidateErr.NewFormat("[%s]值不可为以下内容：[%s]", fieldName, inValuesStr)
 		}
 	}
 
