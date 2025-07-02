@@ -30,7 +30,7 @@ func (my *HttpClientDownload) SetProcessContent(processContent string) *HttpClie
 	return my
 }
 
-// Save 保存到本地
+// SaveLocal 保存到本地
 func (my *HttpClientDownload) SaveLocal() *HttpClient {
 	defer func() { my.httpClient.isReady = false }()
 
@@ -42,10 +42,10 @@ func (my *HttpClientDownload) SaveLocal() *HttpClient {
 	if my.httpClient.response, my.httpClient.Err = client.Do(my.httpClient.request); my.httpClient.Err != nil {
 		return my.httpClient
 	} else {
-		defer my.httpClient.response.Body.Close()
+		defer func() { _ = my.httpClient.response.Body.Close() }()
 
 		f, _ := os.OpenFile(my.filename, os.O_RDWR|os.O_CREATE, 0644)
-		defer f.Close()
+		defer func() { _ = f.Close() }()
 
 		if my.processContent != "" {
 			_, _ = io.Copy(io.MultiWriter(f, processBar.DefaultBytes(my.httpClient.response.ContentLength, my.processContent)), my.httpClient.response.Body)
@@ -57,7 +57,7 @@ func (my *HttpClientDownload) SaveLocal() *HttpClient {
 	}
 }
 
-// Send 发送到客户端
+// SendResponse 发送到客户端
 func (my *HttpClientDownload) SendResponse(w http.ResponseWriter, headers map[string][]string) *HttpClient {
 	defer func() { my.httpClient.isReady = false }()
 
@@ -69,7 +69,7 @@ func (my *HttpClientDownload) SendResponse(w http.ResponseWriter, headers map[st
 	if my.httpClient.response, my.httpClient.Err = client.Do(my.httpClient.request); my.httpClient.Err != nil {
 		return nil
 	} else {
-		defer my.httpClient.response.Body.Close()
+		defer func() { _ = my.httpClient.response.Body.Close() }()
 
 		w.Header().Set("Content-Disposition", "attachment; filename="+my.filename)
 		w.Header().Set("Content-Type", my.httpClient.response.Header.Get("Content-Type"))
