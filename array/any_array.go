@@ -495,6 +495,26 @@ func (my *AnyArray[T]) Intersection(other *AnyArray[T]) *AnyArray[T] {
 	return my
 }
 
+// IntersectionBySlice 取交集：通过切片
+func (my *AnyArray[T]) IntersectionBySlice(other []T) *AnyArray[T] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
+
+	my.intersection(New(other))
+
+	return my
+}
+
+// IntersectionByValues 取交集：通过值
+func (my *AnyArray[T]) IntersectionByValues(values ...T) *AnyArray[T] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
+
+	my.intersection(NewDestruction(values...))
+
+	return my
+}
+
 func (my *AnyArray[T]) difference(other *AnyArray[T]) {
 	if other == nil || other.IsEmpty() {
 		return
@@ -516,6 +536,26 @@ func (my *AnyArray[T]) Difference(other *AnyArray[T]) *AnyArray[T] {
 	defer my.mu.Unlock()
 
 	my.difference(other)
+
+	return my
+}
+
+// DifferenceBySlice 取差集：通过切片
+func (my *AnyArray[T]) DifferenceBySlice(other []T) *AnyArray[T] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
+
+	my.difference(New(other))
+
+	return my
+}
+
+// DifferenceByValues 取差集：通过值
+func (my *AnyArray[T]) DifferenceByValues(values ...T) *AnyArray[T] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
+
+	my.difference(NewDestruction(values...))
 
 	return my
 }
@@ -543,6 +583,26 @@ func (my *AnyArray[T]) Union(other *AnyArray[T]) *AnyArray[T] {
 	defer my.mu.Unlock()
 
 	my.union(other)
+
+	return my
+}
+
+// UnionBySlice 取并集：通过切片
+func (my *AnyArray[T]) UnionBySlice(other []T) *AnyArray[T] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
+
+	my.union(New(other))
+
+	return my
+}
+
+// UnionByValues 取并集：通过值
+func (my *AnyArray[T]) UnionByValues(values ...T) *AnyArray[T] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
+
+	my.union(NewDestruction(values...))
 
 	return my
 }
