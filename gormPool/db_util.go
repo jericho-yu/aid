@@ -14,18 +14,18 @@ type (
 		Total int64
 	}
 
-	// 查询条件
+	// FinderCondition 查询条件
 	FinderCondition struct {
 		Table   *string `json:"table,omitempty"`
 		Queries []struct {
-			Option     *string     `json:"option,omitempty"`     // 操作：and、in、not
+			Option     *string     `json:"option,omitempty"`     // 操作：and、or、not
 			Conditions []Condition `json:"conditions,omitempty"` // 条件
-		} `json:"queries,omitempty"` // 查询条件
+		} `json:"queries,omitempty"`                  // 查询条件
 		Orders   []string `json:"orders,omitempty"`   // 排序
 		Preloads []string `json:"preloads,omitempty"` // 预加载
 	}
 
-	// 查询
+	// Condition 查询
 	Condition struct {
 		Key      string `json:"key"`      // SQL字段名称，如果有别名则需要带有别名
 		Operator string `json:"operator"` // 操作符：=、>、<、!=、<=、>=、<>、in、not in、between、not between、like、like%、%like、raw、join
@@ -47,9 +47,9 @@ func (my *Finder) Find(ret any, preloads ...string) *Finder {
 }
 
 // Ex 额外操作
-func (my *Finder) Ex(funcs ...func(db *gorm.DB)) *Finder {
-	if len(funcs) > 0 {
-		for _, fn := range funcs {
+func (my *Finder) Ex(functions ...func(db *gorm.DB)) *Finder {
+	if len(functions) > 0 {
+		for _, fn := range functions {
 			fn(my.DB)
 		}
 	}
@@ -78,7 +78,7 @@ func (my *Finder) TryOrder(orders ...string) *Finder {
 	return my
 }
 
-// TryPreloads 尝试深度查询
+// TryPreload 尝试深度查询
 func (my *Finder) TryPreload(preloads ...string) *Finder {
 	for _, preload := range preloads {
 		my.DB.Preload(preload)
@@ -215,10 +215,10 @@ func (my *Finder) WhenFunc(condition bool, fn func(db *gorm.DB)) *Finder {
 // 如果任一函数执行出错,将回滚整个事务并返回错误
 // 所有函数执行成功后提交事务
 // 返回 error,nil 表示事务执行成功,非 nil 表示事务执行失败
-func (my *Finder) Transaction(funcs ...func(db *gorm.DB)) error {
+func (my *Finder) Transaction(functions ...func(db *gorm.DB)) error {
 	my.DB.Begin()
 
-	for _, fn := range funcs {
+	for _, fn := range functions {
 		fn(my.DB)
 		if my.DB.Error != nil {
 			my.DB.Rollback()
@@ -338,7 +338,7 @@ func (my *Finder) TryQueryFromMap(queries map[string][]any) *Finder {
 	return my
 }
 
-// TryAutoQuery 自动填充查询条件并查询：使用map[string][]any
+// TryAutoFindFromMap 自动填充查询条件并查询：使用map[string][]any
 func (my *Finder) TryAutoFindFromMap(queries map[string][]any, preloads []string, orders []string, page, size int, ret any) *Finder {
 	my.TryQueryFromMap(queries).TryPagination(page, size).TryOrder(orders...).Find(ret, preloads...)
 
