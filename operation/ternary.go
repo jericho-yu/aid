@@ -16,7 +16,7 @@ func TernaryFuncCondition[V any](condition func() bool, T V, F V) V {
 	return Ternary(condition(), T, F)
 }
 
-// TernaryFunc 三元运算：返回值使用回调方法
+// TernaryFuncReturn 三元运算：返回值使用回调方法
 func TernaryFuncReturn[V any](condition bool, trueFn func() V, falseFn func() V) V {
 	return Ternary(condition, trueFn(), falseFn())
 }
