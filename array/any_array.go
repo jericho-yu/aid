@@ -470,6 +470,83 @@ func (my *AnyArray[T]) Pluck(fn func(item T) any) *AnyArray[any] {
 	return my.pluck(fn)
 }
 
+func (my *AnyArray[T]) intersection(other *AnyArray[T]) {
+	if other == nil || other.IsEmpty() {
+		return
+	}
+
+	var intersection = make([]T, 0)
+	for _, value := range my.data {
+		if other.In(value) {
+			intersection = append(intersection, value)
+		}
+	}
+
+	my.data = intersection
+}
+
+// Intersection 取交集
+func (my *AnyArray[T]) Intersection(other *AnyArray[T]) *AnyArray[T] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
+
+	my.intersection(other)
+
+	return my
+}
+
+func (my *AnyArray[T]) difference(other *AnyArray[T]) {
+	if other == nil || other.IsEmpty() {
+		return
+	}
+
+	var difference = make([]T, 0)
+	for _, value := range my.data {
+		if !other.In(value) {
+			difference = append(difference, value)
+		}
+	}
+
+	my.data = difference
+}
+
+// Difference 取差集
+func (my *AnyArray[T]) Difference(other *AnyArray[T]) *AnyArray[T] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
+
+	my.difference(other)
+
+	return my
+}
+
+func (my *AnyArray[T]) union(other *AnyArray[T]) {
+	if other == nil || other.IsEmpty() {
+		return
+	}
+
+	var union = make([]T, 0)
+	union = append(union, my.data...)
+
+	for _, value := range other.data {
+		if !my.In(value) {
+			union = append(union, value)
+		}
+	}
+
+	my.data = union
+}
+
+// Union 取并集
+func (my *AnyArray[T]) Union(other *AnyArray[T]) *AnyArray[T] {
+	my.mu.Lock()
+	defer my.mu.Unlock()
+
+	my.union(other)
+
+	return my
+}
+
 func (my *AnyArray[T]) unique() *AnyArray[T] {
 	seen := make(map[string]struct{}) // 使用空结构体作为值，因为我们只关心键
 	result := make([]T, 0)
@@ -487,7 +564,7 @@ func (my *AnyArray[T]) unique() *AnyArray[T] {
 	return my
 }
 
-// Unique 切片去重
+// Unique 去重
 func (my *AnyArray[T]) Unique() *AnyArray[T] {
 	my.mu.Lock()
 	defer my.mu.Unlock()
