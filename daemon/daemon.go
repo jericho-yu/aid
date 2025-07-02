@@ -46,7 +46,10 @@ func (my *Daemon) Launch(title, logDir string) {
 		log.Fatalf("【启动失败】%s", err.Error())
 	}
 
-	fp.WriteString(fmt.Sprintf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\r\n%s 程序启动成功 [进程号->%d] 启动于：%s\r\n", title, cmd.Process.Pid, time.Now().Format(string(time.DateTime+".000"))))
+	_, err = fp.WriteString(fmt.Sprintf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\r\n%s 程序启动成功 [进程号->%d] 启动于：%s\r\n", title, cmd.Process.Pid, time.Now().Format(string(time.DateTime+".000"))))
+	if err != nil {
+		log.Fatalf("【启动失败】写入日志失败：%s", err.Error())
+	}
 
 	os.Exit(0)
 }
