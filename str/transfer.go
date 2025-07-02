@@ -87,7 +87,7 @@ func (my *Transfer) CamelToSnake() string {
 	return result.String()
 }
 
-// CamelToSnake 小驼峰 -> babel
+// CamelToBabel 小驼峰 -> babel
 func (my *Transfer) CamelToBabel() string {
 	var result strings.Builder
 
@@ -121,7 +121,7 @@ func (my *Transfer) SnakeToPascal() string {
 	return pascal
 }
 
-// SnakeToPascal 下划线 -> 小驼峰
+// SnakeToCamel 下划线 -> 小驼峰
 func (my *Transfer) SnakeToCamel() string {
 	// 将下划线分割成单词
 	words := strings.Split(my.original, "_")

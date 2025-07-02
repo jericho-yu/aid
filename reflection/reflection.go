@@ -393,9 +393,7 @@ func (my *Reflection) Iter(fn func(k, v any)) (isIter bool) {
 func (my *Reflection) Serialize() []string {
 	var ret = array.Make[string](0)
 
-	if !my.Iter(func(k, v any) {
-		ret.Append(fmt.Sprintf("%v=>%v", k, v))
-	}) {
+	if !my.Iter(func(k, v any) { ret.Append(fmt.Sprintf("%v=>%v", k, v)) }) {
 		ret.Append(fmt.Sprintf("%v", my.original))
 	}
 

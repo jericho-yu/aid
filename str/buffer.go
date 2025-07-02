@@ -6,7 +6,7 @@ type Buffer struct{ original *bytes.Buffer }
 
 var BufferApp Buffer
 
-// NewByBuffer 实例化：通过字符串
+// NewByString 实例化：通过字符串
 func (*Buffer) NewByString(original string) *Buffer { return &Buffer{bytes.NewBufferString(original)} }
 
 // NewByBytes 实例化：通过字节码
