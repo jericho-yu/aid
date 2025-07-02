@@ -382,6 +382,8 @@ func (my *Reflection) Iter(fn func(k, v any)) (isIter bool) {
 			}
 		}
 		isIter = true
+	default:
+		isIter = false
 	}
 
 	return
