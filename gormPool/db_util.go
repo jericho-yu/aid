@@ -20,7 +20,7 @@ type (
 		Queries []struct {
 			Option     *string     `json:"option,omitempty"`     // 操作：and、or、not
 			Conditions []Condition `json:"conditions,omitempty"` // 条件
-		} `json:"queries,omitempty"`                  // 查询条件
+		} `json:"queries,omitempty"` // 查询条件
 		Orders   []string `json:"orders,omitempty"`   // 排序
 		Preloads []string `json:"preloads,omitempty"` // 预加载
 	}

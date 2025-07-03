@@ -1,16 +1,17 @@
 package validator
 
 import (
-	"github.com/jericho-yu/aid/array"
 	"reflect"
 	"regexp"
 	"strings"
 	"unicode/utf8"
 
+	"github.com/jericho-yu/aid/array"
+
 	"github.com/jericho-yu/aid/common"
 )
 
-// checkString 验证：string -> 支持的规则 required、email、email=、date、date=、time、time=、datetime、datetime=、size<、size<=、size>、size>=、range=、length=
+// checkString 验证：string -> 支持的规则 required、email、email=、date、date=、time、time=、datetime、datetime=、size<、size<=、size>、size>=、range=、in=、not in=
 func (my *ValidatorApp[T]) checkString(rule, fieldName string, value any) error {
 	if reflect.TypeOf(value).Kind() == reflect.Ptr {
 		isNil := reflect.ValueOf(value).IsNil()
