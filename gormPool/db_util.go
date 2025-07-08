@@ -10,9 +10,8 @@ import (
 type (
 	// Finder 查询帮助器
 	Finder struct {
-		DB      *gorm.DB
-		Total   int64
-		CountFn func(db *gorm.DB) error // 查询总数回调
+		DB    *gorm.DB
+		Total int64
 	}
 
 	// FinderCondition 查询条件
@@ -37,7 +36,7 @@ type (
 var FinderApp Finder
 
 // New 实例化：查询帮助器
-func (*Finder) New(db *gorm.DB) *Finder { return &Finder{DB: db} }
+func (*Finder) New(db *gorm.DB) *Finder { return &Finder{DB: db, Total: -1} }
 
 // Find 查询数据
 func (my *Finder) Find(ret any, preloads ...string) *Finder {
@@ -61,12 +60,7 @@ func (my *Finder) Ex(functions ...func(db *gorm.DB)) *Finder {
 // TryPagination 尝试分页
 func (my *Finder) TryPagination(page, size int) *Finder {
 	if page > 0 && size > 0 {
-
-		if my.CountFn != nil {
-			if my.CountFn(my.DB) != nil {
-				return my
-			}
-		} else {
+		if my.Total != -1 {
 			if my.DB.Count(&my.Total).Error != nil {
 				return my
 			}
@@ -107,9 +101,9 @@ func (my *Finder) TryQuery(mode string, fieldName string, values ...any) {
 	}
 }
 
-// SetCountFn 设置查询总数回调
-func (my *Finder) SetCountFn(fn func(db *gorm.DB) error) *Finder {
-	my.CountFn = fn
+// SetTotal 设置总数
+func (my *Finder) SetTotal(total int64) *Finder {
+	my.Total = total
 	return my
 }
 
