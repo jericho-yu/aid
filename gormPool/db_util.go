@@ -60,12 +60,13 @@ func (my *Finder) Ex(functions ...func(db *gorm.DB)) *Finder {
 // TryPagination 尝试分页
 func (my *Finder) TryPagination(page, size int) *Finder {
 	if page > 0 && size > 0 {
-		if my.Total != -1 {
+		if my.Total == -1 {
 			if my.DB.Count(&my.Total).Error != nil {
 				return my
 			}
-			my.DB.Limit(size).Offset((page - 1) * size)
 		}
+
+		my.DB.Limit(size).Offset((page - 1) * size)
 	}
 
 	return my
