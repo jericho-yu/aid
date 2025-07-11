@@ -350,13 +350,17 @@ func (my *Finder) TryQueryFromMap(queries map[string][]any) *Finder {
 // TryAutoFindFromMap 自动填充查询条件并查询：使用map[string][]any
 func (my *Finder) TryAutoFindFromMap(queries map[string][]any, preloads []string, orders []string, page, size int, ret any) *Finder {
 	my.TryQueryFromMap(queries).TryPagination(page, size).TryOrder(orders...).Find(ret, preloads...)
-
+	if my.Total == -1 {
+		my.Total = 0
+	}
 	return my
 }
 
 // TryAutoFindFromFinderCondition 自动填充查询条件并查询：使用FinderCondition
 func (my *Finder) TryAutoFindFromFinderCondition(finderCondition *FinderCondition, page, size int, ret any) *Finder {
 	my.TryQueryFromFinderCondition(finderCondition).TryPagination(page, size).Find(ret)
-
+	if my.Total == -1 {
+		my.Total = 0
+	}
 	return my
 }
