@@ -47,12 +47,12 @@ func (my *CoroutinePool) Clean() *CoroutinePool {
 }
 
 // Close 关闭并执行
-func (my *CoroutinePool) Close() {
+func (my *CoroutinePool) Close() []error {
 	my.lock.Lock()
 	defer my.lock.Unlock()
 
 	if my.funcs.Len() == 0 {
-		return
+		return my.wrongs.ToSlice()
 	}
 
 	if my.size == 0 {
@@ -72,11 +72,14 @@ func (my *CoroutinePool) Close() {
 	}
 
 	my.sw.Wait()
+
+	return my.wrongs.ToSlice()
 }
 
 // Wrongs 获取错误列表
 func (my *CoroutinePool) Wrongs() []error {
-	my.lock.Lock()
-	defer my.lock.Unlock()
+	my.lock.RLock()
+	defer my.lock.RUnlock()
+
 	return my.wrongs.ToSlice()
 }
