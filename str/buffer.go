@@ -136,7 +136,7 @@ func (my *BufferJoinAny) Sep(sep string) IBufferJoinOption {
 func (my *BufferJoinAny) ToString() string {
 	var buffer bytes.Buffer
 	for i, value := range my.original {
-		if i > 0 {
+		if i != len(my.original)-1 {
 			buffer.WriteString(my.sep)
 		}
 		fmt.Fprintf(&buffer, "%s", value)
@@ -160,7 +160,7 @@ func (my *BufferJoinString) Sep(sep string) IBufferJoinOption {
 func (my *BufferJoinString) ToString() string {
 	var buffer bytes.Buffer
 	for i, value := range my.original {
-		if i > 0 {
+		if i != len(my.original)-1 {
 			buffer.WriteString(my.sep)
 		}
 		buffer.WriteString(value)
@@ -184,7 +184,7 @@ func (my *BufferJoinByte) Sep(sep string) IBufferJoinOption {
 func (my *BufferJoinByte) ToString() string {
 	var buffer bytes.Buffer
 	for i, value := range my.original {
-		if i > 0 {
+		if i != len(my.original)-1 {
 			buffer.WriteString(my.sep)
 		}
 		buffer.WriteByte(value)
@@ -208,7 +208,7 @@ func (my *BufferJoinRune) Sep(sep string) IBufferJoinOption {
 func (my *BufferJoinRune) ToString() string {
 	var buffer bytes.Buffer
 	for i, value := range my.original {
-		if i > 0 {
+		if i != len(my.original)-1 {
 			buffer.WriteString(my.sep)
 		}
 		buffer.WriteRune(value)
