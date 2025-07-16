@@ -1,16 +1,80 @@
 package str
 
-import "bytes"
+import (
+	"bytes"
+	"fmt"
+)
 
-type Buffer struct{ original *bytes.Buffer }
+type (
+	Buffer        struct{ original *bytes.Buffer }
+	BufferJoinAny struct {
+		original []any
+		sep      string
+	}
+	BufferJoinString struct {
+		original []string
+		sep      string
+	}
+	BufferJoinByte struct {
+		original []byte
+		sep      string
+	}
+	BufferJoinRune struct {
+		original []rune
+		sep      string
+	}
+)
 
-var BufferApp Buffer
+var (
+	BufferApp           Buffer
+	BufferJoinAnyApp    BufferJoinAny
+	BufferJoinStringApp BufferJoinString
+	BufferJoinByteApp   BufferJoinByte
+	BufferJoinRuneApp   BufferJoinRune
+)
 
 // NewByString 实例化：通过字符串
 func (*Buffer) NewByString(original string) *Buffer { return &Buffer{bytes.NewBufferString(original)} }
 
 // NewByBytes 实例化：通过字节码
 func (*Buffer) NewByBytes(original []byte) *Buffer { return &Buffer{bytes.NewBuffer(original)} }
+
+// JoinAny 追加任意到字符串，并使用分隔符
+func (my *Buffer) JoinAny(value *BufferJoinAny) *Buffer {
+	my.original.WriteString(value.ToString())
+
+	return my
+}
+
+// JoinString 追加任意到字符串，并使用分隔符
+func (my *Buffer) JoinString(value *BufferJoinString) *Buffer {
+	my.original.WriteString(value.ToString())
+
+	return my
+}
+
+// JoinByte 追加任意到字符串，并使用分隔符
+func (my *Buffer) JoinByte(value *BufferJoinByte) *Buffer {
+	my.original.WriteString(value.ToString())
+
+	return my
+}
+
+// JoinRune 追加任意到字符串，并使用分隔符
+func (my *Buffer) JoinRune(value *BufferJoinRune) *Buffer {
+	my.original.WriteString(value.ToString())
+
+	return my
+}
+
+// Any 追加任意内容到字符串
+func (my *Buffer) Any(values ...any) *Buffer {
+	for _, value := range values {
+		fmt.Fprintf(my.original, "%s", value)
+	}
+
+	return my
+}
 
 // String 追加写入字符串
 func (my *Buffer) String(stringList ...string) *Buffer {
@@ -49,4 +113,84 @@ func (my *Buffer) ToBytes() []byte { return my.original.Bytes() }
 func (my *Buffer) ToPtr() *string {
 	ret := my.original.String()
 	return &ret
+}
+
+func (*BufferJoinAny) New(values ...any) *BufferJoinAny {
+	return &BufferJoinAny{original: values}
+}
+
+func (my *BufferJoinAny) SetSep(sep string) *BufferJoinAny {
+	my.sep = sep
+	return my
+}
+
+func (my *BufferJoinAny) ToString() string {
+	var buffer bytes.Buffer
+	for i, value := range my.original {
+		if i > 0 {
+			buffer.WriteString(my.sep)
+		}
+		fmt.Fprintf(&buffer, "%s", value)
+	}
+	return buffer.String()
+}
+
+func (*BufferJoinString) New(values ...string) *BufferJoinString {
+	return &BufferJoinString{original: values}
+}
+
+func (my *BufferJoinString) SetSep(sep string) *BufferJoinString {
+	my.sep = sep
+	return my
+}
+
+func (my *BufferJoinString) ToString() string {
+	var buffer bytes.Buffer
+	for i, value := range my.original {
+		if i > 0 {
+			buffer.WriteString(my.sep)
+		}
+		buffer.WriteString(value)
+	}
+	return buffer.String()
+}
+
+func (*BufferJoinByte) New(values ...byte) *BufferJoinByte {
+	return &BufferJoinByte{original: values}
+}
+
+func (my *BufferJoinByte) SetSep(sep string) *BufferJoinByte {
+	my.sep = sep
+	return my
+}
+
+func (my *BufferJoinByte) ToString() string {
+	var buffer bytes.Buffer
+	for i, value := range my.original {
+		if i > 0 {
+			buffer.WriteString(my.sep)
+		}
+		buffer.WriteByte(value)
+	}
+	return buffer.String()
+}
+
+func (*BufferJoinRune) New(values ...rune) *BufferJoinRune {
+	return &BufferJoinRune{original: values}
+}
+
+func (my *BufferJoinRune) SetSep(sep string) *BufferJoinRune {
+	my.sep = sep
+	return my
+}
+
+func (my *BufferJoinRune) ToString() string {
+	var buffer bytes.Buffer
+	for i, value := range my.original {
+		if i > 0 {
+			buffer.WriteString(my.sep)
+		}
+		buffer.WriteRune(value)
+	}
+	return buffer.String()
 }
