@@ -120,15 +120,15 @@ func (my *Buffer) ToPtr() *string {
 	return &ret
 }
 
-func JoinAnyOption(values ...any) *BufferJoinAny { return BufferJoinAnyApp.New(values...) }
+func JoinAnyOption(values ...any) IBufferJoinOption { return BufferJoinAnyApp.New(values...) }
 
 func (*BufferJoinAny) IsBufferJoinOption() {}
 
-func (*BufferJoinAny) New(values ...any) *BufferJoinAny {
+func (*BufferJoinAny) New(values ...any) IBufferJoinOption {
 	return &BufferJoinAny{original: values}
 }
 
-func (my *BufferJoinAny) Sep(sep string) *BufferJoinAny {
+func (my *BufferJoinAny) Sep(sep string) IBufferJoinOption {
 	my.sep = sep
 	return my
 }
@@ -144,15 +144,15 @@ func (my *BufferJoinAny) ToString() string {
 	return buffer.String()
 }
 
-func JoinStringOption(values ...string) *BufferJoinString { return BufferJoinStringApp.New(values...) }
+func JoinStringOption(values ...string) IBufferJoinOption { return BufferJoinStringApp.New(values...) }
 
 func (*BufferJoinString) IsBufferJoinOption() {}
 
-func (*BufferJoinString) New(values ...string) *BufferJoinString {
+func (*BufferJoinString) New(values ...string) IBufferJoinOption {
 	return &BufferJoinString{original: values}
 }
 
-func (my *BufferJoinString) Sep(sep string) *BufferJoinString {
+func (my *BufferJoinString) Sep(sep string) IBufferJoinOption {
 	my.sep = sep
 	return my
 }
@@ -168,15 +168,15 @@ func (my *BufferJoinString) ToString() string {
 	return buffer.String()
 }
 
-func JoinByteOption(values ...byte) *BufferJoinByte { return BufferJoinByteApp.New(values...) }
+func JoinByteOption(values ...byte) IBufferJoinOption { return BufferJoinByteApp.New(values...) }
 
 func (*BufferJoinByte) IsBufferJoinOption() {}
 
-func (*BufferJoinByte) New(values ...byte) *BufferJoinByte {
+func (*BufferJoinByte) New(values ...byte) IBufferJoinOption {
 	return &BufferJoinByte{original: values}
 }
 
-func (my *BufferJoinByte) Sep(sep string) *BufferJoinByte {
+func (my *BufferJoinByte) Sep(sep string) IBufferJoinOption {
 	my.sep = sep
 	return my
 }
@@ -192,15 +192,15 @@ func (my *BufferJoinByte) ToString() string {
 	return buffer.String()
 }
 
-func JoinRuneOption(values ...rune) *BufferJoinRune { return BufferJoinRuneApp.New(values...) }
+func JoinRuneOption(values ...rune) IBufferJoinOption { return BufferJoinRuneApp.New(values...) }
 
 func (*BufferJoinRune) IsBufferJoinOption() {}
 
-func (*BufferJoinRune) New(values ...rune) *BufferJoinRune {
+func (*BufferJoinRune) New(values ...rune) IBufferJoinOption {
 	return &BufferJoinRune{original: values}
 }
 
-func (my *BufferJoinRune) Sep(sep string) *BufferJoinRune {
+func (my *BufferJoinRune) Sep(sep string) IBufferJoinOption {
 	my.sep = sep
 	return my
 }
