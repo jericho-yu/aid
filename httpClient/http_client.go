@@ -259,8 +259,36 @@ func (my *HttpClient) SetJavascriptBody(text string) *HttpClient {
 	return my
 }
 
-// SetSteamBody 设置二进制文件
-func (my *HttpClient) SetSteamBody(filename string) *HttpClient {
+// SetSteamBodyByReader 设置字节码内容：通过readCloser接口
+func (my *HttpClient) SetSteamBodyByReader(reader io.ReadCloser) *HttpClient {
+	my.SetHeaderContentType(ContentTypeSteam)
+
+	if reader == nil {
+		my.Err = SetSteamBodyErr.Panic()
+		return my
+	}
+
+	// 创建RequestBodyReader用于读取文件内容
+	if my.responseBodyBuffer.Len() > 1*1024*1024 { // 1MB
+		_, my.Err = io.Copy(my.responseBodyBuffer, reader)
+		if my.Err != nil {
+			my.Err = ReadResponseErr.Wrap(my.Err)
+			return my
+		}
+		my.requestBody = my.responseBodyBuffer.Bytes()
+	} else {
+		my.requestBody, my.Err = io.ReadAll(reader)
+		if my.Err != nil {
+			my.Err = ReadResponseErr.Wrap(my.Err)
+			return my
+		}
+	}
+
+	return my
+}
+
+// SetSteamBodyByFile 设置字节码内容：通过文件
+func (my *HttpClient) SetSteamBodyByFile(filename string) *HttpClient {
 	var (
 		err  error
 		file *os.File
@@ -516,6 +544,8 @@ func (my *HttpClient) Send() *HttpClient {
 	if my.Err != nil {
 		return my
 	}
+
+	my.request.Header.Set("Content-Length", fmt.Sprintf("%d", len(my.requestBody)))
 
 	my.response, my.Err = client.Do(my.request)
 	if my.Err != nil {
