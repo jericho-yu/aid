@@ -23,6 +23,11 @@ type (
 		original []rune
 		sep      string
 	}
+	IBufferJoinOption interface {
+		Sep(sep string) IBufferJoinOption
+		ToString() string
+		IsBufferJoinOption()
+	}
 )
 
 var (
@@ -40,28 +45,28 @@ func (*Buffer) NewByString(original string) *Buffer { return &Buffer{bytes.NewBu
 func (*Buffer) NewByBytes(original []byte) *Buffer { return &Buffer{bytes.NewBuffer(original)} }
 
 // JoinAny 追加任意到字符串，并使用分隔符
-func (my *Buffer) JoinAny(value *BufferJoinAny) *Buffer {
+func (my *Buffer) JoinAny(value IBufferJoinOption) *Buffer {
 	my.original.WriteString(value.ToString())
 
 	return my
 }
 
 // JoinString 追加任意到字符串，并使用分隔符
-func (my *Buffer) JoinString(value *BufferJoinString) *Buffer {
+func (my *Buffer) JoinString(value IBufferJoinOption) *Buffer {
 	my.original.WriteString(value.ToString())
 
 	return my
 }
 
 // JoinByte 追加任意到字符串，并使用分隔符
-func (my *Buffer) JoinByte(value *BufferJoinByte) *Buffer {
+func (my *Buffer) JoinByte(value IBufferJoinOption) *Buffer {
 	my.original.WriteString(value.ToString())
 
 	return my
 }
 
 // JoinRune 追加任意到字符串，并使用分隔符
-func (my *Buffer) JoinRune(value *BufferJoinRune) *Buffer {
+func (my *Buffer) JoinRune(value IBufferJoinOption) *Buffer {
 	my.original.WriteString(value.ToString())
 
 	return my
@@ -117,6 +122,8 @@ func (my *Buffer) ToPtr() *string {
 
 func JoinAnyOption(values ...any) *BufferJoinAny { return BufferJoinAnyApp.New(values...) }
 
+func (*BufferJoinAny) IsBufferJoinOption() {}
+
 func (*BufferJoinAny) New(values ...any) *BufferJoinAny {
 	return &BufferJoinAny{original: values}
 }
@@ -138,6 +145,8 @@ func (my *BufferJoinAny) ToString() string {
 }
 
 func JoinStringOption(values ...string) *BufferJoinString { return BufferJoinStringApp.New(values...) }
+
+func (*BufferJoinString) IsBufferJoinOption() {}
 
 func (*BufferJoinString) New(values ...string) *BufferJoinString {
 	return &BufferJoinString{original: values}
@@ -161,6 +170,8 @@ func (my *BufferJoinString) ToString() string {
 
 func JoinByteOption(values ...byte) *BufferJoinByte { return BufferJoinByteApp.New(values...) }
 
+func (*BufferJoinByte) IsBufferJoinOption() {}
+
 func (*BufferJoinByte) New(values ...byte) *BufferJoinByte {
 	return &BufferJoinByte{original: values}
 }
@@ -182,6 +193,8 @@ func (my *BufferJoinByte) ToString() string {
 }
 
 func JoinRuneOption(values ...rune) *BufferJoinRune { return BufferJoinRuneApp.New(values...) }
+
+func (*BufferJoinRune) IsBufferJoinOption() {}
 
 func (*BufferJoinRune) New(values ...rune) *BufferJoinRune {
 	return &BufferJoinRune{original: values}
