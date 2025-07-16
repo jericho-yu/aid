@@ -76,7 +76,7 @@ func (my *HttpClientDownload) SendResponse(w http.ResponseWriter, headers map[st
 		if my.httpClient.response.Header.Get("Content-Type") != "" {
 			w.Header().Set("Content-Type", my.httpClient.response.Header.Get("Content-Type"))
 		} else {
-			w.Header().Set("Content-Type", my.httpClient.requestQueries["Content-Type"])
+			w.Header().Set("Content-Type", my.httpClient.request.Header["Content-Type"][0])
 		}
 
 		if headers != nil {
