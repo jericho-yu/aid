@@ -115,6 +115,8 @@ func (my *Buffer) ToPtr() *string {
 	return &ret
 }
 
+func JoinAnyOption(values ...any) *BufferJoinAny { return BufferJoinAnyApp.New(values...) }
+
 func (*BufferJoinAny) New(values ...any) *BufferJoinAny {
 	return &BufferJoinAny{original: values}
 }
@@ -134,6 +136,8 @@ func (my *BufferJoinAny) ToString() string {
 	}
 	return buffer.String()
 }
+
+func JoinStringOption(values ...string) *BufferJoinString { return BufferJoinStringApp.New(values...) }
 
 func (*BufferJoinString) New(values ...string) *BufferJoinString {
 	return &BufferJoinString{original: values}
@@ -155,6 +159,8 @@ func (my *BufferJoinString) ToString() string {
 	return buffer.String()
 }
 
+func JoinByteOption(values ...byte) *BufferJoinByte { return BufferJoinByteApp.New(values...) }
+
 func (*BufferJoinByte) New(values ...byte) *BufferJoinByte {
 	return &BufferJoinByte{original: values}
 }
@@ -174,6 +180,8 @@ func (my *BufferJoinByte) ToString() string {
 	}
 	return buffer.String()
 }
+
+func JoinRuneOption(values ...rune) *BufferJoinRune { return BufferJoinRuneApp.New(values...) }
 
 func (*BufferJoinRune) New(values ...rune) *BufferJoinRune {
 	return &BufferJoinRune{original: values}
