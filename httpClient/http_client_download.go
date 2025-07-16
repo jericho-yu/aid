@@ -72,7 +72,12 @@ func (my *HttpClientDownload) SendResponse(w http.ResponseWriter, headers map[st
 		defer func() { _ = my.httpClient.response.Body.Close() }()
 
 		w.Header().Set("Content-Disposition", "attachment; filename="+my.filename)
-		w.Header().Set("Content-Type", my.httpClient.response.Header.Get("Content-Type"))
+
+		if my.httpClient.response.Header.Get("Content-Type") != "" {
+			w.Header().Set("Content-Type", my.httpClient.response.Header.Get("Content-Type"))
+		} else {
+			w.Header().Set("Content-Type", my.httpClient.requestQueries["Content-Type"])
+		}
 
 		if headers != nil {
 			dict.New(headers).Each(func(key string, values []string) {
