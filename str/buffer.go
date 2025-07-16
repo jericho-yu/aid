@@ -121,7 +121,7 @@ func (*BufferJoinAny) New(values ...any) *BufferJoinAny {
 	return &BufferJoinAny{original: values}
 }
 
-func (my *BufferJoinAny) SetSep(sep string) *BufferJoinAny {
+func (my *BufferJoinAny) Sep(sep string) *BufferJoinAny {
 	my.sep = sep
 	return my
 }
@@ -143,7 +143,7 @@ func (*BufferJoinString) New(values ...string) *BufferJoinString {
 	return &BufferJoinString{original: values}
 }
 
-func (my *BufferJoinString) SetSep(sep string) *BufferJoinString {
+func (my *BufferJoinString) Sep(sep string) *BufferJoinString {
 	my.sep = sep
 	return my
 }
@@ -165,7 +165,7 @@ func (*BufferJoinByte) New(values ...byte) *BufferJoinByte {
 	return &BufferJoinByte{original: values}
 }
 
-func (my *BufferJoinByte) SetSep(sep string) *BufferJoinByte {
+func (my *BufferJoinByte) Sep(sep string) *BufferJoinByte {
 	my.sep = sep
 	return my
 }
@@ -187,7 +187,7 @@ func (*BufferJoinRune) New(values ...rune) *BufferJoinRune {
 	return &BufferJoinRune{original: values}
 }
 
-func (my *BufferJoinRune) SetSep(sep string) *BufferJoinRune {
+func (my *BufferJoinRune) Sep(sep string) *BufferJoinRune {
 	my.sep = sep
 	return my
 }
